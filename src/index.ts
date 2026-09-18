@@ -1,6 +1,7 @@
 import { Env, ChatMessage } from "./types";
 
 const MODEL_ID = "@cf/meta/llama-3.1-8b-instruct-fp8";
+const VISION_MODEL_ID = "@cf/meta/llama-3.2-11b-vision-instruct";
 
 const SYSTEM_PROMPT = `
 You are Global AI Mahlet, a helpful multilingual AI assistant and study tutor.
@@ -15,7 +16,6 @@ Your main purposes are:
 - Be clear, respectful, encouraging, and accurate.
 - Adapt explanations to the user's level.
 - When solving a problem, show the important reasoning and steps.
-- Do not claim that you can see a photo or file unless the content was actually provided to you.
 - Respond in the language requested by the user.
 `;
 
@@ -32,7 +32,7 @@ export default {
 			return env.ASSETS.fetch(request);
 		}
 
-		// AI chat API
+		// Normal text AI
 		if (url.pathname === "/api/chat") {
 			if (request.method !== "POST") {
 				return new Response("Method not allowed", {
@@ -41,6 +41,17 @@ export default {
 			}
 
 			return handleChatRequest(request, env);
+		}
+
+		// AI image understanding
+		if (url.pathname === "/api/vision") {
+			if (request.method !== "POST") {
+				return new Response("Method not allowed", {
+					status: 405,
+				});
+			}
+
+			return handleVisionRequest(request, env);
 		}
 
 		return new Response("Not found", {
@@ -88,7 +99,7 @@ async function handleChatRequest(
 			},
 		});
 	} catch (error) {
-		console.error("Global AI Mahlet error:", error);
+		console.error("Global AI Mahlet text AI error:", error);
 
 		return new Response(
 			JSON.stringify({
@@ -103,3 +114,65 @@ async function handleChatRequest(
 		);
 	}
 }
+
+async function handleVisionRequest(
+	request: Request,
+	env: Env,
+): Promise<Response> {
+	try {
+		const body = (await request.json()) as {
+			image?: string;
+			prompt?: string;
+		};
+
+		if (!body.image) {
+			return new Response(
+				JSON.stringify({
+					error: "No image was provided.",
+				}),
+				{
+					status: 400,
+					headers: {
+						"content-type": "application/json",
+					},
+				},
+			);
+		}
+
+		const prompt =
+			body.prompt?.trim() ||
+			"Describe this image carefully and help the user understand what is shown.";
+
+		const response = await env.AI.run(VISION_MODEL_ID, {
+			messages: [
+				{
+					role: "system",
+					content:
+						"You are Global AI Mahlet's vision assistant. Analyze images carefully. Explain what you can actually see. If the image contains a school question, solve it step by step. If text is visible, read it accurately. Do not invent details that are not visible.",
+				},
+				{
+					role: "user",
+					content: prompt,
+				},
+			],
+			image: body.image,
+			max_tokens: 1024,
+		});
+
+		return Response.json(response);
+	} catch (error) {
+		console.error("Global AI Mahlet vision error:", error);
+
+		return new Response(
+			JSON.stringify({
+				error: "I couldn't understand that image. Please try another image.",
+			}),
+			{
+				status: 500,
+				headers: {
+					"content-type": "application/json",
+				},
+			},
+		);
+	}
+					}
