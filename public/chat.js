@@ -23,10 +23,6 @@ const cameraInput = document.getElementById("camera-input");
 const voiceButton = document.getElementById("voice-button");
 const temporaryChatButton = document.getElementById("temporary-chat-button");
 
-/* =========================================================
-   STATE
-========================================================= */
-
 let isProcessing = false;
 let temporaryChat = false;
 let activeChatId = null;
@@ -35,7 +31,6 @@ let voiceMode = false;
 let isListening = false;
 let recognition = null;
 let voicePanel = null;
-let voiceRequestInProgress = false;
 
 let currentAvatar =
 	localStorage.getItem("globalAIAvatar") || "🤖";
@@ -72,7 +67,7 @@ let savedChats = [];
 
 try {
 	savedChats = JSON.parse(
-		localStorage.getItem("globalAIChats") || "[]",
+		localStorage.getItem("globalAIChats") || "[]"
 	);
 
 	if (!Array.isArray(savedChats)) {
@@ -83,18 +78,8 @@ try {
 }
 
 /* =========================================================
-   BASIC SAFETY CHECK
-========================================================= */
-
-if (!chatMessages || !userInput || !sendButton) {
-	console.error(
-		"Global AI Mahlet: Required chat elements were not found.",
-	);
-}
-
-/* =========================================================
    STYLES
-========================================================= */
+   ========================================================= */
 
 const style = document.createElement("style");
 
@@ -223,11 +208,6 @@ style.textContent = `
 		background: rgba(127,127,127,.12);
 	}
 
-	.message-action:disabled {
-		opacity: .5;
-		cursor: default;
-	}
-
 	.voice-avatar-panel {
 		position: fixed;
 		left: 50%;
@@ -241,7 +221,6 @@ style.textContent = `
 		text-align: center;
 		box-shadow: 0 8px 30px rgba(0,0,0,.3);
 		min-width: 190px;
-		pointer-events: auto;
 	}
 
 	.voice-avatar-face {
@@ -282,41 +261,30 @@ document.head.appendChild(style);
 
 /* =========================================================
    SIDEBAR CLOSE BUTTON
-========================================================= */
+   ========================================================= */
 
 if (sidebar) {
-	const closeSidebarButton =
-		document.createElement("button");
+	const closeButton = document.createElement("button");
 
-	closeSidebarButton.className =
-		"sidebar-close-button";
+	closeButton.className = "sidebar-close-button";
+	closeButton.textContent = "✕";
+	closeButton.title = "Close sidebar";
+	closeButton.setAttribute("aria-label", "Close sidebar");
 
-	closeSidebarButton.textContent = "✕";
-	closeSidebarButton.title = "Close sidebar";
-	closeSidebarButton.setAttribute(
-		"aria-label",
-		"Close sidebar",
-	);
+	closeButton.addEventListener("click", () => {
+		sidebar.classList.remove("open");
+	});
 
-	closeSidebarButton.addEventListener(
-		"click",
-		() => {
-			sidebar.classList.remove("open");
-		},
-	);
-
-	sidebar.appendChild(closeSidebarButton);
+	sidebar.appendChild(closeButton);
 }
 
 /* =========================================================
    TEMPORARY CHAT
-========================================================= */
+   ========================================================= */
 
-const temporaryControl =
-	document.createElement("div");
+const temporaryControl = document.createElement("div");
 
-temporaryControl.className =
-	"temporary-control";
+temporaryControl.className = "temporary-control";
 
 temporaryControl.innerHTML = `
 	<span class="temporary-circle"></span>
@@ -327,29 +295,16 @@ temporaryControl.innerHTML = `
 `;
 
 if (sidebar && recentChats) {
-	sidebar.insertBefore(
-		temporaryControl,
-		recentChats,
-	);
+	sidebar.insertBefore(temporaryControl, recentChats);
 }
 
 function updateTemporaryUI() {
 	const circle =
-		temporaryControl.querySelector(
-			".temporary-circle",
-		);
+		temporaryControl.querySelector(".temporary-circle");
 
 	if (circle) {
-		circle.classList.toggle(
-			"active",
-			temporaryChat,
-		);
+		circle.classList.toggle("active", temporaryChat);
 	}
-
-	temporaryControl.title =
-		temporaryChat
-			? "Temporary Chat is ON"
-			: "Temporary Chat is OFF";
 
 	if (temporaryChatButton) {
 		temporaryChatButton.textContent =
@@ -357,30 +312,23 @@ function updateTemporaryUI() {
 	}
 }
 
-temporaryControl.addEventListener(
-	"click",
-	() => {
-		temporaryChat = !temporaryChat;
-		updateTemporaryUI();
-	},
-);
+temporaryControl.addEventListener("click", () => {
+	temporaryChat = !temporaryChat;
+	updateTemporaryUI();
+});
 
 if (temporaryChatButton) {
-	temporaryChatButton.addEventListener(
-		"click",
-		() => {
-			temporaryChat = !temporaryChat;
-			updateTemporaryUI();
-		},
-	);
+	temporaryChatButton.addEventListener("click", () => {
+		temporaryChat = !temporaryChat;
+		updateTemporaryUI();
+	});
 }
 
 /* =========================================================
    AVATAR PICKER
-========================================================= */
+   ========================================================= */
 
-const avatarArea =
-	document.createElement("div");
+const avatarArea = document.createElement("div");
 
 avatarArea.className = "avatar-area";
 
@@ -392,16 +340,11 @@ avatarArea.innerHTML = `
 `;
 
 if (sidebar && recentChats) {
-	sidebar.insertBefore(
-		avatarArea,
-		recentChats,
-	);
+	sidebar.insertBefore(avatarArea, recentChats);
 }
 
 const avatarPicker =
-	avatarArea.querySelector(
-		".avatar-picker",
-	);
+	avatarArea.querySelector(".avatar-picker");
 
 function renderAvatarPicker() {
 	if (!avatarPicker) return;
@@ -409,8 +352,7 @@ function renderAvatarPicker() {
 	avatarPicker.innerHTML = "";
 
 	AVATARS.forEach((avatar) => {
-		const button =
-			document.createElement("button");
+		const button = document.createElement("button");
 
 		button.className = "avatar-choice";
 		button.textContent = avatar;
@@ -420,26 +362,20 @@ function renderAvatarPicker() {
 			button.classList.add("selected");
 		}
 
-		button.addEventListener(
-			"click",
-			() => {
-				currentAvatar = avatar;
+		button.addEventListener("click", () => {
+			currentAvatar = avatar;
 
-				localStorage.setItem(
-					"globalAIAvatar",
-					currentAvatar,
-				);
+			localStorage.setItem(
+				"globalAIAvatar",
+				currentAvatar
+			);
 
-				renderAvatarPicker();
+			renderAvatarPicker();
 
-				if (voicePanel) {
-					updateVoiceAvatar(
-						false,
-						"Voice mode is ON",
-					);
-				}
-			},
-		);
+			if (voicePanel) {
+				updateVoiceAvatar(false, "Voice mode is ON");
+			}
+		});
 
 		avatarPicker.appendChild(button);
 	});
@@ -449,7 +385,7 @@ renderAvatarPicker();
 
 /* =========================================================
    CHAT STORAGE
-========================================================= */
+   ========================================================= */
 
 function saveChats() {
 	if (temporaryChat) return;
@@ -457,29 +393,23 @@ function saveChats() {
 	try {
 		localStorage.setItem(
 			"globalAIChats",
-			JSON.stringify(savedChats),
+			JSON.stringify(savedChats)
 		);
 	} catch (error) {
-		console.error(
-			"Could not save chats:",
-			error,
-		);
+		console.error("Could not save chats:", error);
 	}
 }
 
 function getConversationTitle(messages) {
-	const firstUser =
-		messages.find(
-			(message) =>
-				message.role === "user",
-		);
+	const firstUser = messages.find(
+		(message) => message.role === "user"
+	);
 
 	if (!firstUser) {
 		return "New Conversation";
 	}
 
-	const text =
-		String(firstUser.content || "").trim();
+	const text = String(firstUser.content || "").trim();
 
 	if (!text) {
 		return "New Conversation";
@@ -489,27 +419,16 @@ function getConversationTitle(messages) {
 
 	if (
 		/^(hi|hello|hey|hii|helo|good morning|good afternoon|good evening)\b/.test(
-			lower,
+			lower
 		)
 	) {
 		return "Greeting Conversation";
 	}
 
-	if (lower.includes("math")) {
-		return "Mathematics";
-	}
-
-	if (lower.includes("physics")) {
-		return "Physics Study";
-	}
-
-	if (lower.includes("chemistry")) {
-		return "Chemistry Study";
-	}
-
-	if (lower.includes("biology")) {
-		return "Biology Study";
-	}
+	if (lower.includes("math")) return "Mathematics";
+	if (lower.includes("physics")) return "Physics Study";
+	if (lower.includes("chemistry")) return "Chemistry Study";
+	if (lower.includes("biology")) return "Biology Study";
 
 	if (
 		lower.includes("code") ||
@@ -544,34 +463,26 @@ function getConversationTitle(messages) {
 function saveCurrentChat() {
 	if (temporaryChat) return;
 
-	const userMessages =
-		chatHistory.filter(
-			(message) =>
-				message.role === "user",
-		);
+	const userMessages = chatHistory.filter(
+		(message) => message.role === "user"
+	);
 
 	if (userMessages.length === 0) return;
 
-	const title =
-		getConversationTitle(chatHistory);
+	const title = getConversationTitle(chatHistory);
 
 	if (activeChatId !== null) {
-		const existingIndex =
-			savedChats.findIndex(
-				(chat) =>
-					chat.id === activeChatId,
-			);
+		const index = savedChats.findIndex(
+			(chat) => chat.id === activeChatId
+		);
 
-		if (existingIndex !== -1) {
-			savedChats[existingIndex].messages =
-				[...chatHistory];
-
-			savedChats[existingIndex].title =
-				title;
+		if (index !== -1) {
+			savedChats[index].messages = [...chatHistory];
+			savedChats[index].title = title;
+			savedChats[index].updatedAt = Date.now();
 
 			saveChats();
 			renderRecentChats();
-
 			return;
 		}
 	}
@@ -581,14 +492,13 @@ function saveCurrentChat() {
 		title,
 		messages: [...chatHistory],
 		pinned: false,
+		updatedAt: Date.now(),
 	};
 
 	activeChatId = newChat.id;
 
 	savedChats.unshift(newChat);
-
-	savedChats =
-		savedChats.slice(0, 100);
+	savedChats = savedChats.slice(0, 100);
 
 	saveChats();
 	renderRecentChats();
@@ -596,58 +506,38 @@ function saveCurrentChat() {
 
 /* =========================================================
    RECENT CHATS
-========================================================= */
+   ========================================================= */
 
 function renderRecentChats(filter = "") {
 	if (!recentChats) return;
 
 	recentChats.innerHTML = "";
 
-	const searchText =
-		String(filter || "").toLowerCase();
+	const searchText = String(filter || "").toLowerCase();
 
-	const filtered =
-		savedChats
-			.filter((chat) =>
-				String(chat.title || "")
-					.toLowerCase()
-					.includes(searchText),
-			)
-			.sort((a, b) => {
-				if (
-					a.pinned &&
-					!b.pinned
-				) {
-					return -1;
-				}
+	const filtered = savedChats
+		.filter((chat) =>
+			String(chat.title || "")
+				.toLowerCase()
+				.includes(searchText)
+		)
+		.sort((a, b) => {
+			if (a.pinned && !b.pinned) return -1;
+			if (!a.pinned && b.pinned) return 1;
 
-				if (
-					!a.pinned &&
-					b.pinned
-				) {
-					return 1;
-				}
-
-				return (
-					(b.updatedAt ||
-						b.id ||
-						0) -
-					(a.updatedAt ||
-						a.id ||
-						0)
-				);
-			});
+			return (
+				(b.updatedAt || b.id || 0) -
+				(a.updatedAt || a.id || 0)
+			);
+		});
 
 	if (filtered.length === 0) {
-		const empty =
-			document.createElement("div");
+		const empty = document.createElement("div");
 
 		empty.style.padding = "10px";
 		empty.style.color = "#6b7280";
 		empty.style.fontSize = "13px";
-
-		empty.textContent =
-			"No recent chats";
+		empty.textContent = "No recent chats";
 
 		recentChats.appendChild(empty);
 
@@ -655,183 +545,108 @@ function renderRecentChats(filter = "") {
 	}
 
 	filtered.forEach((chat) => {
-		const row =
-			document.createElement("div");
+		const row = document.createElement("div");
 
-		row.className =
-			"recent-chat-row";
+		row.className = "recent-chat-row";
 
-		const main =
-			document.createElement("button");
+		const main = document.createElement("button");
 
-		main.className =
-			"recent-chat recent-chat-main";
-
-		if (chat.pinned) {
-			main.classList.add(
-				"pinned-chat",
-			);
-		}
+		main.className = "recent-chat recent-chat-main";
 
 		main.textContent =
 			(chat.pinned ? "📌 " : "") +
-			(chat.title ||
-				"Conversation");
+			(chat.title || "Conversation");
 
-		main.addEventListener(
-			"click",
-			() => {
-				activeChatId = chat.id;
+		main.addEventListener("click", () => {
+			activeChatId = chat.id;
 
-				chatHistory =
-					Array.isArray(
-						chat.messages,
-					)
-						? [...chat.messages]
-						: [];
+			chatHistory = Array.isArray(chat.messages)
+				? [...chat.messages]
+				: [];
 
-				displayHistory();
+			displayHistory();
 
-				if (sidebar) {
-					sidebar.classList.remove(
-						"open",
-					);
-				}
-			},
-		);
+			if (sidebar) {
+				sidebar.classList.remove("open");
+			}
+		});
 
-		const actions =
-			document.createElement("div");
+		const actions = document.createElement("div");
 
-		actions.className =
-			"recent-chat-actions";
+		actions.className = "recent-chat-actions";
 
-		/* PIN */
+		const pin = document.createElement("button");
 
-		const pin =
-			document.createElement("button");
+		pin.className = "recent-chat-action";
+		pin.textContent = chat.pinned ? "📌" : "📍";
+		pin.title = chat.pinned ? "Unpin" : "Pin";
 
-		pin.className =
-			"recent-chat-action";
+		pin.addEventListener("click", (event) => {
+			event.stopPropagation();
 
-		pin.textContent =
-			chat.pinned ? "📌" : "📍";
+			chat.pinned = !chat.pinned;
+			chat.updatedAt = Date.now();
 
-		pin.title =
-			chat.pinned
-				? "Unpin"
-				: "Pin";
+			saveChats();
 
-		pin.addEventListener(
-			"click",
-			(event) => {
-				event.stopPropagation();
+			renderRecentChats(
+				recentSearch ? recentSearch.value : ""
+			);
+		});
 
-				chat.pinned =
-					!chat.pinned;
+		const rename = document.createElement("button");
 
-				chat.updatedAt =
-					Date.now();
-
-				saveChats();
-
-				renderRecentChats(
-					recentSearch
-						? recentSearch.value
-						: "",
-				);
-			},
-		);
-
-		/* RENAME */
-
-		const rename =
-			document.createElement("button");
-
-		rename.className =
-			"recent-chat-action";
-
+		rename.className = "recent-chat-action";
 		rename.textContent = "✏️";
 		rename.title = "Rename";
 
-		rename.addEventListener(
-			"click",
-			(event) => {
-				event.stopPropagation();
+		rename.addEventListener("click", (event) => {
+			event.stopPropagation();
 
-				const newTitle =
-					prompt(
-						"Rename this chat:",
-						chat.title,
-					);
+			const newTitle = prompt(
+				"Rename this chat:",
+				chat.title
+			);
 
-				if (
-					newTitle &&
-					newTitle.trim()
-				) {
-					chat.title =
-						newTitle.trim();
-
-					chat.updatedAt =
-						Date.now();
-
-					saveChats();
-
-					renderRecentChats(
-						recentSearch
-							? recentSearch.value
-							: "",
-					);
-				}
-			},
-		);
-
-		/* DELETE */
-
-		const remove =
-			document.createElement("button");
-
-		remove.className =
-			"recent-chat-action";
-
-		remove.textContent = "🗑️";
-		remove.title = "Delete";
-
-		remove.addEventListener(
-			"click",
-			(event) => {
-				event.stopPropagation();
-
-				const confirmed =
-					confirm(
-						"Delete this conversation?",
-					);
-
-				if (!confirmed) return;
-
-				savedChats =
-					savedChats.filter(
-						(item) =>
-							item.id !==
-							chat.id,
-					);
-
-				if (
-					activeChatId ===
-					chat.id
-				) {
-					activeChatId = null;
-				}
+			if (newTitle && newTitle.trim()) {
+				chat.title = newTitle.trim();
+				chat.updatedAt = Date.now();
 
 				saveChats();
 
 				renderRecentChats(
-					recentSearch
-						? recentSearch.value
-						: "",
+					recentSearch ? recentSearch.value : ""
 				);
-			},
-		);
+			}
+		});
+
+		const remove = document.createElement("button");
+
+		remove.className = "recent-chat-action";
+		remove.textContent = "🗑️";
+		remove.title = "Delete";
+
+		remove.addEventListener("click", (event) => {
+			event.stopPropagation();
+
+			if (!confirm("Delete this conversation?")) {
+				return;
+			}
+
+			savedChats = savedChats.filter(
+				(item) => item.id !== chat.id
+			);
+
+			if (activeChatId === chat.id) {
+				activeChatId = null;
+			}
+
+			saveChats();
+
+			renderRecentChats(
+				recentSearch ? recentSearch.value : ""
+			);
+		});
 
 		actions.appendChild(pin);
 		actions.appendChild(rename);
@@ -845,8 +660,8 @@ function renderRecentChats(filter = "") {
 }
 
 /* =========================================================
-   DISPLAY HISTORY
-========================================================= */
+   DISPLAY CHAT
+   ========================================================= */
 
 function displayHistory() {
 	if (!chatMessages) return;
@@ -856,7 +671,7 @@ function displayHistory() {
 	chatHistory.forEach((message) => {
 		addMessageToChat(
 			message.role,
-			message.content,
+			message.content
 		);
 	});
 
@@ -864,17 +679,12 @@ function displayHistory() {
 		chatMessages.scrollHeight;
 }
 
-/* =========================================================
-   NEW CHAT
-========================================================= */
-
 function startNewChat() {
 	if (!temporaryChat) {
 		saveCurrentChat();
 	}
 
 	activeChatId = null;
-
 	temporaryChat = false;
 
 	chatHistory = [
@@ -886,7 +696,6 @@ function startNewChat() {
 	];
 
 	updateTemporaryUI();
-
 	displayHistory();
 
 	if (userInput) {
@@ -899,234 +708,270 @@ function startNewChat() {
 if (newChatButton) {
 	newChatButton.addEventListener(
 		"click",
-		startNewChat,
+		startNewChat
 	);
 }
 
-/* =========================================================
-   MENU
-========================================================= */
-
 if (menuButton && sidebar) {
-	menuButton.addEventListener(
-		"click",
-		() => {
-			sidebar.classList.toggle(
-				"open",
-			);
-		},
-	);
+	menuButton.addEventListener("click", () => {
+		sidebar.classList.toggle("open");
+	});
 }
 
 if (recentSearch) {
-	recentSearch.addEventListener(
-		"input",
-		() => {
-			renderRecentChats(
-				recentSearch.value,
-			);
-		},
-	);
+	recentSearch.addEventListener("input", () => {
+		renderRecentChats(recentSearch.value);
+	});
 }
 
 if (languageSelect) {
-	languageSelect.addEventListener(
-		"change",
-		() => {
-			const language =
-				languageSelect.value;
+	languageSelect.addEventListener("change", () => {
+		const language = languageSelect.value;
 
-			if (userInput) {
-				userInput.placeholder =
-					`Message Global AI Mahlet in ${language}...`;
-			}
-		},
-	);
+		if (userInput) {
+			userInput.placeholder =
+				`Message Global AI Mahlet in ${language}...`;
+		}
+	});
 }
 
 /* =========================================================
-   TEXT INPUT
-========================================================= */
+   INPUT
+   ========================================================= */
 
 if (userInput) {
-	userInput.addEventListener(
-		"input",
-		function () {
-			this.style.height = "auto";
+	userInput.addEventListener("input", function () {
+		this.style.height = "auto";
 
-			this.style.height =
-				Math.min(
-					this.scrollHeight,
-					180,
-				) + "px";
-		},
-	);
+		this.style.height =
+			Math.min(this.scrollHeight, 180) + "px";
+	});
 
-	userInput.addEventListener(
-		"keydown",
-		(event) => {
-			if (
-				event.key === "Enter" &&
-				!event.shiftKey
-			) {
-				event.preventDefault();
+	userInput.addEventListener("keydown", (event) => {
+		if (
+			event.key === "Enter" &&
+			!event.shiftKey
+		) {
+			event.preventDefault();
 
-				if (!isProcessing) {
-					sendMessage(false);
-				}
-			}
-		},
-	);
-}
-
-if (sendButton) {
-	sendButton.addEventListener(
-		"click",
-		() => {
 			if (!isProcessing) {
 				sendMessage(false);
 			}
-		},
-	);
+		}
+	});
+}
+
+if (sendButton) {
+	sendButton.addEventListener("click", () => {
+		if (!isProcessing) {
+			sendMessage(false);
+		}
+	});
 }
 
 /* =========================================================
-   PHOTO
-========================================================= */
+   PHOTO / FILE / CAMERA
+   ========================================================= */
 
 if (photoButton && photoInput) {
-	photoButton.addEventListener(
-		"click",
-		() => {
-			photoInput.click();
-		},
-	);
+	photoButton.addEventListener("click", () => {
+		photoInput.click();
+	});
 
-	photoInput.addEventListener(
-		"change",
-		() => {
-			if (
-				!photoInput.files ||
-				!photoInput.files.length
-			) {
-				return;
-			}
+	photoInput.addEventListener("change", () => {
+		if (!photoInput.files?.length) return;
 
-			const file =
-				photoInput.files[0];
+		const file = photoInput.files[0];
 
-			addMessageToChat(
-				"user",
-				`🖼️ Photo selected: ${file.name}\n\nPhoto understanding is not connected to the AI vision backend yet.`,
-			);
+		addMessageToChat(
+			"user",
+			`🖼️ Photo selected: ${file.name}\n\nPhoto understanding is not connected to the AI vision backend yet.`
+		);
 
-			photoInput.value = "";
-		},
-	);
+		photoInput.value = "";
+	});
 }
-
-/* =========================================================
-   FILE
-========================================================= */
 
 if (fileButton && fileInput) {
-	fileButton.addEventListener(
-		"click",
-		() => {
-			fileInput.click();
-		},
-	);
+	fileButton.addEventListener("click", () => {
+		fileInput.click();
+	});
 
-	fileInput.addEventListener(
-		"change",
-		() => {
-			if (
-				!fileInput.files ||
-				!fileInput.files.length
-			) {
-				return;
-			}
+	fileInput.addEventListener("change", () => {
+		if (!fileInput.files?.length) return;
 
-			const file =
-				fileInput.files[0];
+		const file = fileInput.files[0];
 
-			addMessageToChat(
-				"user",
-				`📎 File selected: ${file.name}\n\nFile understanding is not connected to the document backend yet.`,
-			);
+		addMessageToChat(
+			"user",
+			`📎 File selected: ${file.name}\n\nFile understanding is not connected to the document backend yet.`
+		);
 
-			fileInput.value = "";
-		},
-	);
+		fileInput.value = "";
+	});
 }
 
-/* =========================================================
-   CAMERA
-========================================================= */
-
 if (cameraButton && cameraInput) {
-	cameraButton.addEventListener(
-		"click",
-		() => {
-			cameraInput.click();
-		},
-	);
+	cameraButton.addEventListener("click", () => {
+		cameraInput.click();
+	});
 
-	cameraInput.addEventListener(
-		"change",
-		() => {
-			if (
-				!cameraInput.files ||
-				!cameraInput.files.length
-			) {
-				return;
-			}
+	cameraInput.addEventListener("change", () => {
+		if (!cameraInput.files?.length) return;
 
-			const file =
-				cameraInput.files[0];
+		const file = cameraInput.files[0];
 
-			addMessageToChat(
-				"user",
-				`📸 Camera image selected: ${file.name}\n\nCamera image understanding is not connected to the AI vision backend yet.`,
-			);
+		addMessageToChat(
+			"user",
+			`📸 Camera image selected: ${file.name}\n\nCamera image understanding is not connected to the AI vision backend yet.`
+		);
 
-			cameraInput.value = "";
-		},
-	);
+		cameraInput.value = "";
+	});
 }
 
 /* =========================================================
    MESSAGE ACTIONS
-========================================================= */
+   ========================================================= */
 
-function createMessageActions(
-	messageText,
-) {
-	const actions =
-		document.createElement("div");
+function createMessageActions(messageText) {
+	const actions = document.createElement("div");
 
-	actions.className =
-		"message-actions";
+	actions.className = "message-actions";
 
-	/* COPY */
+	const copy = document.createElement("button");
 
-	const copy =
-		document.createElement("button");
-
-	copy.className =
-		"message-action";
-
+	copy.className = "message-action";
 	copy.textContent = "📋";
 	copy.title = "Copy";
 
-	copy.addEventListener(
-		"click",
-		async () => {
-			try {
+	copy.addEventListener("click", async () => {
+		try {
+			await navigator.clipboard.writeText(messageText);
+
+			copy.textContent = "✅";
+
+			setTimeout(() => {
+				copy.textContent = "📋";
+			}, 1200);
+		} catch {
+			copy.textContent = "❌";
+
+			setTimeout(() => {
+				copy.textContent = "📋";
+			}, 1200);
+		}
+	});
+
+	const like = document.createElement("button");
+
+	like.className = "message-action";
+	like.textContent = "👍";
+	like.title = "Like";
+
+	like.addEventListener("click", () => {
+		like.textContent =
+			like.textContent === "👍"
+				? "👍🏻"
+				: "👍";
+	});
+
+	const dislike = document.createElement("button");
+
+	dislike.className = "message-action";
+	dislike.textContent = "👎";
+	dislike.title = "Dislike";
+
+	dislike.addEventListener("click", () => {
+		dislike.textContent =
+			dislike.textContent === "👎"
+				? "👎🏻"
+				: "👎";
+	});
+
+	const share = document.createElement("button");
+
+	share.className = "message-action";
+	share.textContent = "↗️";
+	share.title = "Share";
+
+	share.addEventListener("click", async () => {
+		try {
+			if (navigator.share) {
+				await navigator.share({
+					title: "Global AI Mahlet",
+					text: messageText,
+					url: window.location.href,
+				});
+			} else {
 				await navigator.clipboard.writeText(
-					messageText,
+					messageText
 				);
 
-				copy.textContent = "✅";
+				share.textContent = "✅";
 
-				setTimeout(() 
+				setTimeout(() => {
+					share.textContent = "↗️";
+				}, 1200);
+			}
+		} catch {
+			// User cancelled sharing.
+		}
+	});
+
+	actions.appendChild(copy);
+	actions.appendChild(like);
+	actions.appendChild(dislike);
+	actions.appendChild(share);
+
+	return actions;
+}
+
+function addMessageToChat(role, content) {
+	if (!chatMessages) return null;
+
+	const messageEl = document.createElement("div");
+
+	messageEl.className =
+		`message ${role}-message`;
+
+	const avatarEl = document.createElement("div");
+
+	avatarEl.className = "avatar";
+
+	avatarEl.textContent =
+		role === "user"
+			? "👤"
+			: currentAvatar;
+
+	const contentBox = document.createElement("div");
+
+	contentBox.className = "message-content";
+
+	const nameEl = document.createElement("div");
+
+	nameEl.className = "message-name";
+
+	nameEl.textContent =
+		role === "user"
+			? "You"
+			: "Global AI Mahlet";
+
+	const textEl = document.createElement("div");
+
+	textEl.className = "message-text";
+
+	textEl.textContent = String(content ?? "");
+
+	contentBox.appendChild(nameEl);
+	contentBox.appendChild(textEl);
+
+	if (role === "assistant") {
+		contentBox.appendChild(
+			createMessageActions(
+				String(content ?? "")
+			)
+		);
+	}
+
+	messageEl.ap
