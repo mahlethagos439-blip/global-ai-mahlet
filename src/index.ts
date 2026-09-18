@@ -1,26 +1,25 @@
-/**
- * LLM Chat Application Template
- *
- * A simple chat application using Cloudflare Workers AI.
- * This template demonstrates how to implement an LLM-powered chat interface with
- * streaming responses using Server-Sent Events (SSE).
- *
- * @license MIT
- */
 import { Env, ChatMessage } from "./types";
 
-// Model ID for Workers AI model
-// https://developers.cloudflare.com/workers-ai/models/
 const MODEL_ID = "@cf/meta/llama-3.1-8b-instruct-fp8";
 
-// Default system prompt
-const SYSTEM_PROMPT =
-	"You are a helpful, friendly assistant. Provide concise and accurate responses.";
+const SYSTEM_PROMPT = `
+You are Global AI Mahlet, a helpful multilingual AI assistant and study tutor.
+
+Your main purposes are:
+- Help students learn Mathematics, Physics, Chemistry, and Biology.
+- Explain difficult concepts step by step.
+- Give practice questions and quizzes.
+- Help with Computer Science and beginner programming.
+- Help users understand mistakes instead of simply giving answers.
+- Help with summaries, study plans, writing, brainstorming, and general questions.
+- Be clear, respectful, encouraging, and accurate.
+- Adapt explanations to the user's level.
+- When solving a problem, show the important reasoning and steps.
+- Do not claim that you can see a photo or file unless the content was actually provided to you.
+- Respond in the language requested by the user.
+`;
 
 export default {
-	/**
-	 * Main request handler for the Worker
-	 */
 	async fetch(
 		request: Request,
 		env: Env,
@@ -28,43 +27,46 @@ export default {
 	): Promise<Response> {
 		const url = new URL(request.url);
 
-		// Handle static assets (frontend)
+		// Serve the website
 		if (url.pathname === "/" || !url.pathname.startsWith("/api/")) {
 			return env.ASSETS.fetch(request);
 		}
 
-		// API Routes
+		// AI chat API
 		if (url.pathname === "/api/chat") {
-			// Handle POST requests for chat
-			if (request.method === "POST") {
-				return handleChatRequest(request, env);
+			if (request.method !== "POST") {
+				return new Response("Method not allowed", {
+					status: 405,
+				});
 			}
 
-			// Method not allowed for other request types
-			return new Response("Method not allowed", { status: 405 });
+			return handleChatRequest(request, env);
 		}
 
-		// Handle 404 for unmatched routes
-		return new Response("Not found", { status: 404 });
+		return new Response("Not found", {
+			status: 404,
+		});
 	},
 } satisfies ExportedHandler<Env>;
 
-/**
- * Handles chat API requests
- */
 async function handleChatRequest(
 	request: Request,
 	env: Env,
 ): Promise<Response> {
 	try {
-		// Parse JSON request body
-		const { messages = [] } = (await request.json()) as {
-			messages: ChatMessage[];
+		const body = (await request.json()) as {
+			messages?: ChatMessage[];
 		};
 
-		// Add system prompt if not present
-		if (!messages.some((msg) => msg.role === "system")) {
-			messages.unshift({ role: "system", content: SYSTEM_PROMPT });
+		const messages: ChatMessage[] = Array.isArray(body.messages)
+			? body.messages
+			: [];
+
+		if (!messages.some((message) => message.role === "system")) {
+			messages.unshift({
+				role: "system",
+				content: SYSTEM_PROMPT,
+			});
 		}
 
 		const inputs = {
@@ -73,14 +75,10 @@ async function handleChatRequest(
 			stream: true,
 		} satisfies AiTextGenerationInput & { stream: true };
 
-		const stream = await env.AI.run<typeof MODEL_ID>(MODEL_ID, inputs, {
-			// Uncomment to use AI Gateway
-			// gateway: {
-			//   id: "YOUR_GATEWAY_ID", // Replace with your AI Gateway ID
-			//   skipCache: false,      // Set to true to bypass cache
-			//   cacheTtl: 3600,        // Cache time-to-live in seconds
-			// },
-		});
+		const stream = await env.AI.run<typeof MODEL_ID>(
+			MODEL_ID,
+			inputs,
+		);
 
 		return new Response(stream, {
 			headers: {
@@ -90,12 +88,17 @@ async function handleChatRequest(
 			},
 		});
 	} catch (error) {
-		console.error("Error processing chat request:", error);
+		console.error("Global AI Mahlet error:", error);
+
 		return new Response(
-			JSON.stringify({ error: "Failed to process request" }),
+			JSON.stringify({
+				error: "Failed to process the AI request.",
+			}),
 			{
 				status: 500,
-				headers: { "content-type": "application/json" },
+				headers: {
+					"content-type": "application/json",
+				},
 			},
 		);
 	}
