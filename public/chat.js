@@ -974,4 +974,13 @@ function addMessageToChat(role, content) {
 		);
 	}
 
-	messageEl.ap
+	messageEl.appendChild(avatarEl);
+messageEl.appendChild(contentBox);
+
+chatMessages.appendChild(messageEl);
+
+chatMessages.scrollTop =
+    chatMessages.scrollHeight;
+
+return messageEl;
+}
