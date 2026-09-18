@@ -1,5 +1,5 @@
 /* =========================================================
-   GLOBAL AI MAHLET — COMPLETE CHAT.JS
+   GLOBAL AI MAHLET — CHAT.JS
    ========================================================= */
 
 const chatMessages = document.getElementById("chat-messages");
@@ -26,703 +26,273 @@ const temporaryChatButton = document.getElementById("temporary-chat-button");
 let isProcessing = false;
 let temporaryChat = false;
 let activeChatId = null;
-
 let voiceMode = false;
-let isListening = false;
 let recognition = null;
-let voicePanel = null;
 
 let currentAvatar =
-	localStorage.getItem("globalAIAvatar") || "🤖";
+    localStorage.getItem("globalAIAvatar") || "🤖";
 
-const AVATARS = [
-	"🤖",
-	"👩‍💻",
-	"👨‍💻",
-	"🧑‍🚀",
-	"👩‍🔬",
-	"🧑‍🏫",
-	"🧑‍💡",
-];
-
-const VOICE_GREETINGS = [
-	"Welcome to Global AI Mahlet. What would you like to explore today?",
-	"Hi! I'm ready to listen. What would you like to talk about?",
-	"Hello! Voice mode is ready. Tell me what you need help with.",
-	"Welcome back! What shall we learn or explore together?",
-	"Hi there! I'm listening. Start speaking whenever you're ready.",
-];
+const AVATARS = ["🤖", "👩‍💻", "👨‍💻", "🧑‍🚀", "👩‍🔬", "🧑‍🏫", "🧑‍💡"];
 
 let chatHistory = [
-	{
-		role: "assistant",
-		content:
-			"Hello! I'm Global AI Mahlet. I can help you learn, solve problems, explain concepts, practice questions, and much more. 🌍",
-	},
+    {
+        role: "assistant",
+        content:
+            "Hello! I'm Global AI Mahlet. I can help you learn, solve problems, explain concepts, practice questions, and much more. 🌍"
+    }
 ];
 
 let savedChats = [];
 
 try {
-	savedChats = JSON.parse(
-		localStorage.getItem("globalAIChats") || "[]"
-	);
+    savedChats = JSON.parse(
+        localStorage.getItem("globalAIChats") || "[]"
+    );
 
-	if (!Array.isArray(savedChats)) {
-		savedChats = [];
-	}
+    if (!Array.isArray(savedChats)) savedChats = [];
 } catch {
-	savedChats = [];
+    savedChats = [];
 }
 
 /* =========================================================
-   EXTRA STYLES
+   FIX BUTTON LAYOUT
    ========================================================= */
 
 const style = document.createElement("style");
 
 style.textContent = `
-	.sidebar {
-		position: relative;
-	}
+.bottom-tools {
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    width:100%;
+}
 
-	.sidebar-close-button {
-		position: absolute;
-		top: 12px;
-		right: 12px;
-		border: none;
-		background: transparent;
-		font-size: 22px;
-		cursor: pointer;
-		padding: 5px;
-	}
+.tool-group {
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    flex-wrap:nowrap !important;
+    gap:3px;
+}
 
-	.temporary-control {
-		margin: 10px 0 14px;
-		padding: 10px;
-		border-radius: 12px;
-		background: rgba(127,127,127,.08);
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		cursor: pointer;
-	}
+.composer-area {
+    z-index:100 !important;
+    pointer-events:auto !important;
+}
 
-	.temporary-circle {
-		width: 18px;
-		height: 18px;
-		min-width: 18px;
-		border-radius: 50%;
-		border: 2px solid currentColor;
-	}
+.composer,
+.composer button,
+.composer textarea {
+    pointer-events:auto !important;
+}
 
-	.temporary-circle.active {
-		background: currentColor;
-	}
+.sidebar-close-button {
+    position:absolute;
+    top:10px;
+    right:10px;
+    border:0;
+    background:transparent;
+    font-size:22px;
+    cursor:pointer;
+}
 
-	.avatar-area {
-		margin-bottom: 12px;
-	}
+.avatar-picker {
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin:8px 0 12px;
+}
 
-	.avatar-picker {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 7px;
-		margin-top: 8px;
-	}
+.avatar-choice {
+    border:1px solid transparent;
+    background:transparent;
+    font-size:23px;
+    padding:4px;
+    border-radius:8px;
+    cursor:pointer;
+}
 
-	.avatar-choice {
-		font-size: 24px;
-		border: 1px solid transparent;
-		background: transparent;
-		cursor: pointer;
-		border-radius: 8px;
-		padding: 3px 6px;
-	}
+.avatar-choice.selected {
+    border-color:#111827;
+}
 
-	.avatar-choice.selected {
-		border-color: currentColor;
-	}
+.message-actions {
+    display:flex;
+    gap:5px;
+    margin-top:7px;
+}
 
-	.recent-chat-row {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		margin-bottom: 5px;
-	}
+.message-action {
+    border:0;
+    background:transparent;
+    cursor:pointer;
+    padding:4px 6px;
+}
 
-	.recent-chat-main {
-		flex: 1;
-		min-width: 0;
-	}
+.voice-panel {
+    position:fixed;
+    left:50%;
+    bottom:100px;
+    transform:translateX(-50%);
+    z-index:10000;
+    background:#111827;
+    color:white;
+    padding:18px 25px;
+    border-radius:20px;
+    text-align:center;
+    min-width:210px;
+    box-shadow:0 8px 30px rgba(0,0,0,.3);
+}
 
-	.recent-chat-actions {
-		display: flex;
-		gap: 2px;
-	}
+.voice-face {
+    font-size:65px;
+}
 
-	.recent-chat-action {
-		border: none;
-		background: transparent;
-		cursor: pointer;
-		padding: 5px;
-	}
-
-	.message-actions {
-		display: flex;
-		gap: 5px;
-		margin-top: 7px;
-	}
-
-	.message-action {
-		border: none;
-		background: transparent;
-		cursor: pointer;
-		font-size: 15px;
-		padding: 3px 6px;
-		border-radius: 6px;
-	}
-
-	.voice-avatar-panel {
-		position: fixed;
-		left: 50%;
-		bottom: 90px;
-		transform: translateX(-50%);
-		z-index: 9999;
-		padding: 16px 22px;
-		border-radius: 20px;
-		background: rgba(20,20,20,.94);
-		color: white;
-		text-align: center;
-		min-width: 190px;
-		box-shadow: 0 8px 30px rgba(0,0,0,.3);
-	}
-
-	.voice-avatar-face {
-		font-size: 70px;
-		line-height: 1.1;
-	}
-
-	.voice-stop-button {
-		margin-top: 10px;
-		border: none;
-		border-radius: 10px;
-		padding: 7px 14px;
-		cursor: pointer;
-	}
-
-	.gai-error {
-		margin-top: 8px;
-		padding: 8px;
-		border-radius: 8px;
-		background: rgba(220,38,38,.08);
-	}
-
-	.gai-retry {
-		margin-top: 6px;
-		border: none;
-		border-radius: 7px;
-		padding: 6px 10px;
-		cursor: pointer;
-	}
-
-	/* Keep composer controls horizontal */
-	.bottom-tools {
-		display: flex !important;
-		flex-direction: row !important;
-		align-items: center !important;
-		justify-content: space-between !important;
-		width: 100%;
-	}
-
-	.tool-group {
-		display: flex !important;
-		flex-direction: row !important;
-		align-items: center !important;
-		flex-wrap: nowrap !important;
-		gap: 3px;
-	}
-
-	.tool-button,
-	.send-button {
-		flex: 0 0 auto;
-	}
-
-	.send-button:disabled {
-		opacity: 0.45;
-		cursor: not-allowed;
-	}
-
-	/* Never place an invisible overlay over the composer */
-	.composer-area {
-		z-index: 100;
-		pointer-events: auto;
-	}
-
-	.composer {
-		pointer-events: auto;
-	}
-
-	.composer button,
-	.composer textarea {
-		pointer-events: auto;
-	}
+.voice-stop {
+    margin-top:10px;
+    padding:7px 14px;
+    border:0;
+    border-radius:8px;
+    cursor:pointer;
+}
 `;
 
 document.head.appendChild(style);
 
 /* =========================================================
-   SIDEBAR
+   SIDEBAR CLOSE BUTTON
    ========================================================= */
 
 if (sidebar) {
-	const closeButton = document.createElement("button");
+    const close = document.createElement("button");
 
-	closeButton.className = "sidebar-close-button";
-	closeButton.textContent = "✕";
-	closeButton.title = "Close sidebar";
+    close.className = "sidebar-close-button";
+    close.textContent = "✕";
+    close.title = "Close sidebar";
 
-	closeButton.addEventListener("click", () => {
-		sidebar.classList.remove("open");
-	});
+    close.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+    });
 
-	sidebar.appendChild(closeButton);
-}
-
-/* =========================================================
-   TEMPORARY CHAT
-   ========================================================= */
-
-const temporaryControl = document.createElement("div");
-
-temporaryControl.className = "temporary-control";
-
-temporaryControl.innerHTML = `
-	<span class="temporary-circle"></span>
-	<span>
-		<strong>Temporary Chat</strong><br>
-		<small>Don't save this conversation</small>
-	</span>
-`;
-
-if (sidebar && recentChats) {
-	sidebar.insertBefore(temporaryControl, recentChats);
-}
-
-function updateTemporaryUI() {
-	const circle =
-		temporaryControl.querySelector(".temporary-circle");
-
-	if (circle) {
-		circle.classList.toggle("active", temporaryChat);
-	}
-
-	if (temporaryChatButton) {
-		temporaryChatButton.textContent =
-			temporaryChat ? "🗑️✓" : "🗑️";
-	}
-}
-
-temporaryControl.addEventListener("click", () => {
-	temporaryChat = !temporaryChat;
-	updateTemporaryUI();
-});
-
-if (temporaryChatButton) {
-	temporaryChatButton.addEventListener("click", () => {
-		temporaryChat = !temporaryChat;
-		updateTemporaryUI();
-	});
+    sidebar.appendChild(close);
 }
 
 /* =========================================================
    AVATAR PICKER
    ========================================================= */
 
-const avatarArea = document.createElement("div");
-
-avatarArea.className = "avatar-area";
-
-avatarArea.innerHTML = `
-	<div style="font-size:13px;">
-		<strong>Choose AI Avatar</strong>
-	</div>
-	<div class="avatar-picker"></div>
-`;
-
 if (sidebar && recentChats) {
-	sidebar.insertBefore(avatarArea, recentChats);
-}
+    const avatarArea = document.createElement("div");
 
-const avatarPicker =
-	avatarArea.querySelector(".avatar-picker");
+    avatarArea.innerHTML = `
+        <div style="font-size:13px;font-weight:700;margin:8px;">
+            🤖 AI Avatar
+        </div>
+        <div class="avatar-picker"></div>
+    `;
 
-function renderAvatarPicker() {
-	if (!avatarPicker) return;
+    sidebar.insertBefore(avatarArea, recentChats);
 
-	avatarPicker.innerHTML = "";
+    const picker = avatarArea.querySelector(".avatar-picker");
 
-	AVATARS.forEach((avatar) => {
-		const button = document.createElement("button");
+    AVATARS.forEach((avatar) => {
+        const button = document.createElement("button");
 
-		button.className = "avatar-choice";
-		button.textContent = avatar;
+        button.type = "button";
+        button.className = "avatar-choice";
+        button.textContent = avatar;
 
-		if (avatar === currentAvatar) {
-			button.classList.add("selected");
-		}
+        if (avatar === currentAvatar) {
+            button.classList.add("selected");
+        }
 
-		button.addEventListener("click", () => {
-			currentAvatar = avatar;
+        button.addEventListener("click", () => {
+            currentAvatar = avatar;
 
-			localStorage.setItem(
-				"globalAIAvatar",
-				currentAvatar
-			);
+            localStorage.setItem(
+                "globalAIAvatar",
+                currentAvatar
+            );
 
-			renderAvatarPicker();
+            picker.querySelectorAll(".avatar-choice")
+                .forEach((b) => b.classList.remove("selected"));
 
-			if (voicePanel) {
-				updateVoiceAvatar("Voice mode is ON");
-			}
-		});
+            button.classList.add("selected");
+        });
 
-		avatarPicker.appendChild(button);
-	});
-}
-
-renderAvatarPicker();
-
-/* =========================================================
-   CHAT STORAGE
-   ========================================================= */
-
-function saveChats() {
-	if (temporaryChat) return;
-
-	try {
-		localStorage.setItem(
-			"globalAIChats",
-			JSON.stringify(savedChats)
-		);
-	} catch (error) {
-		console.error(error);
-	}
-}
-
-function getConversationTitle(messages) {
-	const firstUser = messages.find(
-		(message) => message.role === "user"
-	);
-
-	if (!firstUser) return "New Conversation";
-
-	const text = String(firstUser.content || "").trim();
-
-	if (!text) return "New Conversation";
-
-	const lower = text.toLowerCase();
-
-	if (/^(hi|hello|hey|hii|helo)\b/.test(lower)) {
-		return "Greeting Conversation";
-	}
-
-	if (lower.includes("math")) return "Mathematics";
-	if (lower.includes("physics")) return "Physics Study";
-	if (lower.includes("chemistry")) return "Chemistry Study";
-	if (lower.includes("biology")) return "Biology Study";
-
-	if (
-		lower.includes("code") ||
-		lower.includes("coding") ||
-		lower.includes("program")
-	) {
-		return "Coding & Computer Science";
-	}
-
-	if (
-		lower.includes("university") ||
-		lower.includes("college") ||
-		lower.includes("scholarship")
-	) {
-		return "University & Scholarship";
-	}
-
-	if (text.length <= 42) return text;
-
-	return text.substring(0, 42) + "...";
-}
-
-function saveCurrentChat() {
-	if (temporaryChat) return;
-
-	const userMessages = chatHistory.filter(
-		(message) => message.role === "user"
-	);
-
-	if (userMessages.length === 0) return;
-
-	const title = getConversationTitle(chatHistory);
-
-	if (activeChatId !== null) {
-		const index = savedChats.findIndex(
-			(chat) => chat.id === activeChatId
-		);
-
-		if (index !== -1) {
-			savedChats[index].messages = [...chatHistory];
-			savedChats[index].title = title;
-			savedChats[index].updatedAt = Date.now();
-
-			saveChats();
-			renderRecentChats();
-			return;
-		}
-	}
-
-	const newChat = {
-		id: Date.now(),
-		title,
-		messages: [...chatHistory],
-		pinned: false,
-		updatedAt: Date.now(),
-	};
-
-	activeChatId = newChat.id;
-
-	savedChats.unshift(newChat);
-	savedChats = savedChats.slice(0, 100);
-
-	saveChats();
-	renderRecentChats();
+        picker.appendChild(button);
+    });
 }
 
 /* =========================================================
-   RECENT CHATS
+   TEMPORARY CHAT
    ========================================================= */
 
-function renderRecentChats(filter = "") {
-	if (!recentChats) return;
+function updateTemporaryButton() {
+    if (!temporaryChatButton) return;
 
-	recentChats.innerHTML = "";
+    temporaryChatButton.textContent =
+        temporaryChat ? "🗑️✓" : "🗑️";
+}
 
-	const searchText =
-		String(filter || "").toLowerCase();
-
-	const filtered = savedChats
-		.filter((chat) =>
-			String(chat.title || "")
-				.toLowerCase()
-				.includes(searchText)
-		)
-		.sort((a, b) => {
-			if (a.pinned && !b.pinned) return -1;
-			if (!a.pinned && b.pinned) return 1;
-
-			return (
-				(b.updatedAt || b.id || 0) -
-				(a.updatedAt || a.id || 0)
-			);
-		});
-
-	if (filtered.length === 0) {
-		const empty = document.createElement("div");
-
-		empty.style.padding = "10px";
-		empty.style.color = "#6b7280";
-		empty.style.fontSize = "13px";
-		empty.textContent = "No recent chats";
-
-		recentChats.appendChild(empty);
-
-		return;
-	}
-
-	filtered.forEach((chat) => {
-		const row = document.createElement("div");
-		row.className = "recent-chat-row";
-
-		const main = document.createElement("button");
-
-		main.className =
-			"recent-chat recent-chat-main";
-
-		main.textContent =
-			(chat.pinned ? "📌 " : "") +
-			(chat.title || "Conversation");
-
-		main.addEventListener("click", () => {
-			activeChatId = chat.id;
-
-			chatHistory = Array.isArray(chat.messages)
-				? [...chat.messages]
-				: [];
-
-			displayHistory();
-
-			if (sidebar) {
-				sidebar.classList.remove("open");
-			}
-		});
-
-		const actions = document.createElement("div");
-		actions.className = "recent-chat-actions";
-
-		const pin = document.createElement("button");
-		pin.className = "recent-chat-action";
-		pin.textContent = chat.pinned ? "📌" : "📍";
-		pin.title = chat.pinned ? "Unpin" : "Pin";
-
-		pin.addEventListener("click", (event) => {
-			event.stopPropagation();
-
-			chat.pinned = !chat.pinned;
-			chat.updatedAt = Date.now();
-
-			saveChats();
-
-			renderRecentChats(
-				recentSearch ? recentSearch.value : ""
-			);
-		});
-
-		const rename = document.createElement("button");
-		rename.className = "recent-chat-action";
-		rename.textContent = "✏️";
-		rename.title = "Rename";
-
-		rename.addEventListener("click", (event) => {
-			event.stopPropagation();
-
-			const newTitle = prompt(
-				"Rename this chat:",
-				chat.title
-			);
-
-			if (newTitle && newTitle.trim()) {
-				chat.title = newTitle.trim();
-				chat.updatedAt = Date.now();
-
-				saveChats();
-
-				renderRecentChats(
-					recentSearch ? recentSearch.value : ""
-				);
-			}
-		});
-
-		const remove = document.createElement("button");
-		remove.className = "recent-chat-action";
-		remove.textContent = "🗑️";
-		remove.title = "Delete";
-
-		remove.addEventListener("click", (event) => {
-			event.stopPropagation();
-
-			if (!confirm("Delete this conversation?")) {
-				return;
-			}
-
-			savedChats = savedChats.filter(
-				(item) => item.id !== chat.id
-			);
-
-			if (activeChatId === chat.id) {
-				activeChatId = null;
-			}
-
-			saveChats();
-
-			renderRecentChats(
-				recentSearch ? recentSearch.value : ""
-			);
-		});
-
-		actions.appendChild(pin);
-		actions.appendChild(rename);
-		actions.appendChild(remove);
-
-		row.appendChild(main);
-		row.appendChild(actions);
-
-		recentChats.appendChild(row);
-	});
+if (temporaryChatButton) {
+    temporaryChatButton.addEventListener("click", () => {
+        temporaryChat = !temporaryChat;
+        updateTemporaryButton();
+    });
 }
 
 /* =========================================================
-   DISPLAY CHAT
+   NEW CHAT
    ========================================================= */
-
-function displayHistory() {
-	if (!chatMessages) return;
-
-	chatMessages.innerHTML = "";
-
-	chatHistory.forEach((message) => {
-		addMessageToChat(
-			message.role,
-			message.content
-		);
-	});
-
-	chatMessages.scrollTop =
-		chatMessages.scrollHeight;
-}
 
 function startNewChat() {
-	if (!temporaryChat) {
-		saveCurrentChat();
-	}
+    activeChatId = null;
+    temporaryChat = false;
 
-	activeChatId = null;
-	temporaryChat = false;
+    chatHistory = [
+        {
+            role: "assistant",
+            content:
+                "Hello! I'm Global AI Mahlet. What would you like to learn or explore?"
+        }
+    ];
 
-	chatHistory = [
-		{
-			role: "assistant",
-			content:
-				"Hello! I'm Global AI Mahlet. What would you like to learn or explore?",
-		},
-	];
+    updateTemporaryButton();
+    displayHistory();
 
-	updateTemporaryUI();
-	displayHistory();
-
-	if (userInput) {
-		userInput.value = "";
-		userInput.style.height = "auto";
-		userInput.focus();
-	}
+    if (userInput) {
+        userInput.value = "";
+        userInput.style.height = "auto";
+        userInput.focus();
+    }
 }
 
 if (newChatButton) {
-	newChatButton.addEventListener(
-		"click",
-		startNewChat
-	);
+    newChatButton.addEventListener("click", startNewChat);
 }
+
+/* =========================================================
+   MENU
+   ========================================================= */
 
 if (menuButton && sidebar) {
-	menuButton.addEventListener("click", () => {
-		sidebar.classList.toggle("open");
-	});
+    menuButton.addEventListener("click", () => {
+        sidebar.classList.toggle("open");
+    });
 }
 
-if (recentSearch) {
-	recentSearch.addEventListener("input", () => {
-		renderRecentChats(recentSearch.value);
-	});
-}
+/* =========================================================
+   LANGUAGE
+   ========================================================= */
 
-if (languageSelect) {
-	languageSelect.addEventListener("change", () => {
-		const language = languageSelect.value;
-
-		if (userInput) {
-			userInput.placeholder =
-				`Message Global AI Mahlet in ${language}...`;
-		}
-	});
+if (languageSelect && userInput) {
+    languageSelect.addEventListener("change", () => {
+        userInput.placeholder =
+            `Message Global AI Mahlet in ${languageSelect.value}...`;
+    });
 }
 
 /* =========================================================
@@ -730,172 +300,107 @@ if (languageSelect) {
    ========================================================= */
 
 if (userInput) {
-	userInput.addEventListener("input", function () {
-		this.style.height = "auto";
+    userInput.addEventListener("input", () => {
+        userInput.style.height = "auto";
+        userInput.style.height =
+            Math.min(userInput.scrollHeight, 180) + "px";
+    });
 
-		this.style.height =
-			Math.min(this.scrollHeight, 180) + "px";
-	});
+    userInput.addEventListener("keydown", (event) => {
+        if (
+            event.key === "Enter" &&
+            !event.shiftKey
+        ) {
+            event.preventDefault();
 
-	userInput.addEventListener("keydown", (event) => {
-		if (
-			event.key === "Enter" &&
-			!event.shiftKey
-		) {
-			event.preventDefault();
-
-			if (!isProcessing) {
-				sendMessage(false);
-			}
-		}
-	});
+            if (!isProcessing) {
+                sendMessage();
+            }
+        }
+    });
 }
 
 if (sendButton) {
-	sendButton.addEventListener("click", () => {
-		if (!isProcessing) {
-			sendMessage(false);
-		}
-	});
+    sendButton.addEventListener("click", () => {
+        if (!isProcessing) {
+            sendMessage();
+        }
+    });
 }
 
 /* =========================================================
-   PHOTO / FILE / CAMERA
+   PHOTO
    ========================================================= */
 
 if (photoButton && photoInput) {
-	photoButton.addEventListener("click", () => {
-		photoInput.click();
-	});
+    photoButton.addEventListener("click", () => {
+        photoInput.click();
+    });
 
-	photoInput.addEventListener("change", () => {
-		if (!photoInput.files?.length) return;
+    photoInput.addEventListener("change", () => {
+        if (!photoInput.files.length) return;
 
-		const file = photoInput.files[0];
+        const file = photoInput.files[0];
 
-		addMessageToChat(
-			"user",
-			`🖼️ Photo selected: ${file.name}\n\nPhoto understanding is not connected to the AI vision backend yet.`
-		);
+        addMessageToChat(
+            "user",
+            `🖼️ Photo selected: ${file.name}
 
-		photoInput.value = "";
-	});
-}
+Photo understanding will be connected to the AI vision system later.`
+        );
 
-if (fileButton && fileInput) {
-	fileButton.addEventListener("click", () => {
-		fileInput.click();
-	});
-
-	fileInput.addEventListener("change", () => {
-		if (!fileInput.files?.length) return;
-
-		const file = fileInput.files[0];
-
-		addMessageToChat(
-			"user",
-			`📎 File selected: ${file.name}\n\nFile understanding is not connected to the document backend yet.`
-		);
-
-		fileInput.value = "";
-	});
-}
-
-if (cameraButton && cameraInput) {
-	cameraButton.addEventListener("click", () => {
-		cameraInput.click();
-	});
-
-	cameraInput.addEventListener("change", () => {
-		if (!cameraInput.files?.length) return;
-
-		const file = cameraInput.files[0];
-
-		addMessageToChat(
-			"user",
-			`📸 Camera image selected: ${file.name}\n\nCamera image understanding is not connected to the AI vision backend yet.`
-		);
-
-		cameraInput.value = "";
-	});
+        photoInput.value = "";
+    });
 }
 
 /* =========================================================
-   MESSAGE ACTIONS
+   FILE
    ========================================================= */
 
-function createMessageActions(messageText) {
-	const actions = document.createElement("div");
+if (fileButton && fileInput) {
+    fileButton.addEventListener("click", () => {
+        fileInput.click();
+    });
 
-	actions.className = "message-actions";
+    fileInput.addEventListener("change", () => {
+        if (!fileInput.files.length) return;
 
-	const copy = document.createElement("button");
-	copy.className = "message-action";
-	copy.textContent = "📋";
-	copy.title = "Copy";
+        const file = fileInput.files[0];
 
-	copy.addEventListener("click", async () => {
-		try {
-			await navigator.clipboard.writeText(messageText);
-			copy.textContent = "✅";
+        addMessageToChat(
+            "user",
+            `📎 File selected: ${file.name}
 
-			setTimeout(() => {
-				copy.textContent = "📋";
-			}, 1200);
-		} catch {
-			copy.textContent = "❌";
-		}
-	});
+File understanding will be connected to the document system later.`
+        );
 
-	const like = document.createElement("button");
-	like.className = "message-action";
-	like.textContent = "👍";
-	like.title = "Like";
+        fileInput.value = "";
+    });
+}
 
-	like.addEventListener("click", () => {
-		like.textContent =
-			like.textContent === "👍"
-				? "👍🏻"
-				: "👍";
-	});
+/* =========================================================
+   CAMERA
+   ========================================================= */
 
-	const dislike = document.createElement("button");
-	dislike.className = "message-action";
-	dislike.textContent = "👎";
-	dislike.title = "Dislike";
+if (cameraButton && cameraInput) {
+    cameraButton.addEventListener("click", () => {
+        cameraInput.click();
+    });
 
-	dislike.addEventListener("click", () => {
-		dislike.textContent =
-			dislike.textContent === "👎"
-				? "👎🏻"
-				: "👎";
-	});
+    cameraInput.addEventListener("change", () => {
+        if (!cameraInput.files.length) return;
 
-	const share = document.createElement("button");
-	share.className = "message-action";
-	share.textContent = "↗️";
-	share.title = "Share";
+        const file = cameraInput.files[0];
 
-	share.addEventListener("click", async () => {
-		try {
-			if (navigator.share) {
-				await navigator.share({
-					title: "Global AI Mahlet",
-					text: messageText,
-					url: window.location.href,
-				});
-			} else {
-				await navigator.clipboard.writeText(messageText);
-			}
-		} catch {}
-	});
+        addMessageToChat(
+            "user",
+            `📸 Camera image selected: ${file.name}
 
-	actions.appendChild(copy);
-	actions.appendChild(like);
-	actions.appendChild(dislike);
-	actions.appendChild(share);
+Camera image understanding will be connected later.`
+        );
 
-	return actions;
+        cameraInput.value = "";
+    });
 }
 
 /* =========================================================
@@ -903,59 +408,377 @@ function createMessageActions(messageText) {
    ========================================================= */
 
 function addMessageToChat(role, content) {
-	if (!chatMessages) return null;
+    if (!chatMessages) return null;
 
-	const messageEl = document.createElement("div");
+    const message = document.createElement("div");
 
-	messageEl.className =
-		`message ${role}-message`;
+    message.className =
+        `message ${role}-message`;
 
-	const avatarEl = document.createElement("div");
-	avatarEl.className = "avatar";
+    const avatar = document.createElement("div");
 
-	avatarEl.textContent =
-		role === "user"
-			? "👤"
-			: currentAvatar;
+    avatar.className = "avatar";
 
-	const contentBox = document.createElement("div");
-	contentBox.className = "message-content";
+    avatar.textContent =
+        role === "user" ? "👤" : currentAvatar;
 
-	const nameEl = document.createElement("div");
-	nameEl.className = "message-name";
+    const contentBox = document.createElement("div");
 
-	nameEl.textContent =
-		role === "user"
-			? "You"
-			: "Global AI Mahlet";
+    contentBox.className = "message-content";
 
-	const textEl = document.createElement("div");
-	textEl.className = "message-text";
+    const name = document.createElement("div");
 
-	textEl.textContent = String(content ?? "");
+    name.className = "message-name";
 
-	contentBox.appendChild(nameEl);
-	contentBox.appendChild(textEl);
+    name.textContent =
+        role === "user"
+            ? "You"
+            : "Global AI Mahlet";
 
-	if (role === "assistant" && String(content ?? "").trim()) {
-		contentBox.appendChild(
-			createMessageActions(
-				String(content ?? "")
-			)
-		);
-	}
+    const text = document.createElement("div");
 
-	messageEl.appendChild(avatarEl);
-	messageEl.appendChild(contentBox);
+    text.className = "message-text";
 
-	chatMessages.appendChild(messageEl);
+    text.textContent = String(content || "");
 
-	chatMessages.scrollTop =
-		chatMessages.scrollHeight;
+    contentBox.appendChild(name);
+    contentBox.appendChild(text);
 
-	return messageEl;
+    if (role === "assistant") {
+        const actions = document.createElement("div");
+
+        actions.className = "message-actions";
+
+        ["📋", "👍", "👎", "↗️"].forEach((icon) => {
+            const button = document.createElement("button");
+
+            button.type = "button";
+            button.className = "message-action";
+            button.textContent = icon;
+
+            button.addEventListener("click", async () => {
+                if (icon === "📋") {
+                    try {
+                        await navigator.clipboard.writeText(
+                            String(content || "")
+                        );
+                        button.textContent = "✅";
+                    } catch {}
+                }
+
+                if (icon === "↗️" && navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: "Global AI Mahlet",
+                            text: String(content || ""),
+                            url: location.href
+                        });
+                    } catch {}
+                }
+            });
+
+            actions.appendChild(button);
+        });
+
+        contentBox.appendChild(actions);
+    }
+
+    message.appendChild(avatar);
+    message.appendChild(contentBox);
+
+    chatMessages.appendChild(message);
+
+    chatMessages.scrollTop =
+        chatMessages.scrollHeight;
+
+    return message;
 }
 
 /* =========================================================
-   TYPING
-   ================
+   DISPLAY HISTORY
+   ========================================================= */
+
+function displayHistory() {
+    if (!chatMessages) return;
+
+    chatMessages.innerHTML = "";
+
+    chatHistory.forEach((message) => {
+        addMessageToChat(
+            message.role,
+            message.content
+        );
+    });
+}
+
+/* =========================================================
+   AI RESPONSE
+   ========================================================= */
+
+async function sendMessage() {
+    if (!userInput || !chatMessages) return;
+
+    const text = userInput.value.trim();
+
+    if (!text || isProcessing) return;
+
+    isProcessing = true;
+
+    sendButton.disabled = true;
+    userInput.disabled = true;
+
+    userInput.value = "";
+    userInput.style.height = "auto";
+
+    const welcome = document.getElementById("welcome");
+
+    if (welcome) {
+        welcome.remove();
+    }
+
+    chatHistory.push({
+        role: "user",
+        content: text
+    });
+
+    addMessageToChat("user", text);
+
+    if (typingIndicator) {
+        typingIndicator.classList.add("visible");
+    }
+
+    const assistantMessage =
+        addMessageToChat("assistant", "");
+
+    const textElement =
+        assistantMessage?.querySelector(".message-text");
+
+    try {
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                messages: chatHistory
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(
+                `AI request failed: ${response.status}`
+            );
+        }
+
+        if (!response.body) {
+            throw new Error("No AI response stream.");
+        }
+
+        const reader =
+            response.body.getReader();
+
+        const decoder =
+            new TextDecoder();
+
+        let fullText = "";
+
+        while (true) {
+            const { value, done } =
+                await reader.read();
+
+            if (done) break;
+
+            const chunk =
+                decoder.decode(value, {
+                    stream: true
+                });
+
+            const lines =
+                chunk.split("\n");
+
+            for (const line of lines) {
+                if (!line.startsWith("data:")) {
+                    continue;
+                }
+
+                const data =
+                    line.substring(5).trim();
+
+                if (!data || data === "[DONE]") {
+                    continue;
+                }
+
+                try {
+                    const parsed =
+                        JSON.parse(data);
+
+                    const piece =
+                        parsed.response ||
+                        parsed.text ||
+                        parsed.content ||
+                        "";
+
+                    if (piece) {
+                        fullText += piece;
+
+                        if (textElement) {
+                            textElement.textContent =
+                                fullText;
+                        }
+
+                        chatMessages.scrollTop =
+                            chatMessages.scrollHeight;
+                    }
+                } catch {
+                    /* Ignore non-JSON SSE lines */
+                }
+            }
+        }
+
+        if (!fullText.trim()) {
+            fullText =
+                "I received your message, but I could not generate a response.";
+        }
+
+        if (textElement) {
+            textElement.textContent = fullText;
+        }
+
+        chatHistory.push({
+            role: "assistant",
+            content: fullText
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        if (textElement) {
+            textElement.textContent =
+                "Sorry, I could not connect to the AI right now. Please try again.";
+        }
+
+    } finally {
+        if (typingIndicator) {
+            typingIndicator.classList.remove("visible");
+        }
+
+        isProcessing = false;
+
+        sendButton.disabled = false;
+        userInput.disabled = false;
+
+        userInput.focus();
+    }
+}
+
+/* =========================================================
+   VOICE MODE
+   ========================================================= */
+
+function createVoicePanel() {
+    if (document.querySelector(".voice-panel")) return;
+
+    const panel =
+        document.createElement("div");
+
+    panel.className = "voice-panel";
+
+    panel.innerHTML = `
+        <div class="voice-face">${currentAvatar}</div>
+        <div>Voice mode is ON</div>
+        <button class="voice-stop">Turn Off</button>
+    `;
+
+    panel.querySelector(".voice-stop")
+        .addEventListener("click", stopVoiceMode);
+
+    document.body.appendChild(panel);
+}
+
+function stopVoiceMode() {
+    voiceMode = false;
+
+    if (recognition) {
+        try {
+            recognition.stop();
+        } catch {}
+    }
+
+    const panel =
+        document.querySelector(".voice-panel");
+
+    if (panel) panel.remove();
+
+    if (voiceButton) {
+        voiceButton.textContent = "🎤";
+    }
+}
+
+function startVoiceMode() {
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+        alert(
+            "Voice recognition is not supported by this browser."
+        );
+        return;
+    }
+
+    voiceMode = true;
+
+    createVoicePanel();
+
+    if (voiceButton) {
+        voiceButton.textContent = "🔴";
+    }
+
+    recognition =
+        new SpeechRecognition();
+
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = (event) => {
+        const spoken =
+            event.results[0][0].transcript;
+
+        if (userInput) {
+            userInput.value = spoken;
+            sendMessage();
+        }
+    };
+
+    recognition.onend = () => {
+        if (voiceMode) {
+            try {
+                recognition.start();
+            } catch {}
+        }
+    };
+
+    try {
+        recognition.start();
+    } catch {}
+}
+
+if (voiceButton) {
+    voiceButton.addEventListener("click", () => {
+        if (voiceMode) {
+            stopVoiceMode();
+        } else {
+            startVoiceMode();
+        }
+    });
+}
+
+/* =========================================================
+   STARTUP
+   ========================================================= */
+
+updateTemporaryButton();
+displayHistory();
+
+console.log("Global AI Mahlet chat.js loaded successfully.");
