@@ -21,18 +21,78 @@ const fileInput = document.getElementById("file-input");
 const cameraButton = document.getElementById("camera-button");
 const cameraInput = document.getElementById("camera-input");
 const voiceButton = document.getElementById("voice-button");
-const temporaryChatButton = document.getElementById("temporary-chat-button");
+const temporaryChatButton =
+    document.getElementById("temporary-chat-button");
 
 let isProcessing = false;
 let temporaryChat = false;
 let activeChatId = null;
 let voiceMode = false;
 let recognition = null;
+let speaking = false;
 
-let currentAvatar =
-    localStorage.getItem("globalAIAvatar") || "🤖";
+const currentAvatar = "🤖";
 
-const AVATARS = ["🤖", "👩‍💻", "👨‍💻", "🧑‍🚀", "👩‍🔬", "🧑‍🏫", "🧑‍💡"];
+/* =========================================================
+   50 LANGUAGES
+   ========================================================= */
+
+const LANGUAGES = [
+    "English",
+    "Amharic",
+    "Arabic",
+    "French",
+    "Spanish",
+    "Portuguese",
+    "German",
+    "Italian",
+    "Dutch",
+    "Russian",
+    "Ukrainian",
+    "Polish",
+    "Turkish",
+    "Greek",
+    "Hebrew",
+    "Persian",
+    "Hindi",
+    "Bengali",
+    "Urdu",
+    "Punjabi",
+    "Gujarati",
+    "Marathi",
+    "Tamil",
+    "Telugu",
+    "Kannada",
+    "Malayalam",
+    "Nepali",
+    "Sinhala",
+    "Thai",
+    "Vietnamese",
+    "Indonesian",
+    "Malay",
+    "Filipino",
+    "Swahili",
+    "Somali",
+    "Hausa",
+    "Yoruba",
+    "Zulu",
+    "Afrikaans",
+    "Oromo",
+    "Tigrinya",
+    "Chinese",
+    "Japanese",
+    "Korean",
+    "Romanian",
+    "Czech",
+    "Hungarian",
+    "Swedish",
+    "Danish",
+    "Finnish"
+];
+
+/* =========================================================
+   CHAT HISTORY
+   ========================================================= */
 
 let chatHistory = [
     {
@@ -49,13 +109,15 @@ try {
         localStorage.getItem("globalAIChats") || "[]"
     );
 
-    if (!Array.isArray(savedChats)) savedChats = [];
+    if (!Array.isArray(savedChats)) {
+        savedChats = [];
+    }
 } catch {
     savedChats = [];
 }
 
 /* =========================================================
-   FIX BUTTON LAYOUT
+   STYLES
    ========================================================= */
 
 const style = document.createElement("style");
@@ -98,26 +160,6 @@ style.textContent = `
     cursor:pointer;
 }
 
-.avatar-picker {
-    display:flex;
-    flex-wrap:wrap;
-    gap:5px;
-    margin:8px 0 12px;
-}
-
-.avatar-choice {
-    border:1px solid transparent;
-    background:transparent;
-    font-size:23px;
-    padding:4px;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-.avatar-choice.selected {
-    border-color:#111827;
-}
-
 .message-actions {
     display:flex;
     gap:5px;
@@ -139,20 +181,32 @@ style.textContent = `
     z-index:10000;
     background:#111827;
     color:white;
-    padding:18px 25px;
+    padding:20px 25px;
     border-radius:20px;
     text-align:center;
-    min-width:210px;
+    min-width:230px;
     box-shadow:0 8px 30px rgba(0,0,0,.3);
 }
 
 .voice-face {
     font-size:65px;
+    animation: globalVoicePulse 1.2s infinite;
+}
+
+@keyframes globalVoicePulse {
+    0% { transform:scale(1); }
+    50% { transform:scale(1.12); }
+    100% { transform:scale(1); }
+}
+
+.voice-status {
+    margin-top:7px;
+    font-size:14px;
 }
 
 .voice-stop {
-    margin-top:10px;
-    padding:7px 14px;
+    margin-top:12px;
+    padding:8px 15px;
     border:0;
     border-radius:8px;
     cursor:pointer;
@@ -160,6 +214,31 @@ style.textContent = `
 `;
 
 document.head.appendChild(style);
+
+/* =========================================================
+   50 LANGUAGE SELECT
+   ========================================================= */
+
+function setupLanguages() {
+    if (!languageSelect) return;
+
+    languageSelect.innerHTML = "";
+
+    LANGUAGES.forEach((language) => {
+        const option = document.createElement("option");
+
+        option.value = language;
+        option.textContent = language;
+
+        if (language === "English") {
+            option.selected = true;
+        }
+
+        languageSelect.appendChild(option);
+    });
+}
+
+setupLanguages();
 
 /* =========================================================
    SIDEBAR CLOSE BUTTON
@@ -171,59 +250,13 @@ if (sidebar) {
     close.className = "sidebar-close-button";
     close.textContent = "✕";
     close.title = "Close sidebar";
+    close.type = "button";
 
     close.addEventListener("click", () => {
         sidebar.classList.remove("open");
     });
 
     sidebar.appendChild(close);
-}
-
-/* =========================================================
-   AVATAR PICKER
-   ========================================================= */
-
-if (sidebar && recentChats) {
-    const avatarArea = document.createElement("div");
-
-    avatarArea.innerHTML = `
-        <div style="font-size:13px;font-weight:700;margin:8px;">
-            🤖 AI Avatar
-        </div>
-        <div class="avatar-picker"></div>
-    `;
-
-    sidebar.insertBefore(avatarArea, recentChats);
-
-    const picker = avatarArea.querySelector(".avatar-picker");
-
-    AVATARS.forEach((avatar) => {
-        const button = document.createElement("button");
-
-        button.type = "button";
-        button.className = "avatar-choice";
-        button.textContent = avatar;
-
-        if (avatar === currentAvatar) {
-            button.classList.add("selected");
-        }
-
-        button.addEventListener("click", () => {
-            currentAvatar = avatar;
-
-            localStorage.setItem(
-                "globalAIAvatar",
-                currentAvatar
-            );
-
-            picker.querySelectorAll(".avatar-choice")
-                .forEach((b) => b.classList.remove("selected"));
-
-            button.classList.add("selected");
-        });
-
-        picker.appendChild(button);
-    });
 }
 
 /* =========================================================
@@ -235,12 +268,132 @@ function updateTemporaryButton() {
 
     temporaryChatButton.textContent =
         temporaryChat ? "🗑️✓" : "🗑️";
+
+    temporaryChatButton.title =
+        temporaryChat
+            ? "Temporary Chat is ON"
+            : "Temporary Chat is OFF";
 }
 
 if (temporaryChatButton) {
     temporaryChatButton.addEventListener("click", () => {
         temporaryChat = !temporaryChat;
+
+        if (temporaryChat) {
+            activeChatId = null;
+        }
+
         updateTemporaryButton();
+    });
+}
+
+/* =========================================================
+   SAVE NORMAL CHAT
+   ========================================================= */
+
+function saveCurrentChat() {
+    if (temporaryChat) return;
+
+    const usefulMessages = chatHistory.filter(
+        (message) =>
+            message.content &&
+            String(message.content).trim()
+    );
+
+    if (usefulMessages.length < 2) return;
+
+    const firstUserMessage =
+        usefulMessages.find(
+            (message) => message.role === "user"
+        );
+
+    const title =
+        firstUserMessage
+            ? String(firstUserMessage.content)
+                  .replace(/\s+/g, " ")
+                  .slice(0, 45)
+            : "New Chat";
+
+    if (!activeChatId) {
+        activeChatId =
+            Date.now().toString();
+    }
+
+    const chat = {
+        id: activeChatId,
+        title,
+        messages: chatHistory
+    };
+
+    const existingIndex =
+        savedChats.findIndex(
+            (item) => item.id === activeChatId
+        );
+
+    if (existingIndex >= 0) {
+        savedChats[existingIndex] = chat;
+    } else {
+        savedChats.unshift(chat);
+    }
+
+    try {
+        localStorage.setItem(
+            "globalAIChats",
+            JSON.stringify(savedChats)
+        );
+    } catch {
+        console.warn("Could not save chat.");
+    }
+
+    displayRecentChats();
+}
+
+/* =========================================================
+   RECENT CHATS
+   ========================================================= */
+
+function displayRecentChats() {
+    if (!recentChats) return;
+
+    recentChats.innerHTML = "";
+
+    savedChats.forEach((chat) => {
+        const button =
+            document.createElement("button");
+
+        button.type = "button";
+        button.style.display = "block";
+        button.style.width = "100%";
+        button.style.textAlign = "left";
+        button.style.padding = "8px";
+        button.style.marginBottom = "4px";
+        button.style.border = "0";
+        button.style.borderRadius = "8px";
+        button.style.background = "transparent";
+        button.style.cursor = "pointer";
+
+        button.textContent =
+            chat.title || "Chat";
+
+        button.addEventListener("click", () => {
+            activeChatId = chat.id;
+
+            chatHistory =
+                Array.isArray(chat.messages)
+                    ? chat.messages
+                    : [];
+
+            temporaryChat = false;
+
+            updateTemporaryButton();
+            displayHistory();
+
+            if (sidebar) {
+                sidebar.classList.remove("open");
+            }
+        });
+
+        recentChats.appendChild(button);
     });
 }
 
@@ -271,7 +424,10 @@ function startNewChat() {
 }
 
 if (newChatButton) {
-    newChatButton.addEventListener("click", startNewChat);
+    newChatButton.addEventListener(
+        "click",
+        startNewChat
+    );
 }
 
 /* =========================================================
@@ -285,14 +441,48 @@ if (menuButton && sidebar) {
 }
 
 /* =========================================================
+   RECENT SEARCH
+   ========================================================= */
+
+if (recentSearch) {
+    recentSearch.addEventListener(
+        "input",
+        () => {
+            const query =
+                recentSearch.value
+                    .toLowerCase()
+                    .trim();
+
+            const buttons =
+                recentChats?.querySelectorAll(
+                    "button"
+                ) || [];
+
+            buttons.forEach((button) => {
+                button.style.display =
+                    !query ||
+                    button.textContent
+                        .toLowerCase()
+                        .includes(query)
+                        ? "block"
+                        : "none";
+            });
+        }
+    );
+}
+
+/* =========================================================
    LANGUAGE
    ========================================================= */
 
 if (languageSelect && userInput) {
-    languageSelect.addEventListener("change", () => {
-        userInput.placeholder =
-            `Message Global AI Mahlet in ${languageSelect.value}...`;
-    });
+    languageSelect.addEventListener(
+        "change",
+        () => {
+            userInput.placeholder =
+                `Message Global AI Mahlet in ${languageSelect.value}...`;
+        }
+    );
 }
 
 /* =========================================================
@@ -300,57 +490,237 @@ if (languageSelect && userInput) {
    ========================================================= */
 
 if (userInput) {
-    userInput.addEventListener("input", () => {
-        userInput.style.height = "auto";
-        userInput.style.height =
-            Math.min(userInput.scrollHeight, 180) + "px";
-    });
+    userInput.addEventListener(
+        "input",
+        () => {
+            userInput.style.height = "auto";
 
-    userInput.addEventListener("keydown", (event) => {
-        if (
-            event.key === "Enter" &&
-            !event.shiftKey
-        ) {
-            event.preventDefault();
+            userInput.style.height =
+                Math.min(
+                    userInput.scrollHeight,
+                    180
+                ) + "px";
+        }
+    );
 
+    userInput.addEventListener(
+        "keydown",
+        (event) => {
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+                event.preventDefault();
+
+                if (!isProcessing) {
+                    sendMessage();
+                }
+            }
+        }
+    );
+}
+
+if (sendButton) {
+    sendButton.addEventListener(
+        "click",
+        () => {
             if (!isProcessing) {
                 sendMessage();
             }
         }
-    });
-}
-
-if (sendButton) {
-    sendButton.addEventListener("click", () => {
-        if (!isProcessing) {
-            sendMessage();
-        }
-    });
+    );
 }
 
 /* =========================================================
-   PHOTO
+   IMAGE → BASE64
    ========================================================= */
 
-if (photoButton && photoInput) {
-    photoButton.addEventListener("click", () => {
-        photoInput.click();
-    });
+function fileToBase64(file) {
+    return new Promise(
+        (resolve, reject) => {
+            const reader =
+                new FileReader();
 
-    photoInput.addEventListener("change", () => {
-        if (!photoInput.files.length) return;
+            reader.onload = () => {
+                const result =
+                    String(
+                        reader.result || ""
+                    );
 
-        const file = photoInput.files[0];
+                resolve(result);
+            };
 
+            reader.onerror = () => {
+                reject(
+                    new Error(
+                        "Could not read image."
+                    )
+                );
+            };
+
+            reader.readAsDataURL(file);
+        }
+    );
+}
+
+/* =========================================================
+   PHOTO + CAMERA AI VISION
+   ========================================================= */
+
+async function analyzeImage(
+    file,
+    source = "photo"
+) {
+    if (!file) return;
+
+    const label =
+        source === "camera"
+            ? "📸 Camera image"
+            : "🖼️ Photo";
+
+    addMessageToChat(
+        "user",
+        `${label}: ${file.name}`
+    );
+
+    const assistantMessage =
         addMessageToChat(
-            "user",
-            `🖼️ Photo selected: ${file.name}
-
-Photo understanding will be connected to the AI vision system later.`
+            "assistant",
+            "🔎 I'm analyzing the image..."
         );
 
-        photoInput.value = "";
-    });
+    const textElement =
+        assistantMessage?.querySelector(
+            ".message-text"
+        );
+
+    try {
+        const base64 =
+            await fileToBase64(file);
+
+        const response =
+            await fetch(
+                "/api/vision",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+                    body: JSON.stringify({
+                        image: base64,
+                        prompt:
+                            `Analyze this image carefully.
+If it contains a school question, solve it step by step.
+If it contains text, read and explain it.
+If it contains a diagram, chart, object, or other visual information, explain what is visible.
+Do not invent information that cannot be seen.
+Answer in ${languageSelect?.value || "English"}.`
+                    })
+                }
+            );
+
+        const result =
+            await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                result.error ||
+                "Vision request failed."
+            );
+        }
+
+        const answer =
+            result.response ||
+            result.description ||
+            result.text ||
+            result.content ||
+            "I could not understand the image.";
+
+        if (textElement) {
+            textElement.textContent =
+                answer;
+        }
+
+        chatHistory.push({
+            role: "assistant",
+            content: answer
+        });
+
+        speakText(answer);
+
+        saveCurrentChat();
+
+    } catch (error) {
+        console.error(
+            "Vision error:",
+            error
+        );
+
+        const message =
+            "Sorry, I could not understand that image. Please try another photo.";
+
+        if (textElement) {
+            textElement.textContent =
+                message;
+        }
+    }
+}
+
+if (photoButton && photoInput) {
+    photoButton.addEventListener(
+        "click",
+        () => {
+            photoInput.click();
+        }
+    );
+
+    photoInput.addEventListener(
+        "change",
+        async () => {
+            if (!photoInput.files.length) {
+                return;
+            }
+
+            const file =
+                photoInput.files[0];
+
+            await analyzeImage(
+                file,
+                "photo"
+            );
+
+            photoInput.value = "";
+        }
+    );
+}
+
+if (cameraButton && cameraInput) {
+    cameraButton.addEventListener(
+        "click",
+        () => {
+            cameraInput.click();
+        }
+    );
+
+    cameraInput.addEventListener(
+        "change",
+        async () => {
+            if (!cameraInput.files.length) {
+                return;
+            }
+
+            const file =
+                cameraInput.files[0];
+
+            await analyzeImage(
+                file,
+                "camera"
+            );
+
+            cameraInput.value = "";
+        }
+    );
 }
 
 /* =========================================================
@@ -358,427 +728,139 @@ Photo understanding will be connected to the AI vision system later.`
    ========================================================= */
 
 if (fileButton && fileInput) {
-    fileButton.addEventListener("click", () => {
-        fileInput.click();
-    });
+    fileButton.addEventListener(
+        "click",
+        () => {
+            fileInput.click();
+        }
+    );
 
-    fileInput.addEventListener("change", () => {
-        if (!fileInput.files.length) return;
+    fileInput.addEventListener(
+        "change",
+        () => {
+            if (!fileInput.files.length) {
+                return;
+            }
 
-        const file = fileInput.files[0];
+            const file =
+                fileInput.files[0];
 
-        addMessageToChat(
-            "user",
-            `📎 File selected: ${file.name}
+            addMessageToChat(
+                "user",
+                `📎 File selected: ${file.name}`
+            );
 
-File understanding will be connected to the document system later.`
-        );
+            addMessageToChat(
+                "assistant",
+                "I received your file. Full document understanding will be added separately."
+            );
 
-        fileInput.value = "";
-    });
-}
-
-/* =========================================================
-   CAMERA
-   ========================================================= */
-
-if (cameraButton && cameraInput) {
-    cameraButton.addEventListener("click", () => {
-        cameraInput.click();
-    });
-
-    cameraInput.addEventListener("change", () => {
-        if (!cameraInput.files.length) return;
-
-        const file = cameraInput.files[0];
-
-        addMessageToChat(
-            "user",
-            `📸 Camera image selected: ${file.name}
-
-Camera image understanding will be connected later.`
-        );
-
-        cameraInput.value = "";
-    });
+            fileInput.value = "";
+        }
+    );
 }
 
 /* =========================================================
    ADD MESSAGE
    ========================================================= */
 
-function addMessageToChat(role, content) {
+function addMessageToChat(
+    role,
+    content
+) {
     if (!chatMessages) return null;
 
-    const message = document.createElement("div");
+    const message =
+        document.createElement("div");
 
     message.className =
         `message ${role}-message`;
 
-    const avatar = document.createElement("div");
+    const avatar =
+        document.createElement("div");
 
     avatar.className = "avatar";
 
     avatar.textContent =
-        role === "user" ? "👤" : currentAvatar;
+        role === "user"
+            ? "👤"
+            : currentAvatar;
 
-    const contentBox = document.createElement("div");
+    const contentBox =
+        document.createElement("div");
 
-    contentBox.className = "message-content";
+    contentBox.className =
+        "message-content";
 
-    const name = document.createElement("div");
+    const name =
+        document.createElement("div");
 
-    name.className = "message-name";
+    name.className =
+        "message-name";
 
     name.textContent =
         role === "user"
             ? "You"
             : "Global AI Mahlet";
 
-    const text = document.createElement("div");
+    const text =
+        document.createElement("div");
 
-    text.className = "message-text";
+    text.className =
+        "message-text";
 
-    text.textContent = String(content || "");
+    text.textContent =
+        String(content || "");
 
     contentBox.appendChild(name);
     contentBox.appendChild(text);
 
     if (role === "assistant") {
-        const actions = document.createElement("div");
+        const actions =
+            document.createElement("div");
 
-        actions.className = "message-actions";
+        actions.className =
+            "message-actions";
 
-        ["📋", "👍", "👎", "↗️"].forEach((icon) => {
-            const button = document.createElement("button");
+        ["📋", "👍", "👎", "↗️"]
+            .forEach((icon) => {
+                const button =
+                    document.createElement(
+                        "button"
+                    );
 
-            button.type = "button";
-            button.className = "message-action";
-            button.textContent = icon;
+                button.type = "button";
+                button.className =
+                    "message-action";
+                button.textContent = icon;
 
-            button.addEventListener("click", async () => {
-                if (icon === "📋") {
-                    try {
-                        await navigator.clipboard.writeText(
-                            String(content || "")
-                        );
-                        button.textContent = "✅";
-                    } catch {}
-                }
+                button.addEventListener(
+                    "click",
+                    async () => {
+                        if (
+                            icon === "📋"
+                        ) {
+                            try {
+                                await navigator.clipboard.writeText(
+                                    String(
+                                        content ||
+                                        text.textContent ||
+                                        ""
+                                    )
+                                );
 
-                if (icon === "↗️" && navigator.share) {
-                    try {
-                        await navigator.share({
-                            title: "Global AI Mahlet",
-                            text: String(content || ""),
-                            url: location.href
-                        });
-                    } catch {}
-                }
-            });
-
-            actions.appendChild(button);
-        });
-
-        contentBox.appendChild(actions);
-    }
-
-    message.appendChild(avatar);
-    message.appendChild(contentBox);
-
-    chatMessages.appendChild(message);
-
-    chatMessages.scrollTop =
-        chatMessages.scrollHeight;
-
-    return message;
-}
-
-/* =========================================================
-   DISPLAY HISTORY
-   ========================================================= */
-
-function displayHistory() {
-    if (!chatMessages) return;
-
-    chatMessages.innerHTML = "";
-
-    chatHistory.forEach((message) => {
-        addMessageToChat(
-            message.role,
-            message.content
-        );
-    });
-}
-
-/* =========================================================
-   AI RESPONSE
-   ========================================================= */
-
-async function sendMessage() {
-    if (!userInput || !chatMessages) return;
-
-    const text = userInput.value.trim();
-
-    if (!text || isProcessing) return;
-
-    isProcessing = true;
-
-    sendButton.disabled = true;
-    userInput.disabled = true;
-
-    userInput.value = "";
-    userInput.style.height = "auto";
-
-    const welcome = document.getElementById("welcome");
-
-    if (welcome) {
-        welcome.remove();
-    }
-
-    chatHistory.push({
-        role: "user",
-        content: text
-    });
-
-    addMessageToChat("user", text);
-
-    if (typingIndicator) {
-        typingIndicator.classList.add("visible");
-    }
-
-    const assistantMessage =
-        addMessageToChat("assistant", "");
-
-    const textElement =
-        assistantMessage?.querySelector(".message-text");
-
-    try {
-        const response = await fetch("/api/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                messages: chatHistory
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(
-                `AI request failed: ${response.status}`
-            );
-        }
-
-        if (!response.body) {
-            throw new Error("No AI response stream.");
-        }
-
-        const reader =
-            response.body.getReader();
-
-        const decoder =
-            new TextDecoder();
-
-        let fullText = "";
-
-        while (true) {
-            const { value, done } =
-                await reader.read();
-
-            if (done) break;
-
-            const chunk =
-                decoder.decode(value, {
-                    stream: true
-                });
-
-            const lines =
-                chunk.split("\n");
-
-            for (const line of lines) {
-                if (!line.startsWith("data:")) {
-                    continue;
-                }
-
-                const data =
-                    line.substring(5).trim();
-
-                if (!data || data === "[DONE]") {
-                    continue;
-                }
-
-                try {
-                    const parsed =
-                        JSON.parse(data);
-
-                    const piece =
-                        parsed.response ||
-                        parsed.text ||
-                        parsed.content ||
-                        "";
-
-                    if (piece) {
-                        fullText += piece;
-
-                        if (textElement) {
-                            textElement.textContent =
-                                fullText;
+                                button.textContent =
+                                    "✅";
+                            } catch {}
                         }
 
-                        chatMessages.scrollTop =
-                            chatMessages.scrollHeight;
-                    }
-                } catch {
-                    /* Ignore non-JSON SSE lines */
-                }
-            }
-        }
+                        if (
+                            icon === "👍" ||
+                            icon === "👎"
+                        ) {
+                            button.textContent =
+                                "✓";
+                        }
 
-        if (!fullText.trim()) {
-            fullText =
-                "I received your message, but I could not generate a response.";
-        }
-
-        if (textElement) {
-            textElement.textContent = fullText;
-        }
-
-        chatHistory.push({
-            role: "assistant",
-            content: fullText
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        if (textElement) {
-            textElement.textContent =
-                "Sorry, I could not connect to the AI right now. Please try again.";
-        }
-
-    } finally {
-        if (typingIndicator) {
-            typingIndicator.classList.remove("visible");
-        }
-
-        isProcessing = false;
-
-        sendButton.disabled = false;
-        userInput.disabled = false;
-
-        userInput.focus();
-    }
-}
-
-/* =========================================================
-   VOICE MODE
-   ========================================================= */
-
-function createVoicePanel() {
-    if (document.querySelector(".voice-panel")) return;
-
-    const panel =
-        document.createElement("div");
-
-    panel.className = "voice-panel";
-
-    panel.innerHTML = `
-        <div class="voice-face">${currentAvatar}</div>
-        <div>Voice mode is ON</div>
-        <button class="voice-stop">Turn Off</button>
-    `;
-
-    panel.querySelector(".voice-stop")
-        .addEventListener("click", stopVoiceMode);
-
-    document.body.appendChild(panel);
-}
-
-function stopVoiceMode() {
-    voiceMode = false;
-
-    if (recognition) {
-        try {
-            recognition.stop();
-        } catch {}
-    }
-
-    const panel =
-        document.querySelector(".voice-panel");
-
-    if (panel) panel.remove();
-
-    if (voiceButton) {
-        voiceButton.textContent = "🎤";
-    }
-}
-
-function startVoiceMode() {
-    const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-        alert(
-            "Voice recognition is not supported by this browser."
-        );
-        return;
-    }
-
-    voiceMode = true;
-
-    createVoicePanel();
-
-    if (voiceButton) {
-        voiceButton.textContent = "🔴";
-    }
-
-    recognition =
-        new SpeechRecognition();
-
-    recognition.lang = "en-US";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onresult = (event) => {
-        const spoken =
-            event.results[0][0].transcript;
-
-        if (userInput) {
-            userInput.value = spoken;
-            sendMessage();
-        }
-    };
-
-    recognition.onend = () => {
-        if (voiceMode) {
-            try {
-                recognition.start();
-            } catch {}
-        }
-    };
-
-    try {
-        recognition.start();
-    } catch {}
-}
-
-if (voiceButton) {
-    voiceButton.addEventListener("click", () => {
-        if (voiceMode) {
-            stopVoiceMode();
-        } else {
-            startVoiceMode();
-        }
-    });
-}
-
-/* =========================================================
-   STARTUP
-   ========================================================= */
-
-updateTemporaryButton();
-displayHistory();
-
-console.log("Global AI Mahlet chat.js loaded successfully.");
+                        if (
+ 
