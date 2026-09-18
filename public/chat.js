@@ -1,3 +1,7 @@
+/* =========================================================
+   GLOBAL AI MAHLET — COMPLETE CHAT.JS
+   ========================================================= */
+
 const chatMessages = document.getElementById("chat-messages");
 const userInput = document.getElementById("user-input");
 const sendButton = document.getElementById("send-button");
@@ -19,13 +23,22 @@ const cameraInput = document.getElementById("camera-input");
 const voiceButton = document.getElementById("voice-button");
 const temporaryChatButton = document.getElementById("temporary-chat-button");
 
+/* =========================================================
+   STATE
+========================================================= */
+
 let isProcessing = false;
 let temporaryChat = false;
 let activeChatId = null;
+
 let voiceMode = false;
 let isListening = false;
 let recognition = null;
-let currentAvatar = "🤖";
+let voicePanel = null;
+let voiceRequestInProgress = false;
+
+let currentAvatar =
+	localStorage.getItem("globalAIAvatar") || "🤖";
 
 const AVATARS = [
 	"🤖",
@@ -55,29 +68,51 @@ let chatHistory = [
 	},
 ];
 
-let savedChats = JSON.parse(
-	localStorage.getItem("globalAIChats") || "[]",
-);
+let savedChats = [];
+
+try {
+	savedChats = JSON.parse(
+		localStorage.getItem("globalAIChats") || "[]",
+	);
+
+	if (!Array.isArray(savedChats)) {
+		savedChats = [];
+	}
+} catch {
+	savedChats = [];
+}
 
 /* =========================================================
-   STYLES ADDED FOR THE NEW FEATURES
+   BASIC SAFETY CHECK
+========================================================= */
+
+if (!chatMessages || !userInput || !sendButton) {
+	console.error(
+		"Global AI Mahlet: Required chat elements were not found.",
+	);
+}
+
+/* =========================================================
+   STYLES
 ========================================================= */
 
 const style = document.createElement("style");
 
 style.textContent = `
+	.sidebar {
+		position: relative;
+	}
+
 	.sidebar-close-button {
 		position: absolute;
 		top: 12px;
 		right: 12px;
+		z-index: 20;
 		border: none;
 		background: transparent;
-		font-size: 24px;
+		font-size: 22px;
 		cursor: pointer;
-	}
-
-	.sidebar {
-		position: relative;
+		padding: 5px;
 	}
 
 	.temporary-control {
@@ -89,11 +124,13 @@ style.textContent = `
 		align-items: center;
 		gap: 10px;
 		cursor: pointer;
+		user-select: none;
 	}
 
 	.temporary-circle {
-		width: 20px;
-		height: 20px;
+		width: 18px;
+		height: 18px;
+		min-width: 18px;
 		border-radius: 50%;
 		border: 2px solid currentColor;
 		display: inline-block;
@@ -101,6 +138,34 @@ style.textContent = `
 
 	.temporary-circle.active {
 		background: currentColor;
+	}
+
+	.avatar-area {
+		margin-bottom: 12px;
+	}
+
+	.avatar-picker {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 7px;
+		margin-top: 8px;
+	}
+
+	.avatar-choice {
+		font-size: 24px;
+		border: 1px solid transparent;
+		background: transparent;
+		cursor: pointer;
+		border-radius: 8px;
+		padding: 3px 6px;
+	}
+
+	.avatar-choice:hover {
+		background: rgba(127,127,127,.12);
+	}
+
+	.avatar-choice.selected {
+		border-color: currentColor;
 	}
 
 	.recent-chat-row {
@@ -114,6 +179,8 @@ style.textContent = `
 		flex: 1;
 		text-align: left;
 		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
 	}
 
 	.recent-chat-actions {
@@ -126,6 +193,15 @@ style.textContent = `
 		background: transparent;
 		cursor: pointer;
 		padding: 5px;
+	}
+
+	.recent-chat-action:hover {
+		background: rgba(127,127,127,.12);
+		border-radius: 6px;
+	}
+
+	.pinned-chat {
+		font-weight: 600;
 	}
 
 	.message-actions {
@@ -147,51 +223,58 @@ style.textContent = `
 		background: rgba(127,127,127,.12);
 	}
 
+	.message-action:disabled {
+		opacity: .5;
+		cursor: default;
+	}
+
 	.voice-avatar-panel {
 		position: fixed;
 		left: 50%;
 		bottom: 90px;
 		transform: translateX(-50%);
-		z-index: 1000;
+		z-index: 9999;
 		padding: 16px 22px;
 		border-radius: 20px;
-		background: rgba(20,20,20,.92);
+		background: rgba(20,20,20,.94);
 		color: white;
 		text-align: center;
 		box-shadow: 0 8px 30px rgba(0,0,0,.3);
+		min-width: 190px;
+		pointer-events: auto;
 	}
 
 	.voice-avatar-face {
 		font-size: 70px;
 		line-height: 1.1;
+		transition: transform .15s ease;
 	}
 
 	.voice-avatar-face.talking {
-		transform: scale(1.08);
+		transform: scale(1.12);
 	}
 
-	.avatar-picker {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 7px;
-		margin-top: 8px;
-	}
-
-	.avatar-choice {
-		font-size: 24px;
-		border: 1px solid transparent;
-		background: transparent;
+	.voice-stop-button {
+		margin-top: 10px;
+		border: none;
+		border-radius: 10px;
+		padding: 7px 14px;
 		cursor: pointer;
+	}
+
+	.gai-error {
+		margin-top: 8px;
+		padding: 8px;
 		border-radius: 8px;
-		padding: 3px;
+		background: rgba(220,38,38,.08);
 	}
 
-	.avatar-choice.selected {
-		border-color: currentColor;
-	}
-
-	.pinned-chat {
-		font-weight: 600;
+	.gai-retry {
+		margin-top: 6px;
+		border: none;
+		border-radius: 7px;
+		padding: 6px 10px;
+		cursor: pointer;
 	}
 `;
 
@@ -201,22 +284,40 @@ document.head.appendChild(style);
    SIDEBAR CLOSE BUTTON
 ========================================================= */
 
-const closeSidebarButton = document.createElement("button");
-closeSidebarButton.className = "sidebar-close-button";
-closeSidebarButton.textContent = "✕";
-closeSidebarButton.title = "Close";
-closeSidebarButton.addEventListener("click", () => {
-	sidebar.classList.remove("open");
-});
+if (sidebar) {
+	const closeSidebarButton =
+		document.createElement("button");
 
-sidebar.appendChild(closeSidebarButton);
+	closeSidebarButton.className =
+		"sidebar-close-button";
+
+	closeSidebarButton.textContent = "✕";
+	closeSidebarButton.title = "Close sidebar";
+	closeSidebarButton.setAttribute(
+		"aria-label",
+		"Close sidebar",
+	);
+
+	closeSidebarButton.addEventListener(
+		"click",
+		() => {
+			sidebar.classList.remove("open");
+		},
+	);
+
+	sidebar.appendChild(closeSidebarButton);
+}
 
 /* =========================================================
-   TEMPORARY CHAT CONTROL
+   TEMPORARY CHAT
 ========================================================= */
 
-const temporaryControl = document.createElement("div");
-temporaryControl.className = "temporary-control";
+const temporaryControl =
+	document.createElement("div");
+
+temporaryControl.className =
+	"temporary-control";
+
 temporaryControl.innerHTML = `
 	<span class="temporary-circle"></span>
 	<span>
@@ -225,61 +326,91 @@ temporaryControl.innerHTML = `
 	</span>
 `;
 
-sidebar.insertBefore(
-	temporaryControl,
-	recentChats,
-);
-
-function updateTemporaryUI() {
-	const circle = temporaryControl.querySelector(
-		".temporary-circle",
+if (sidebar && recentChats) {
+	sidebar.insertBefore(
+		temporaryControl,
+		recentChats,
 	);
-
-	circle.classList.toggle("active", temporaryChat);
-
-	if (temporaryChat) {
-		temporaryControl.title = "Temporary Chat is ON";
-	} else {
-		temporaryControl.title = "Temporary Chat is OFF";
-	}
-
-	temporaryChatButton.textContent = temporaryChat
-		? "🗑️✓"
-		: "🗑️";
 }
 
-temporaryControl.addEventListener("click", () => {
-	temporaryChat = !temporaryChat;
-	updateTemporaryUI();
-});
+function updateTemporaryUI() {
+	const circle =
+		temporaryControl.querySelector(
+			".temporary-circle",
+		);
 
-/* Keep the old button working too. */
-temporaryChatButton.addEventListener("click", () => {
-	temporaryChat = !temporaryChat;
-	updateTemporaryUI();
-});
+	if (circle) {
+		circle.classList.toggle(
+			"active",
+			temporaryChat,
+		);
+	}
+
+	temporaryControl.title =
+		temporaryChat
+			? "Temporary Chat is ON"
+			: "Temporary Chat is OFF";
+
+	if (temporaryChatButton) {
+		temporaryChatButton.textContent =
+			temporaryChat ? "🗑️✓" : "🗑️";
+	}
+}
+
+temporaryControl.addEventListener(
+	"click",
+	() => {
+		temporaryChat = !temporaryChat;
+		updateTemporaryUI();
+	},
+);
+
+if (temporaryChatButton) {
+	temporaryChatButton.addEventListener(
+		"click",
+		() => {
+			temporaryChat = !temporaryChat;
+			updateTemporaryUI();
+		},
+	);
+}
 
 /* =========================================================
    AVATAR PICKER
 ========================================================= */
 
-const avatarArea = document.createElement("div");
+const avatarArea =
+	document.createElement("div");
+
+avatarArea.className = "avatar-area";
+
 avatarArea.innerHTML = `
-	<div style="margin-top:12px;font-size:13px;">
+	<div style="font-size:13px;">
 		<strong>Choose AI Avatar</strong>
 	</div>
 	<div class="avatar-picker"></div>
 `;
 
-sidebar.insertBefore(avatarArea, recentChats);
+if (sidebar && recentChats) {
+	sidebar.insertBefore(
+		avatarArea,
+		recentChats,
+	);
+}
 
-const avatarPicker = avatarArea.querySelector(".avatar-picker");
+const avatarPicker =
+	avatarArea.querySelector(
+		".avatar-picker",
+	);
 
 function renderAvatarPicker() {
+	if (!avatarPicker) return;
+
 	avatarPicker.innerHTML = "";
 
 	AVATARS.forEach((avatar) => {
-		const button = document.createElement("button");
+		const button =
+			document.createElement("button");
 
 		button.className = "avatar-choice";
 		button.textContent = avatar;
@@ -289,21 +420,30 @@ function renderAvatarPicker() {
 			button.classList.add("selected");
 		}
 
-		button.addEventListener("click", () => {
-			currentAvatar = avatar;
-			localStorage.setItem(
-				"globalAIAvatar",
-				currentAvatar,
-			);
-			renderAvatarPicker();
-		});
+		button.addEventListener(
+			"click",
+			() => {
+				currentAvatar = avatar;
+
+				localStorage.setItem(
+					"globalAIAvatar",
+					currentAvatar,
+				);
+
+				renderAvatarPicker();
+
+				if (voicePanel) {
+					updateVoiceAvatar(
+						false,
+						"Voice mode is ON",
+					);
+				}
+			},
+		);
 
 		avatarPicker.appendChild(button);
 	});
 }
-
-currentAvatar =
-	localStorage.getItem("globalAIAvatar") || "🤖";
 
 renderAvatarPicker();
 
@@ -314,43 +454,63 @@ renderAvatarPicker();
 function saveChats() {
 	if (temporaryChat) return;
 
-	localStorage.setItem(
-		"globalAIChats",
-		JSON.stringify(savedChats),
-	);
+	try {
+		localStorage.setItem(
+			"globalAIChats",
+			JSON.stringify(savedChats),
+		);
+	} catch (error) {
+		console.error(
+			"Could not save chats:",
+			error,
+		);
+	}
 }
 
-/*
-  One conversation stays ONE recent chat.
-  New messages update that conversation instead of creating
-  another recent item.
-*/
-
 function getConversationTitle(messages) {
-	const firstUser = messages.find(
-		(message) => message.role === "user",
-	);
+	const firstUser =
+		messages.find(
+			(message) =>
+				message.role === "user",
+		);
 
 	if (!firstUser) {
 		return "New Conversation";
 	}
 
-	const text = firstUser.content.trim();
+	const text =
+		String(firstUser.content || "").trim();
+
+	if (!text) {
+		return "New Conversation";
+	}
 
 	const lower = text.toLowerCase();
 
 	if (
-		lower.match(
-			/^(hi|hello|hey|hii|helo|good morning|good afternoon|good evening)\b/,
+		/^(hi|hello|hey|hii|helo|good morning|good afternoon|good evening)\b/.test(
+			lower,
 		)
 	) {
 		return "Greeting Conversation";
 	}
 
-	if (lower.includes("math")) return "Mathematics";
-	if (lower.includes("physics")) return "Physics Study";
-	if (lower.includes("chemistry")) return "Chemistry Study";
-	if (lower.includes("biology")) return "Biology Study";
+	if (lower.includes("math")) {
+		return "Mathematics";
+	}
+
+	if (lower.includes("physics")) {
+		return "Physics Study";
+	}
+
+	if (lower.includes("chemistry")) {
+		return "Chemistry Study";
+	}
+
+	if (lower.includes("biology")) {
+		return "Biology Study";
+	}
+
 	if (
 		lower.includes("code") ||
 		lower.includes("coding") ||
@@ -384,28 +544,34 @@ function getConversationTitle(messages) {
 function saveCurrentChat() {
 	if (temporaryChat) return;
 
-	const userMessages = chatHistory.filter(
-		(message) => message.role === "user",
-	);
+	const userMessages =
+		chatHistory.filter(
+			(message) =>
+				message.role === "user",
+		);
 
 	if (userMessages.length === 0) return;
 
-	const title = getConversationTitle(chatHistory);
+	const title =
+		getConversationTitle(chatHistory);
 
 	if (activeChatId !== null) {
-		const existingIndex = savedChats.findIndex(
-			(chat) => chat.id === activeChatId,
-		);
+		const existingIndex =
+			savedChats.findIndex(
+				(chat) =>
+					chat.id === activeChatId,
+			);
 
 		if (existingIndex !== -1) {
-			savedChats[existingIndex].messages = [
-				...chatHistory,
-			];
+			savedChats[existingIndex].messages =
+				[...chatHistory];
 
-			savedChats[existingIndex].title = title;
+			savedChats[existingIndex].title =
+				title;
 
 			saveChats();
 			renderRecentChats();
+
 			return;
 		}
 	}
@@ -421,41 +587,67 @@ function saveCurrentChat() {
 
 	savedChats.unshift(newChat);
 
-	savedChats = savedChats.slice(0, 100);
+	savedChats =
+		savedChats.slice(0, 100);
 
 	saveChats();
 	renderRecentChats();
 }
 
 /* =========================================================
-   RECENT CHAT LIST
+   RECENT CHATS
 ========================================================= */
 
 function renderRecentChats(filter = "") {
+	if (!recentChats) return;
+
 	recentChats.innerHTML = "";
 
-	const searchText = filter.toLowerCase();
+	const searchText =
+		String(filter || "").toLowerCase();
 
-	const filtered = savedChats
-		.filter((chat) =>
-			chat.title
-				.toLowerCase()
-				.includes(searchText),
-		)
-		.sort((a, b) => {
-			if (a.pinned && !b.pinned) return -1;
-			if (!a.pinned && b.pinned) return 1;
-			return b.id - a.id;
-		});
+	const filtered =
+		savedChats
+			.filter((chat) =>
+				String(chat.title || "")
+					.toLowerCase()
+					.includes(searchText),
+			)
+			.sort((a, b) => {
+				if (
+					a.pinned &&
+					!b.pinned
+				) {
+					return -1;
+				}
+
+				if (
+					!a.pinned &&
+					b.pinned
+				) {
+					return 1;
+				}
+
+				return (
+					(b.updatedAt ||
+						b.id ||
+						0) -
+					(a.updatedAt ||
+						a.id ||
+						0)
+				);
+			});
 
 	if (filtered.length === 0) {
-		const empty = document.createElement("div");
+		const empty =
+			document.createElement("div");
 
 		empty.style.padding = "10px";
 		empty.style.color = "#6b7280";
 		empty.style.fontSize = "13px";
 
-		empty.textContent = "No recent chats";
+		empty.textContent =
+			"No recent chats";
 
 		recentChats.appendChild(empty);
 
@@ -463,87 +655,136 @@ function renderRecentChats(filter = "") {
 	}
 
 	filtered.forEach((chat) => {
-		const row = document.createElement("div");
+		const row =
+			document.createElement("div");
 
-		row.className = "recent-chat-row";
+		row.className =
+			"recent-chat-row";
 
-		const main = document.createElement("button");
+		const main =
+			document.createElement("button");
 
-		main.className = "recent-chat recent-chat-main";
+		main.className =
+			"recent-chat recent-chat-main";
 
 		if (chat.pinned) {
-			main.classList.add("pinned-chat");
+			main.classList.add(
+				"pinned-chat",
+			);
 		}
 
 		main.textContent =
 			(chat.pinned ? "📌 " : "") +
-			chat.title;
+			(chat.title ||
+				"Conversation");
 
-		main.addEventListener("click", () => {
-			activeChatId = chat.id;
-			chatHistory = [...chat.messages];
+		main.addEventListener(
+			"click",
+			() => {
+				activeChatId = chat.id;
 
-			displayHistory();
+				chatHistory =
+					Array.isArray(
+						chat.messages,
+					)
+						? [...chat.messages]
+						: [];
 
-			sidebar.classList.remove("open");
-		});
+				displayHistory();
+
+				if (sidebar) {
+					sidebar.classList.remove(
+						"open",
+					);
+				}
+			},
+		);
 
 		const actions =
 			document.createElement("div");
 
-		actions.className = "recent-chat-actions";
+		actions.className =
+			"recent-chat-actions";
 
 		/* PIN */
 
-		const pin = document.createElement("button");
+		const pin =
+			document.createElement("button");
 
-		pin.className = "recent-chat-action";
-		pin.textContent = chat.pinned ? "📌" : "📍";
-		pin.title = chat.pinned
-			? "Unpin"
-			: "Pin";
+		pin.className =
+			"recent-chat-action";
 
-		pin.addEventListener("click", (event) => {
-			event.stopPropagation();
+		pin.textContent =
+			chat.pinned ? "📌" : "📍";
 
-			chat.pinned = !chat.pinned;
+		pin.title =
+			chat.pinned
+				? "Unpin"
+				: "Pin";
 
-			saveChats();
-			renderRecentChats(
-				recentSearch.value,
-			);
-		});
+		pin.addEventListener(
+			"click",
+			(event) => {
+				event.stopPropagation();
+
+				chat.pinned =
+					!chat.pinned;
+
+				chat.updatedAt =
+					Date.now();
+
+				saveChats();
+
+				renderRecentChats(
+					recentSearch
+						? recentSearch.value
+						: "",
+				);
+			},
+		);
 
 		/* RENAME */
 
 		const rename =
 			document.createElement("button");
 
-		rename.className = "recent-chat-action";
+		rename.className =
+			"recent-chat-action";
+
 		rename.textContent = "✏️";
 		rename.title = "Rename";
 
-		rename.addEventListener("click", (event) => {
-			event.stopPropagation();
+		rename.addEventListener(
+			"click",
+			(event) => {
+				event.stopPropagation();
 
-			const newTitle = prompt(
-				"Rename this chat:",
-				chat.title,
-			);
+				const newTitle =
+					prompt(
+						"Rename this chat:",
+						chat.title,
+					);
 
-			if (
-				newTitle &&
-				newTitle.trim()
-			) {
-				chat.title =
-					newTitle.trim();
+				if (
+					newTitle &&
+					newTitle.trim()
+				) {
+					chat.title =
+						newTitle.trim();
 
-				saveChats();
-				renderRecentChats(
-					recentSearch.value,
-				);
-			}
-		});
+					chat.updatedAt =
+						Date.now();
+
+					saveChats();
+
+					renderRecentChats(
+						recentSearch
+							? recentSearch.value
+							: "",
+					);
+				}
+			},
+		);
 
 		/* DELETE */
 
@@ -583,8 +824,11 @@ function renderRecentChats(filter = "") {
 				}
 
 				saveChats();
+
 				renderRecentChats(
-					recentSearch.value,
+					recentSearch
+						? recentSearch.value
+						: "",
 				);
 			},
 		);
@@ -601,10 +845,12 @@ function renderRecentChats(filter = "") {
 }
 
 /* =========================================================
-   DISPLAY CHAT
+   DISPLAY HISTORY
 ========================================================= */
 
 function displayHistory() {
+	if (!chatMessages) return;
+
 	chatMessages.innerHTML = "";
 
 	chatHistory.forEach((message) => {
@@ -629,6 +875,8 @@ function startNewChat() {
 
 	activeChatId = null;
 
+	temporaryChat = false;
+
 	chatHistory = [
 		{
 			role: "assistant",
@@ -637,170 +885,215 @@ function startNewChat() {
 		},
 	];
 
-	temporaryChat = false;
-
 	updateTemporaryUI();
 
 	displayHistory();
 
-	userInput.value = "";
-	userInput.focus();
+	if (userInput) {
+		userInput.value = "";
+		userInput.style.height = "auto";
+		userInput.focus();
+	}
 }
 
-newChatButton.addEventListener(
-	"click",
-	startNewChat,
-);
+if (newChatButton) {
+	newChatButton.addEventListener(
+		"click",
+		startNewChat,
+	);
+}
 
 /* =========================================================
    MENU
 ========================================================= */
 
-menuButton.addEventListener("click", () => {
-	sidebar.classList.toggle("open");
-});
+if (menuButton && sidebar) {
+	menuButton.addEventListener(
+		"click",
+		() => {
+			sidebar.classList.toggle(
+				"open",
+			);
+		},
+	);
+}
 
-recentSearch.addEventListener(
-	"input",
-	() => {
-		renderRecentChats(
-			recentSearch.value,
-		);
-	},
-);
+if (recentSearch) {
+	recentSearch.addEventListener(
+		"input",
+		() => {
+			renderRecentChats(
+				recentSearch.value,
+			);
+		},
+	);
+}
 
-languageSelect.addEventListener(
-	"change",
-	() => {
-		const language =
-			languageSelect.value;
+if (languageSelect) {
+	languageSelect.addEventListener(
+		"change",
+		() => {
+			const language =
+				languageSelect.value;
 
-		userInput.placeholder =
-			`Message Global AI Mahlet in ${language}...`;
-	},
-);
+			if (userInput) {
+				userInput.placeholder =
+					`Message Global AI Mahlet in ${language}...`;
+			}
+		},
+	);
+}
 
 /* =========================================================
    TEXT INPUT
 ========================================================= */
 
-userInput.addEventListener(
-	"input",
-	function () {
-		this.style.height = "auto";
+if (userInput) {
+	userInput.addEventListener(
+		"input",
+		function () {
+			this.style.height = "auto";
 
-		this.style.height =
-			Math.min(
-				this.scrollHeight,
-				180,
-			) + "px";
-	},
-);
+			this.style.height =
+				Math.min(
+					this.scrollHeight,
+					180,
+				) + "px";
+		},
+	);
 
-userInput.addEventListener(
-	"keydown",
-	(event) => {
-		if (
-			event.key === "Enter" &&
-			!event.shiftKey
-		) {
-			event.preventDefault();
-			sendMessage(false);
-		}
-	},
-);
+	userInput.addEventListener(
+		"keydown",
+		(event) => {
+			if (
+				event.key === "Enter" &&
+				!event.shiftKey
+			) {
+				event.preventDefault();
 
-sendButton.addEventListener(
-	"click",
-	() => sendMessage(false),
-);
+				if (!isProcessing) {
+					sendMessage(false);
+				}
+			}
+		},
+	);
+}
+
+if (sendButton) {
+	sendButton.addEventListener(
+		"click",
+		() => {
+			if (!isProcessing) {
+				sendMessage(false);
+			}
+		},
+	);
+}
 
 /* =========================================================
    PHOTO
 ========================================================= */
 
-photoButton.addEventListener(
-	"click",
-	() => {
-		photoInput.click();
-	},
-);
+if (photoButton && photoInput) {
+	photoButton.addEventListener(
+		"click",
+		() => {
+			photoInput.click();
+		},
+	);
 
-photoInput.addEventListener(
-	"change",
-	() => {
-		if (!photoInput.files.length)
-			return;
+	photoInput.addEventListener(
+		"change",
+		() => {
+			if (
+				!photoInput.files ||
+				!photoInput.files.length
+			) {
+				return;
+			}
 
-		const file =
-			photoInput.files[0];
+			const file =
+				photoInput.files[0];
 
-		addMessageToChat(
-			"user",
-			`🖼️ Photo selected: ${file.name}\n\nPhoto understanding will be connected to the AI vision backend next.`,
-		);
+			addMessageToChat(
+				"user",
+				`🖼️ Photo selected: ${file.name}\n\nPhoto understanding is not connected to the AI vision backend yet.`,
+			);
 
-		photoInput.value = "";
-	},
-);
+			photoInput.value = "";
+		},
+	);
+}
 
 /* =========================================================
    FILE
 ========================================================= */
 
-fileButton.addEventListener(
-	"click",
-	() => {
-		fileInput.click();
-	},
-);
+if (fileButton && fileInput) {
+	fileButton.addEventListener(
+		"click",
+		() => {
+			fileInput.click();
+		},
+	);
 
-fileInput.addEventListener(
-	"change",
-	() => {
-		if (!fileInput.files.length)
-			return;
+	fileInput.addEventListener(
+		"change",
+		() => {
+			if (
+				!fileInput.files ||
+				!fileInput.files.length
+			) {
+				return;
+			}
 
-		const file =
-			fileInput.files[0];
+			const file =
+				fileInput.files[0];
 
-		addMessageToChat(
-			"user",
-			`📎 File selected: ${file.name}\n\nFile understanding will be connected to the document backend next.`,
-		);
+			addMessageToChat(
+				"user",
+				`📎 File selected: ${file.name}\n\nFile understanding is not connected to the document backend yet.`,
+			);
 
-		fileInput.value = "";
-	},
-);
+			fileInput.value = "";
+		},
+	);
+}
 
 /* =========================================================
    CAMERA
 ========================================================= */
 
-cameraButton.addEventListener(
-	"click",
-	() => {
-		cameraInput.click();
-	},
-);
+if (cameraButton && cameraInput) {
+	cameraButton.addEventListener(
+		"click",
+		() => {
+			cameraInput.click();
+		},
+	);
 
-cameraInput.addEventListener(
-	"change",
-	() => {
-		if (!cameraInput.files.length)
-			return;
+	cameraInput.addEventListener(
+		"change",
+		() => {
+			if (
+				!cameraInput.files ||
+				!cameraInput.files.length
+			) {
+				return;
+			}
 
-		const file =
-			cameraInput.files[0];
+			const file =
+				cameraInput.files[0];
 
-		addMessageToChat(
-			"user",
-			`📸 Camera image selected: ${file.name}\n\nCamera image understanding will be connected to the AI vision backend next.`,
-		);
+			addMessageToChat(
+				"user",
+				`📸 Camera image selected: ${file.name}\n\nCamera image understanding is not connected to the AI vision backend yet.`,
+			);
 
-		cameraInput.value = "";
-	},
-);
+			cameraInput.value = "";
+		},
+	);
+}
 
 /* =========================================================
    MESSAGE ACTIONS
@@ -820,7 +1113,9 @@ function createMessageActions(
 	const copy =
 		document.createElement("button");
 
-	copy.className = "message-action";
+	copy.className =
+		"message-action";
+
 	copy.textContent = "📋";
 	copy.title = "Copy";
 
@@ -833,218 +1128,5 @@ function createMessageActions(
 				);
 
 				copy.textContent = "✅";
-			} catch {
-				copy.textContent = "❌";
-			}
 
-			setTimeout(() => {
-				copy.textContent = "📋";
-			}, 1200);
-		},
-	);
-
-	/* LIKE */
-
-	const like =
-		document.createElement("button");
-
-	like.className = "message-action";
-	like.textContent = "👍";
-	like.title = "Like";
-
-	like.addEventListener(
-		"click",
-		() => {
-			like.textContent =
-				like.textContent === "👍"
-					? "👍🏻"
-					: "👍";
-		},
-	);
-
-	/* DISLIKE */
-
-	const dislike =
-		document.createElement("button");
-
-	dislike.className =
-		"message-action";
-
-	dislike.textContent = "👎";
-	dislike.title = "Dislike";
-
-	dislike.addEventListener(
-		"click",
-		() => {
-			dislike.textContent =
-				dislike.textContent === "👎"
-					? "👎🏻"
-					: "👎";
-		},
-	);
-
-	/* SHARE */
-
-	const share =
-		document.createElement("button");
-
-	share.className =
-		"message-action";
-
-	share.textContent = "↗️";
-	share.title = "Share";
-
-	share.addEventListener(
-		"click",
-		async () => {
-			if (navigator.share) {
-				try {
-					await navigator.share({
-						title:
-							"Global AI Mahlet",
-						text: messageText,
-						url:
-							window.location.href,
-					});
-				} catch {}
-			} else {
-				try {
-					await navigator.clipboard.writeText(
-						messageText,
-					);
-
-					share.textContent =
-						"✅";
-
-					setTimeout(
-						() => {
-							share.textContent =
-								"↗️";
-						},
-						1200,
-					);
-				} catch {}
-			}
-		},
-	);
-
-	actions.appendChild(copy);
-	actions.appendChild(like);
-	actions.appendChild(dislike);
-	actions.appendChild(share);
-
-	return actions;
-}
-
-/* =========================================================
-   ADD MESSAGE
-========================================================= */
-
-function addMessageToChat(
-	role,
-	content,
-) {
-	const messageEl =
-		document.createElement("div");
-
-	messageEl.className =
-		`message ${role}-message`;
-
-	const avatar =
-		role === "user"
-			? "👤"
-			: currentAvatar;
-
-	const name =
-		role === "user"
-			? "You"
-			: "Global AI Mahlet";
-
-	messageEl.innerHTML = `
-		<div class="avatar">${avatar}</div>
-		<div class="message-content">
-			<div class="message-name">${name}</div>
-			<div class="message-text"></div>
-		</div>
-	`;
-
-	const textElement =
-		messageEl.querySelector(
-			".message-text",
-		);
-
-	textElement.textContent =
-		content;
-
-	if (role === "assistant") {
-		const contentBox =
-			messageEl.querySelector(
-				".message-content",
-			);
-
-		contentBox.appendChild(
-			createMessageActions(content),
-		);
-	}
-
-	chatMessages.appendChild(
-		messageEl,
-	);
-
-	chatMessages.scrollTop =
-		chatMessages.scrollHeight;
-
-	return messageEl;
-}
-
-/* =========================================================
-   VOICE AVATAR
-========================================================= */
-
-let voicePanel = null;
-
-function createVoicePanel() {
-	if (voicePanel) return;
-
-	voicePanel =
-		document.createElement("div");
-
-	voicePanel.className =
-		"voice-avatar-panel";
-
-	voicePanel.innerHTML = `
-		<div class="voice-avatar-face">${currentAvatar}</div>
-		<div class="voice-status">
-			Voice mode is ON
-		</div>
-	`;
-
-	document.body.appendChild(
-		voicePanel,
-	);
-}
-
-function updateVoiceAvatar(
-	talking,
-	status,
-) {
-	if (!voicePanel) return;
-
-	const face =
-		voicePanel.querySelector(
-			".voice-avatar-face",
-		);
-
-	const statusText =
-		voicePanel.querySelector(
-			".voice-status",
-		);
-
-	face.textContent =
-		talking
-			? "🗣️"
-			: currentAvatar;
-
-	face.classList.toggle(
-		"talking",
-		
+				setTimeout(() 
