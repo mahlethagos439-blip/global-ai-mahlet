@@ -54,7 +54,6 @@ export default {
     }
 
     try {
-
       const body = await request.json() as {
         message?: string;
         language?: string;
@@ -144,9 +143,10 @@ Do not claim to have performed actions that you cannot actually perform.
 `;
 
       // Cloudflare Workers AI
+      // Using the currently active fast version of Llama 3.1 8B.
       const result =
         await env.AI.run(
-          "@cf/meta/llama-3.1-8b-instruct",
+          "@cf/meta/llama-3.1-8b-instruct-fast",
           {
             messages: [
               {
