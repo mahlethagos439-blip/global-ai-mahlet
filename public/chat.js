@@ -29,6 +29,7 @@
     chats: loadChats(),
     activeId: null,
     temporary: false,
+    tempChat: null,
     voiceMode: false,
     listening: false,
     language: localStorage.getItem(LANG_KEY) || "en",
@@ -36,22 +37,27 @@
     recognition: null
   };
 
-  const $ = s => document.querySelector(s);
-  const $$ = s => [...document.querySelectorAll(s)];
+  const $ = selector => document.querySelector(selector);
+  const $$ = selector => [...document.querySelectorAll(selector)];
 
   function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
   }
 
   function esc(value) {
-    return String(value ?? "").replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-    }[c]));
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    }[char]));
   }
 
   function loadChats() {
     try {
-      return JSON.parse(localStorage.getItem(KEY)) || [];
+      const saved = JSON.parse(localStorage.getItem(KEY));
+      return Array.isArray(saved) ? saved : [];
     } catch {
       return [];
     }
@@ -64,7 +70,7 @@
   }
 
   function activeChat() {
-    return state.chats.find(c => c.id === state.activeId) || null;
+    return state.chats.find(chat => chat.id === state.activeId) || null;
   }
 
   function newChat(save = true) {
@@ -83,7 +89,10 @@
     } else {
       state.chats.unshift(chat);
       state.activeId = chat.id;
-      if (save) saveChats();
+
+      if (save) {
+        saveChats();
+      }
     }
 
     render();
@@ -102,11 +111,16 @@
           messages: []
         };
       }
+
       return state.tempChat;
     }
 
     let chat = activeChat();
-    if (!chat) chat = newChat(false);
+
+    if (!chat) {
+      chat = newChat(false);
+    }
+
     return chat;
   }
 
@@ -124,7 +138,10 @@
     chat.updated = Date.now();
 
     if (role === "user" && chat.title === "New Chat") {
-      const clean = String(text).trim().replace(/\s+/g, " ");
+      const clean = String(text)
+        .trim()
+        .replace(/\s+/g, " ");
+
       chat.title = clean.slice(0, 42) || "New Chat";
     }
 
@@ -133,37 +150,61 @@
     renderRecents();
   }
 
-  function languageName(code) {
-    return (LANGUAGES.find(x => x[1] === code) || ["English","en"])[0];
-  }
-
   function renderMessages() {
-    const box = $("#messages") || $(".messages") || $("#chatMessages");
+    const box =
+      $("#messages") ||
+      $(".messages") ||
+      $("#chatMessages");
+
     if (!box) return;
 
     const chat = getChat();
+
     if (!chat.messages.length) {
       box.innerHTML = `
         <div class="empty-chat">
           <div class="empty-icon">✨</div>
           <h2>Hello, Mahlet ✨</h2>
-          <p>I'm Global AI Mahlet — your smart assistant.<br>
-          Ask me anything, anytime. I'm here to help you learn, create, solve, and grow! 💙</p>
-        </div>`;
+          <p>
+            I'm Global AI Mahlet — your smart assistant.<br>
+            Ask me anything, anytime. I'm here to help you learn,
+            create, solve, and grow! 💙
+          </p>
+        </div>
+      `;
       return;
     }
 
-    box.innerHTML = chat.messages.map(m => {
-      const isAI = m.role === "assistant";
+    box.innerHTML = chat.messages.map(message => {
+      const isAI = message.role === "assistant";
+
       return `
-        <div class="message ${isAI ? "ai-message" : "user-message"}" data-id="${m.id}">
-          <div class="message-bubble">${formatText(m.text)}</div>
+        <div class="message ${isAI ? "ai-message" : "user-message"}"
+             data-id="${message.id}">
+
+          <div class="message-bubble">
+            ${formatText(message.text)}
+          </div>
+
           ${isAI ? `
             <div class="message-actions">
-              <button data-speak="${m.id}" title="Speak">🔊</button>
-              <button data-share="${m.id}" title="Share">↗</button>
-            </div>` : ""}
-        </div>`;
+              <button
+                type="button"
+                data-speak="${message.id}"
+                title="Speak">
+                🔊
+              </button>
+
+              <button
+                type="button"
+                data-share="${message.id}"
+                title="Share">
+                ↗
+              </button>
+            </div>
+          ` : ""}
+        </div>
+      `;
     }).join("");
 
     box.scrollTop = box.scrollHeight;
@@ -177,37 +218,64 @@
   }
 
   function renderRecents(filter = "") {
-    const box = $("#recentChats") || $(".recent-chats") || $("#recents");
+    const box =
+      $("#recentChats") ||
+      $(".recent-chats") ||
+      $("#recents");
+
     if (!box) return;
 
     if (state.temporary) {
-      box.innerHTML = `<div class="recent-empty">Temporary Chat is not saved.</div>`;
+      box.innerHTML =
+        `<div class="recent-empty">Temporary Chat is not saved.</div>`;
       return;
     }
 
-    let chats = [...state.chats].sort((a,b) =>
-      Number(b.pinned) - Number(a.pinned) || b.updated - a.updated
+    let chats = [...state.chats].sort(
+      (a, b) =>
+        Number(b.pinned) - Number(a.pinned) ||
+        b.updated - a.updated
     );
 
     if (filter) {
-      const q = filter.toLowerCase();
-      chats = chats.filter(c =>
-        c.title.toLowerCase().includes(q) ||
-        c.messages.some(m => m.text.toLowerCase().includes(q))
+      const query = filter.toLowerCase();
+
+      chats = chats.filter(chat =>
+        chat.title.toLowerCase().includes(query) ||
+        chat.messages.some(message =>
+          message.text.toLowerCase().includes(query)
+        )
       );
     }
 
     if (!chats.length) {
-      box.innerHTML = `<div class="recent-empty">No recent chats yet.</div>`;
+      box.innerHTML =
+        `<div class="recent-empty">No recent chats yet.</div>`;
       return;
     }
 
-    box.innerHTML = chats.map(c => `
-      <div class="recent-chat ${c.id === state.activeId ? "active" : ""}" data-chat="${c.id}">
-        <button class="recent-open" data-open="${c.id}">
-          <span>${c.pinned ? "📌 " : ""}${esc(c.title)}</span>
+    box.innerHTML = chats.map(chat => `
+      <div
+        class="recent-chat ${chat.id === state.activeId ? "active" : ""}"
+        data-chat="${chat.id}">
+
+        <button
+          type="button"
+          class="recent-open"
+          data-open="${chat.id}">
+          <span>
+            ${chat.pinned ? "📌 " : ""}
+            ${esc(chat.title)}
+          </span>
         </button>
-        <button class="recent-more" data-more="${c.id}">⋮</button>
+
+        <button
+          type="button"
+          class="recent-more"
+          data-more="${chat.id}">
+          ⋮
+        </button>
+
       </div>
     `).join("");
   }
@@ -218,60 +286,101 @@
     updateLanguageUI();
     updateVoiceUI();
     updateTemporaryUI();
+    updateFilePreview();
   }
 
   function updateLanguageUI() {
-    $$("[data-language-label]").forEach(el => {
-      el.textContent = state.language.toUpperCase();
+    $$("[data-language-label]").forEach(element => {
+      element.textContent = state.language.toUpperCase();
     });
 
     $$("select[data-language]").forEach(select => {
       if (!select.options.length) {
-        select.innerHTML = LANGUAGES.map(([name,code]) =>
+        select.innerHTML = LANGUAGES.map(([name, code]) =>
           `<option value="${code}">${name}</option>`
         ).join("");
       }
+
       select.value = state.language;
     });
   }
 
   function updateVoiceUI() {
-    $$("[data-voice-mode]").forEach(btn => {
-      btn.classList.toggle("active", state.voiceMode);
-      btn.setAttribute("aria-pressed", String(state.voiceMode));
+    $$("[data-voice-mode]").forEach(button => {
+      button.classList.toggle("active", state.voiceMode);
+      button.setAttribute(
+        "aria-pressed",
+        String(state.voiceMode)
+      );
     });
 
-    $$("[data-mic]").forEach(btn => {
-      btn.classList.toggle("active", state.listening);
+    const mic = $("#micButton");
+
+    if (mic) {
+      mic.classList.toggle("active", state.listening);
+    }
+
+    $$("[data-mic]").forEach(button => {
+      button.classList.toggle("active", state.listening);
     });
   }
 
   function updateTemporaryUI() {
-    $$("[data-temporary]").forEach(el => {
-      if (el.matches("input")) el.checked = state.temporary;
-      el.classList.toggle("active", state.temporary);
+    const checkbox = $("#temporaryChat");
+
+    if (checkbox) {
+      checkbox.checked = state.temporary;
+    }
+
+    $$("[data-temporary]").forEach(element => {
+      if (element.matches("input")) {
+        element.checked = state.temporary;
+      }
+
+      element.classList.toggle(
+        "active",
+        state.temporary
+      );
     });
   }
 
   function inputBox() {
-    return $("#messageInput") || $("textarea") || $("input[name='message']");
+    return (
+      $("#messageInput") ||
+      $("textarea") ||
+      $("input[name='message']")
+    );
   }
 
   function sendButton() {
-    return $("[data-send]") || $("#sendButton") || $(".send-button");
+    return (
+      $("[data-send]") ||
+      $("#sendButton") ||
+      $(".send-button")
+    );
   }
 
   async function sendMessage() {
     const input = inputBox();
+
     if (!input) return;
 
     const text = input.value.trim();
-    if (!text && !state.selectedFiles.length) return;
+
+    if (!text && !state.selectedFiles.length) {
+      return;
+    }
 
     const files = await prepareFiles();
 
     input.value = "";
-    addMessage("user", text || "Please analyze the attached file/image.", {files});
+    input.style.height = "auto";
+
+    addMessage(
+      "user",
+      text || "Please analyze the attached file/image.",
+      { files }
+    );
 
     const chat = getChat();
 
@@ -281,35 +390,46 @@
       const result = await requestAI({
         message: text,
         language: state.language,
-        chat: chat,
-        files: files
+        chat,
+        files
       });
 
-      const answer = result?.text || result?.response ||
-        "I received your message. The AI connection is ready to be connected to your Cloudflare Workers AI backend.";
+      const answer =
+        result?.text ||
+        result?.response ||
+        result?.message ||
+        "I received your message.";
 
       addMessage("assistant", answer);
 
-      if (state.voiceMode) speak(answer);
+      if (state.voiceMode) {
+        speak(answer);
+      }
+
     } catch (error) {
-      console.error(error);
+      console.error("Global AI Mahlet:", error);
+
       addMessage(
         "assistant",
         "I couldn't connect to the AI server right now. Please check the Cloudflare AI connection."
       );
+
     } finally {
       showTyping(false);
+
       state.selectedFiles = [];
+
       updateFilePreview();
     }
   }
 
   async function requestAI(payload) {
     /*
-      IMPORTANT:
-      This function intentionally does not invent a Cloudflare endpoint.
-      Your actual Worker backend must be connected here after we inspect
-      your current Cloudflare Worker configuration.
+      The frontend intentionally does NOT invent
+      a Cloudflare Workers AI endpoint.
+
+      We will connect this function to your actual
+      Cloudflare Worker after the backend is created.
     */
 
     const endpoint =
@@ -319,7 +439,9 @@
 
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: {"Content-Type":"application/json"},
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         message: payload.message,
         language: payload.language,
@@ -329,36 +451,55 @@
     });
 
     if (!response.ok) {
-      throw new Error("AI request failed: " + response.status);
+      throw new Error(
+        "AI request failed: " + response.status
+      );
     }
 
-    const type = response.headers.get("content-type") || "";
+    const contentType =
+      response.headers.get("content-type") || "";
 
-    if (type.includes("application/json")) {
+    if (contentType.includes("application/json")) {
       return await response.json();
     }
 
-    return {text: await response.text()};
+    return {
+      text: await response.text()
+    };
   }
 
   function showTyping(show) {
-    const box = $("#messages") || $(".messages") || $("#chatMessages");
+    const box =
+      $("#messages") ||
+      $(".messages") ||
+      $("#chatMessages");
+
     if (!box) return;
 
     const old = box.querySelector(".typing");
-    if (old) old.remove();
+
+    if (old) {
+      old.remove();
+    }
 
     if (show) {
-      box.insertAdjacentHTML("beforeend", `
+      box.insertAdjacentHTML(
+        "beforeend",
+        `
         <div class="message ai-message typing">
-          <div class="message-bubble">Thinking<span>.</span><span>.</span><span>.</span></div>
-        </div>`);
+          <div class="message-bubble">
+            Thinking<span>.</span><span>.</span><span>.</span>
+          </div>
+        </div>
+        `
+      );
+
       box.scrollTop = box.scrollHeight;
     }
   }
 
   async function prepareFiles() {
-    const out = [];
+    const output = [];
 
     for (const file of state.selectedFiles) {
       const item = {
@@ -371,44 +512,66 @@
         item.preview = await fileToDataURL(file);
       }
 
-      out.push(item);
+      output.push(item);
     }
 
-    return out;
+    return output;
   }
 
   function fileToDataURL(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+
       reader.onload = () => resolve(reader.result);
       reader.onerror = reject;
+
       reader.readAsDataURL(file);
     });
   }
 
   function addFiles(files) {
-    state.selectedFiles.push(...[...files]);
+    if (!files) return;
+
+    const incoming = [...files];
+
+    state.selectedFiles.push(...incoming);
+
     updateFilePreview();
   }
 
   function updateFilePreview() {
-    const box = $("#filePreview") || $(".file-preview");
+    const box =
+      $("#filePreview") ||
+      $(".file-preview");
+
     if (!box) return;
 
-    box.innerHTML = state.selectedFiles.map((f,i) => `
+    box.innerHTML = state.selectedFiles.map((file, index) => `
       <div class="file-chip">
-        <span>${f.type.startsWith("image/") ? "🖼️" : "📎"} ${esc(f.name)}</span>
-        <button data-remove-file="${i}">×</button>
+        <span>
+          ${file.type.startsWith("image/") ? "🖼️" : "📎"}
+          ${esc(file.name)}
+        </span>
+
+        <button
+          type="button"
+          data-remove-file="${index}">
+          ×
+        </button>
       </div>
     `).join("");
   }
 
   function speak(text) {
-    if (!("speechSynthesis" in window)) return;
+    if (!("speechSynthesis" in window)) {
+      return;
+    }
 
     speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance =
+      new SpeechSynthesisUtterance(text);
+
     utterance.lang = state.language;
     utterance.rate = 1;
     utterance.pitch = 1;
@@ -418,47 +581,62 @@
 
   function setupRecognition() {
     const Recognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
 
-    if (!Recognition) return null;
+    if (!Recognition) {
+      return null;
+    }
 
-    const r = new Recognition();
-    r.lang = state.language;
-    r.continuous = state.voiceMode;
-    r.interimResults = false;
+    const recognition = new Recognition();
 
-    r.onstart = () => {
+    recognition.lang = state.language;
+    recognition.continuous = state.voiceMode;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
       state.listening = true;
       updateVoiceUI();
     };
 
-    r.onend = () => {
+    recognition.onend = () => {
       state.listening = false;
       updateVoiceUI();
 
       if (state.voiceMode) {
-        try { r.start(); } catch {}
+        try {
+          recognition.start();
+        } catch {}
       }
     };
 
-    r.onerror = e => {
-      console.warn("Speech recognition:", e.error);
+    recognition.onerror = event => {
+      console.warn(
+        "Speech recognition:",
+        event.error
+      );
+
       state.listening = false;
       updateVoiceUI();
     };
 
-    r.onresult = e => {
-      const transcript = [...e.results]
-        .map(r => r[0].transcript)
+    recognition.onresult = event => {
+      const transcript = [...event.results]
+        .map(result => result[0].transcript)
         .join(" ");
 
       const input = inputBox();
-      if (input) input.value = transcript;
 
-      if (state.voiceMode) sendMessage();
+      if (input) {
+        input.value = transcript;
+      }
+
+      if (state.voiceMode) {
+        sendMessage();
+      }
     };
 
-    return r;
+    return recognition;
   }
 
   function toggleVoiceMode() {
@@ -468,36 +646,56 @@
       state.recognition = setupRecognition();
 
       if (state.recognition) {
-        try { state.recognition.start(); } catch {}
+        try {
+          state.recognition.start();
+        } catch {}
       }
 
       addMessage(
         "assistant",
         "Voice mode is on 🎙️. You can speak naturally, and I'll respond by voice. You can interrupt me at any time."
       );
+
     } else {
       if (state.recognition) {
-        try { state.recognition.stop(); } catch {}
+        try {
+          state.recognition.stop();
+        } catch {}
       }
-      speechSynthesis?.cancel();
-      state.listening = false;
-    }
 
-    updateVoiceUI();
+      if ("speechSynthesis" in window) {
+        speechSynthesis.cancel();
+      }
+
+      state.listening = false;
+
+      updateVoiceUI();
+    }
   }
 
   function toggleMic() {
-    if (!state.recognition) state.recognition = setupRecognition();
     if (!state.recognition) {
-      alert("Voice input is not supported by this browser.");
+      state.recognition = setupRecognition();
+    }
+
+    if (!state.recognition) {
+      alert(
+        "Voice input is not supported by this browser."
+      );
       return;
     }
 
     if (state.listening) {
-      try { state.recognition.stop(); } catch {}
+      try {
+        state.recognition.stop();
+      } catch {}
+
     } else {
       state.recognition.lang = state.language;
-      try { state.recognition.start(); } catch {}
+
+      try {
+        state.recognition.start();
+      } catch {}
     }
   }
 
@@ -505,10 +703,15 @@
     $$("select[data-language]").forEach(select => {
       select.addEventListener("change", () => {
         state.language = select.value;
-        localStorage.setItem(LANG_KEY, state.language);
+
+        localStorage.setItem(
+          LANG_KEY,
+          state.language
+        );
 
         if (state.recognition) {
-          state.recognition.lang = state.language;
+          state.recognition.lang =
+            state.language;
         }
 
         updateLanguageUI();
@@ -518,200 +721,201 @@
 
   function setupInput() {
     const input = inputBox();
+
     if (!input) return;
 
-    input.addEventListener("keydown", e => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
+    input.addEventListener("keydown", event => {
+      if (
+        event.key === "Enter" &&
+        !event.shiftKey
+      ) {
+        event.preventDefault();
         sendMessage();
       }
     });
 
     input.addEventListener("input", () => {
       input.style.height = "auto";
-      input.style.height = Math.min(input.scrollHeight, 160) + "px";
+
+      input.style.height =
+        Math.min(
+          input.scrollHeight,
+          160
+        ) + "px";
     });
   }
 
   function setupActions() {
-    document.addEventListener("click", async e => {
-      const t = e.target.closest("button,[data-open],[data-more]");
-      if (!t) return;
+    /*
+      One global click handler for dynamically created
+      chat controls.
+    */
 
-      if (t.matches("[data-send]") || t.id === "sendButton" ||
-          t.classList.contains("send-button")) {
-        e.preventDefault();
-        sendMessage();
-        return;
-      }
+    document.addEventListener(
+      "click",
+      async event => {
 
-      if (t.matches("[data-new-chat]")) {
-        e.preventDefault();
-        newChat();
-        return;
-      }
+        const target =
+          event.target.closest(
+            "button,[data-open],[data-more]"
+          );
 
-      if (t.matches("[data-voice-mode]")) {
-        e.preventDefault();
-        toggleVoiceMode();
-        return;
-      }
+        if (!target) return;
 
-      if (t.matches("[data-mic]")) {
-        e.preventDefault();
-        toggleMic();
-        return;
-      }
-
-      if (t.matches("[data-speak]")) {
-        const chat = getChat();
-        const m = chat.messages.find(x => x.id === t.dataset.speak);
-        if (m) speak(m.text);
-        return;
-      }
-
-      if (t.matches("[data-share]")) {
-        const chat = getChat();
-        const m = chat.messages.find(x => x.id === t.dataset.share);
-        if (!m) return;
-
-        if (navigator.share) {
-          navigator.share({title:"Global AI Mahlet",text:m.text}).catch(()=>{});
-        } else if (navigator.clipboard) {
-          await navigator.clipboard.writeText(m.text);
-          alert("Message copied.");
-        }
-        return;
-      }
-
-      if (t.matches("[data-open]")) {
-        state.activeId = t.dataset.open;
-        render();
-        return;
-      }
-
-      if (t.matches("[data-more]")) {
-        recentMenu(t.dataset.more);
-        return;
-      }
-
-      if (t.matches("[data-remove-file]")) {
-        state.selectedFiles.splice(Number(t.dataset.removeFile),1);
-        updateFilePreview();
-      }
-    });
-
-    document.addEventListener("change", e => {
-      const el = e.target;
-
-      if (el.matches("[data-temporary]")) {
-        state.temporary = el.checked;
-
-        if (state.temporary) {
-          state.tempChat = null;
-          state.activeId = null;
-        } else {
-          state.tempChat = null;
-          if (!state.chats.length) newChat();
-          else state.activeId = state.chats[0].id;
+        /* SEND */
+        if (
+          target.matches("[data-send]") ||
+          target.id === "sendButton" ||
+          target.classList.contains("send-button")
+        ) {
+          event.preventDefault();
+          await sendMessage();
+          return;
         }
 
-        render();
+        /* MICROPHONE */
+        if (
+          target.matches("[data-mic]") ||
+          target.id === "micButton"
+        ) {
+          event.preventDefault();
+          toggleMic();
+          return;
+        }
+
+        /* SPEAKER */
+        if (target.matches("[data-speak]")) {
+          const chat = getChat();
+
+          const message =
+            chat.messages.find(
+              item =>
+                item.id ===
+                target.dataset.speak
+            );
+
+          if (message) {
+            speak(message.text);
+          }
+
+          return;
+        }
+
+        /* SHARE */
+        if (target.matches("[data-share]")) {
+          const chat = getChat();
+
+          const message =
+            chat.messages.find(
+              item =>
+                item.id ===
+                target.dataset.share
+            );
+
+          if (!message) return;
+
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: "Global AI Mahlet",
+                text: message.text
+              });
+            } catch {}
+          } else if (
+            navigator.clipboard
+          ) {
+            try {
+              await navigator.clipboard.writeText(
+                message.text
+              );
+
+              if (window.showToast) {
+                window.showToast(
+                  "Message copied."
+                );
+              } else {
+                alert("Message copied.");
+              }
+            } catch {}
+          }
+
+          return;
+        }
+
+        /* OPEN RECENT CHAT */
+        if (target.matches("[data-open]")) {
+          event.preventDefault();
+
+          const id =
+            target.dataset.open;
+
+          const chat =
+            state.chats.find(
+              item => item.id === id
+            );
+
+          if (!chat) return;
+
+          state.activeId = id;
+
+          render();
+
+          return;
+        }
+
+        /* RECENT CHAT MENU */
+        if (target.matches("[data-more]")) {
+          event.preventDefault();
+
+          recentMenu(
+            target.dataset.more
+          );
+
+          return;
+        }
+
+        /* REMOVE SELECTED FILE */
+        if (
+          target.matches(
+            "[data-remove-file]"
+          )
+        ) {
+          event.preventDefault();
+
+          const index =
+            Number(
+              target.dataset.removeFile
+            );
+
+          state.selectedFiles.splice(
+            index,
+            1
+          );
+
+          updateFilePreview();
+
+          return;
+        }
       }
-
-      if (el.matches("input[type=file]")) {
-        addFiles(el.files);
-        el.value = "";
-      }
-    });
-  }
-
-  function recentMenu(id) {
-    const chat = state.chats.find(c => c.id === id);
-    if (!chat) return;
-
-    const action = prompt(
-      "Choose an action:\n1 = Rename\n2 = Pin/Unpin\n3 = Delete"
     );
 
-    if (action === "1") {
-      const name = prompt("New chat name:", chat.title);
-      if (name?.trim()) chat.title = name.trim().slice(0,60);
-    }
+    /* CHECKBOXES ONLY */
+    document.addEventListener(
+      "change",
+      event => {
+        const element =
+          event.target;
 
-    if (action === "2") {
-      chat.pinned = !chat.pinned;
-    }
+        if (
+          element.id ===
+            "temporaryChat" ||
+          element.matches(
+            "[data-temporary]"
+          )
+        ) {
+          state.temporary =
+            element.checked;
 
-    if (action === "3") {
-      if (confirm("Delete this chat?")) {
-        state.chats = state.chats.filter(c => c.id !== id);
-
-        if (state.activeId === id) {
-          state.activeId = state.chats[0]?.id || null;
-        }
-      }
-    }
-
-    saveChats();
-    render();
-  }
-
-  function setupSearch() {
-    $$("[data-search-chats]").forEach(input => {
-      input.addEventListener("input", () => renderRecents(input.value));
-    });
-  }
-
-  function setupFileInputs() {
-    $$("[data-file-input]").forEach(input => {
-      input.addEventListener("change", () => {
-        addFiles(input.files);
-        input.value = "";
-      });
-    });
-
-    $$("[data-camera]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const input = document.querySelector(
-          'input[type="file"][capture="environment"]'
-        );
-        if (input) input.click();
-      });
-    });
-
-    $$("[data-attach]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const input = document.querySelector(
-          'input[type="file"]:not([capture])'
-        );
-        if (input) input.click();
-      });
-    });
-  }
-
-  function start() {
-    if (!state.chats.length && !state.temporary) newChat();
-
-    setupLanguage();
-    setupInput();
-    setupActions();
-    setupSearch();
-    setupFileInputs();
-    render();
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start);
-  } else {
-    start();
-  }
-
-  window.GlobalAIMahlet = {
-    state,
-    sendMessage,
-    newChat,
-    speak,
-    toggleVoiceMode
-  };
-})();
+          if (state.temporary) {
+            state.tempChat = null;
+            state.activ
