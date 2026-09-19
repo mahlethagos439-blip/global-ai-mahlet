@@ -1,1 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#f8f9ff">
+<meta name="description" content="Global AI Mahlet — Your AI Partner for a Smarter Future">
+<title>Global AI Mahlet</title>
 
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,
+  "Segoe UI",sans-serif;
+  color:#172033;
+}
+
+body{
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 10% 5%,#e9ddff 0,transparent 27%),
+    radial-gradient(circle at 90% 15%,#d8f5ff 0,transparent 30%),
+    linear-gradient(135deg,#fff 0%,#f7f4ff 48%,#f3fbff 100%);
+}
+
+button,input,select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+  border:0;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible{
+  outline:3px solid #8b7cff55;
+  outline-offset:2px;
+}
+
+.app{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* HEADER */
+
+.header{
+  height:72px;
+  position:sticky;
+  top:0;
+  z-index:50;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 18px;
+  border-bottom:1px solid #ffffffaa;
+  background:#ffffffc7;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-width:0;
+}
+
+.logo{
+  width:45px;
+  height:45px;
+  border-radius:15px;
+  display:grid;
+  place-items:center;
+  font-size:23px;
+  background:
+    linear-gradient(135deg,#7b61ff,#b76cff 48%,#5cdcff);
+  box-shadow:0 9px 25px #826cff3d;
+  color:#fff;
+}
+
+.brand h1{
+  margin:0;
+  font-size:18px;
+  line-height:1.1;
+  white-space:nowrap;
+}
+
+.brand p{
+  margin:4px 0 0;
+  font-size:11px;
+  color:#68738a;
+  white-space:nowrap;
+}
+
+.menu-btn{
+  width:45px;
+  height:45px;
+  border-radius:14px;
+  background:#ffffffd9;
+  box-shadow:0 7px 22px #53608a18;
+  font-size:25px;
+  color:#26304a;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+  position:fixed;
+  z-index:60;
+  top:72px;
+  right:0;
+  width:315px;
+  height:calc(100vh - 72px);
+  padding:18px;
+  transform:translateX(105%);
+  transition:transform .25s ease;
+  background:#ffffffed;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-left:1px solid #ffffff;
+  box-shadow:-15px 0 40px #26324a18;
+  overflow-y:auto;
+}
+
+.sidebar.open{
+  transform:translateX(0);
+}
+
+.side-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:13px;
+}
+
+.side-title h2{
+  font-size:18px;
+  margin:0;
+}
+
+.side-section{
+  background:#f7f7ff;
+  border:1px solid #ececff;
+  border-radius:18px;
+  padding:11px;
+  margin-bottom:12px;
+}
+
+.side-action,
+.switch-row{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:12px;
+  border-radius:13px;
+  background:transparent;
+  text-align:left;
+  color:#29334b;
+}
+
+.side-action:hover,
+.switch-row:hover{
+  background:#fff;
+}
+
+.side-icon{
+  width:34px;
+  height:34px;
+  border-radius:11px;
+  display:grid;
+  place-items:center;
+  background:#e9e5ff;
+}
+
+.search{
+  width:100%;
+  border:1px solid #e4e5f2;
+  background:#fff;
+  border-radius:12px;
+  padding:10px 12px;
+  outline:none;
+}
+
+.switch{
+  margin-left:auto;
+  width:45px;
+  height:25px;
+  border-radius:20px;
+  background:#cfd3df;
+  padding:3px;
+}
+
+.switch i{
+  display:block;
+  width:19px;
+  height:19px;
+  background:#fff;
+  border-radius:50%;
+  transition:.2s;
+}
+
+.switch.on{
+  background:#7563f5;
+}
+
+.switch.on i{
+  transform:translateX(20px);
+}
+
+#recentChats{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-top:10px;
+}
+
+.recent{
+  padding:10px;
+  border-radius:12px;
+  background:#fff;
+  border:1px solid #e9eaf4;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.recent-title{
+  flex:1;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:13px;
+}
+
+.recent button{
+  background:#f3f3fa;
+  border-radius:8px;
+  width:30px;
+  height:30px;
+}
+
+/* MAIN */
+
+.main{
+  width:100%;
+  max-width:1120px;
+  margin:auto;
+  padding:34px 20px 25px;
+  display:flex;
+  flex-direction:column;
+  min-height:calc(100vh - 72px);
+}
+
+/* HERO */
+
+.hero{
+  text-align:center;
+  padding:12px 0 28px;
+}
+
+.hero h2{
+  font-size:clamp(30px,6vw,48px);
+  margin:0 0 10px;
+  letter-spacing:-1.5px;
+}
+
+.gradient-text{
+  background:linear-gradient(
+    90deg,
+    #7658f5,
+    #d55bd9,
+    #29aee8
+  );
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+.hero p{
+  max-width:650px;
+  margin:auto;
+  color:#647087;
+  font-size:15px;
+  line-height:1.65;
+}
+
+/* FEATURES */
+
+.features{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin-bottom:25px;
+}
+
+.feature{
+  min-height:138px;
+  padding:18px;
+  border-radius:23px;
+  text-align:left;
+  border:1px solid #fff;
+  background:linear-gradient(145deg,#fff,#f5f3ff);
+  box-shadow:0 12px 30px #53608a12;
+  transition:
+    transform .18s,
+    box-shadow .18s;
+}
+
+.feature:hover{
+  transform:translateY(-3px);
+  box-shadow:0 18px 38px #53608a20;
+}
+
+.feature:nth-child(2){
+  background:linear-gradient(145deg,#fff,#effbff);
+}
+
+.feature:nth-child(3){
+  background:linear-gradient(145deg,#fff,#fff1fb);
+}
+
+.feature:nth-child(4){
+  background:linear-gradient(145deg,#fff,#f2fff8);
+}
+
+.feature:nth-child(5){
+  background:linear-gradient(145deg,#fff,#fff9e9);
+}
+
+.feature:nth-child(6){
+  background:linear-gradient(145deg,#fff,#f0f4ff);
+}
+
+.feature-icon{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  background:#ffffffc9;
+  font-size:21px;
+  margin-bottom:10px;
+}
+
+.feature h3{
+  margin:0 0 5px;
+  font-size:15px;
+}
+
+.feature p{
+  margin:0;
+  color:#70798d;
+  font-size:12px;
+}
+
+/* CHAT */
+
+.chat-shell{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-height:250px;
+}
+
+.messages{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:4px 2px 15px;
+  overflow-y:auto;
+  scroll-behavior:smooth;
+}
+
+.empty{
+  text-align:center;
+  color:#7a8498;
+  padding:25px 10px;
+  font-size:13px;
+}
+
+.msg{
+  max-width:min(780px,90%);
+  padding:13px 15px;
+  border-radius:18px;
+  line-height:1.55;
+  font-size:14px;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.msg.user{
+  align-self:flex-end;
+  background:linear-gradient(135deg,#7462f4,#9073f7);
+  color:#fff;
+  border-bottom-right-radius:6px;
+}
+
+.msg.ai{
+  align-self:flex-start;
+  background:#ffffffd9;
+  border:1px solid #e9e9f3;
+  box-shadow:0 8px 22px #52608010;
+  border-bottom-left-radius:6px;
+}
+
+.msg-actions{
+  display:flex;
+  gap:7px;
+  margin-top:9px;
+}
+
+.msg-actions button{
+  height:30px;
+  min-width:30px;
+  border-radius:9px;
+  background:#f0f0f8;
+  color:#555f74;
+  font-size:13px;
+}
+
+/* COMPOSER */
+
+.composer-wrap{
+  position:relative;
+  z-index:10;
+  padding-top:8px;
+}
+
+.file-preview{
+  display:none;
+  margin:0 0 8px;
+  padding:9px 12px;
+  border-radius:13px;
+  background:#fff;
+  border:1px solid #e8e8f1;
+  font-size:12px;
+}
+
+.composer{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:9px 10px;
+  border:1px solid #fff;
+  background:#ffffffe6;
+  border-radius:23px;
+  box-shadow:0 14px 38px #3b426a20;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+
+.composer input[type=text]{
+  flex:1;
+  min-width:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  padding:11px 6px;
+  color:#1c2538;
+}
+
+.tool-btn,
+.send-btn{
+  flex:0 0 auto;
+  width:40px;
+  height:40px;
+  border-radius:13px;
+  background:#f1f1f8;
+  color:#4e5870;
+  display:grid;
+  place-items:center;
+  font-size:18px;
+}
+
+.tool-btn:hover{
+  background:#e8e7f5;
+}
+
+.send-btn{
+  border-radius:50%;
+  background:linear-gradient(135deg,#735cf4,#b967e8);
+  color:#fff;
+  box-shadow:0 7px 17px #8064e840;
+}
+
+.lang{
+  height:40px;
+  max-width:100px;
+  border:0;
+  border-radius:13px;
+  background:#f1f1f8;
+  padding:0 8px;
+  color:#4e5870;
+}
+
+/* FOOTER */
+
+.footer{
+  text-align:center;
+  color:#8790a3;
+  font-size:11px;
+  padding:15px 0 4px;
+}
+
+/* TYPING */
+
+.typing{
+  display:flex;
+  gap:4px;
+  align-items:center;
+}
+
+.dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#8790a3;
+  animation:b .8s infinite alternate;
+}
+
+.dot:nth-child(2){
+  animation-delay:.2s;
+}
+
+.dot:nth-child(3){
+  animation-delay:.4s;
+}
+
+@keyframes b{
+  to{
+    opacity:.25;
+    transform:translateY(-3px);
+  }
+}
+
+/* RESPONSIVE */
+
+@media(max-width:850px){
+  .features{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .main{
+    padding:25px 14px;
+  }
+
+  .hero{
+    padding-top:8px;
+  }
+}
+
+@media(max-width:520px){
+  .header{
+    padding:9px 12px;
+  }
+
+  .brand h1{
+    font-size:16px;
+  }
+
+  .brand p{
+    font-size:9px;
+  }
+
+  .logo{
+    width:41px;
+    height:41px;
+  }
+
+  .features{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .feature{
+    min-height:108px;
+  }
+
+  .hero h2{
+    font-size:31px;
+  }
+
+  .hero p{
+    font-size:13px;
+  }
+
+  .composer{
+    gap:4px;
+    padding:7px;
+  }
+
+  .tool-btn,
+  .send-btn{
+    width:37px;
+    height:37px;
+  }
+
+  .lang{
+    width:54px;
+    font-size:11px;
+    padding:0 3px;
+  }
+
+  .composer input[type=text]{
+    font-size:13px;
+  }
+
+  .sidebar{
+    width:min(315px,88vw);
+  }
+}
+
+@media(max-width:370px){
+  .lang{
+    width:48px;
+  }
+
+  .composer input[type=text]{
+    padding-left:3px;
+  }
+}
+
+.hidden{
+  display:none!important;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+  <div class="brand">
+
+    <div class="logo">✦</div>
+
+    <div>
+      <h1>Global AI Mahlet</h1>
+      <p>Your AI Partner for a Smarter Future</p>
+    </div>
+
+  </div>
+
+  <button
+    id="menuBtn"
+    class="menu-btn"
+    type="button"
+    aria-label="Open menu">
+    ☰
+  </button>
+
+</header>
+
+<aside
+  id="sidebar"
+  class="sidebar"
+  aria-label="Menu">
+
+  <div class="side-title">
+    <h2>Menu</h2>
+    <span>✨</span>
+  </div>
+
+  <div class="side-section">
+
+    <button
+      id="newChat"
+      class="side-action"
+      type="button">
+
+      <span class="side-icon">＋</span>
+      <b>New Chat</b>
+
+    </button>
+
+    <button
+      id="voiceMode"
+      class="side-action"
+      type="button">
+
+      <span class="side-icon">🎙️</span>
+      <b id="voiceLabel">Voice Mode: OFF</b>
+
+    </button>
+
+    <label class="switch-row">
+
+      <span class="side-icon">🕶️</span>
+
+      <b>Temporary Chat</b>
+
+      <button
+        id="temporaryChat"
+        class="switch"
+        type="button"
+        aria-label="Temporary Chat">
+
+        <i></i>
+
+      </button>
+
+    </label>
+
+  </div>
+
+  <div class="side-section">
+
+    <input
+      id="recentSearch"
+      class="search"
+      type="search"
+      placeholder="Search recent chats...">
+
+    <div id="recentChats"></div>
+
+  </div>
+
+</aside>
+
+<main class="main">
+
+<section class="hero">
+
+  <h2>
+    Hello,
+    <span class="gradient-text">
+      Mahlet ✨
+    </span>
+  </h2>
+
+  <p>
+    I'm Global AI Mahlet — your smart assistant.
+    Ask me anything, anytime. I'm here to help you
+    learn, create, solve, and grow! 💙
+  </p>
+
+</section>
+
+<section class="features">
+
+  <button
+    class="feature"
+    type="button"
+    data-prompt="Help me study this topic clearly and deeply.">
+
+    <div class="feature-icon">🎓</div>
+
+    <h3>Study Help</h3>
+
+    <p>Learn faster &amp; better →</p>
+
+  </button>
+
+  <button
+    class="feature"
+    type="button"
+    data-prompt="Help me learn coding and technology step by step.">
+
+    <div class="feature-icon">💻</div>
+
+    <h3>Coding &amp; Tech</h3>
+
+    <p>Build your skills →</p>
+
+  </button>
+
+  <button
+    class="feature"
+    type="button"
+    data-prompt="Help me turn an idea into a useful project.">
+
+    <div class="feature-icon">💡</div>
+
+    <h3>Ideas &amp; Creativity</h3>
+
+    <p>Turn ideas into reality →</p>
+
+  </button>
+
+  <button
+    class="feature"
+    type="button"
+    data-prompt="Help me improve my writing and make it clear and natural.">
+
+    <div class="feature-icon">📝</div>
+
+    <h3>Write &amp; Improve</h3>
+
+    <p>Better writing, clearer →</p>
+
+  </button>
+
+  <button
+    class="feature"
+    type="button"
+    data-prompt="Tell me useful information about the world and explain it clearly.">
+
+    <div class="feature-icon">🌍</div>
+
+    <h3>Global Information</h3>
+
+    <p>Explore the world →</p>
+
+  </button>
+
+  <button
+    class="feature"
+    type="button"
+    data-prompt="Help me make a practical plan for my goals.">
+
+    <div class="feature-icon">🎯</div>
+
+    <h3>Your Goals</h3>
+
+    <p>Plan. Learn. Achieve. →</p>
+
+  </button>
+
+</section>
+
+<section class="chat-shell">
+
+  <div
+    id="messages"
+    class="messages">
+
+    <div
+      id="empty"
+      class="empty">
+
+      Start a conversation with Global AI Mahlet 💙
+
+    </div>
+
+  </div>
+
+  <div class="composer-wrap">
+
+    <div
+      id="filePreview"
+      class="file-preview">
+    </div>
+
+    <div class="composer">
+
+      <button
+        id="cameraBtn"
+        class="tool-btn"
+        type="button"
+        title="Camera">
+        📷
+      </button>
+
+      <button
+        id="attachBtn"
+        class="tool-btn"
+        type="button"
+        title="Attach file">
+        📎
+      </button>
+
+      <button
+        id="imageBtn"
+        class="tool-btn"
+        type="button"
+        title="Image">
+        🖼️
+      </button>
+
+      <input
+        id="messageInput"
+        type="text"
+        autocomplete="off"
+        placeholder="Message Global AI Mahlet...">
+
+      <button
+        id="micBtn"
+        class="tool-btn"
+        type="button"
+        title="Microphone">
+        🎤
+      </button>
+
+      <select
+        id="language"
+        class="lang"
+        title="Language"
+        aria-label="Language">
+      </select>
+
+      <button
+        id="sendBtn"
+        class="send-btn"
+        type="button"
+        title="Send">
+        ➤
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+<footer class="footer">
+  Made for a better tomorrow 💙
+</footer>
+
+</main>
+
+<input
+  id="fileInput"
+  class="hidden"
+  type="file">
+
+<input
+  id="imageInput"
+  class="hidden"
+  type="file"
+  accept="image/*">
+
+<input
+  id="cameraInput"
+  class="hidden"
+  type="file"
+  accept="image/*"
+  capture="environment">
