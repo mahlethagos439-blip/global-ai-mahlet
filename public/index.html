@@ -8,1113 +8,1322 @@
 <title>Global AI Mahlet</title>
 
 <style>
-:root{
---bg:#f8fbff;
---text:#18233b;
---muted:#71809b;
---blue:#5b7cff;
---purple:#9b6cff;
---pink:#ef82c8;
---cyan:#63d9e9;
---green:#9be7bd;
---glass:rgba(255,255,255,.72);
---line:rgba(115,132,170,.16);
---shadow:0 18px 50px rgba(74,91,140,.13)
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
 
-*{box-sizing:border-box}
-
 html,body{
-margin:0;
-min-height:100%;
-font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-color:var(--text);
-background:var(--bg);
-pointer-events:auto!important
+  width:100%;
+  min-height:100%;
 }
 
 body{
-overflow-x:hidden;
-position:relative
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:#172033;
+  background:
+    radial-gradient(circle at 8% 8%,rgba(122,162,255,.18),transparent 28%),
+    radial-gradient(circle at 92% 10%,rgba(226,139,255,.16),transparent 28%),
+    radial-gradient(circle at 50% 100%,rgba(110,225,204,.12),transparent 30%),
+    #f8fbff;
+  overflow-x:hidden;
 }
 
-body:before,
-body:after{
-content:"";
-position:fixed;
-z-index:-2;
-border-radius:50%;
-filter:blur(60px);
-opacity:.42;
-pointer-events:none
-}
-
-body:before{
-width:330px;
-height:330px;
-top:-100px;
-left:-100px;
-background:#b9d9ff
-}
-
-body:after{
-width:350px;
-height:350px;
-right:-120px;
-bottom:-100px;
-background:#efc8ed
-}
-
-button,input,select,textarea{
-font:inherit
+button,input,textarea,select{
+  font:inherit;
 }
 
 button{
-cursor:pointer;
--webkit-tap-highlight-color:transparent
+  border:0;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
 }
 
 button:focus-visible,
 input:focus-visible,
-select:focus-visible,
-textarea:focus-visible{
-outline:3px solid rgba(91,124,255,.22);
-outline-offset:2px
+textarea:focus-visible,
+select:focus-visible{
+  outline:3px solid rgba(92,124,250,.25);
+  outline-offset:2px;
 }
 
-.app{
-width:min(1180px,100%);
-margin:auto;
-padding:18px 18px 30px;
-position:relative;
-z-index:1;
-pointer-events:auto!important
+body:before,
+body:after{
+  content:"";
+  position:fixed;
+  pointer-events:none;
+  border-radius:50%;
+  filter:blur(50px);
+  opacity:.35;
+  z-index:-1;
 }
+
+body:before{
+  width:260px;
+  height:260px;
+  left:-100px;
+  top:180px;
+  background:#b9d6ff;
+}
+
+body:after{
+  width:300px;
+  height:300px;
+  right:-130px;
+  bottom:80px;
+  background:#edc7ff;
+}
+
+/* TOP BAR */
 
 .top{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:15px;
-position:relative;
-z-index:200;
-pointer-events:auto!important
+  position:sticky;
+  top:0;
+  z-index:1000;
+  height:74px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 18px;
+  background:rgba(255,255,255,.78);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(120,140,180,.14);
 }
 
 .brand{
-display:flex;
-align-items:center;
-gap:11px;
-pointer-events:auto
+  display:flex;
+  align-items:center;
+  gap:11px;
+  min-width:0;
 }
 
 .logo{
-width:46px;
-height:46px;
-display:grid;
-place-items:center;
-border-radius:16px;
-background:linear-gradient(135deg,#6e8cff,#b978ef,#67dbe4);
-box-shadow:0 10px 25px rgba(91,124,255,.22);
-font-size:22px
+  width:46px;
+  height:46px;
+  flex:0 0 46px;
+  border-radius:15px;
+  display:grid;
+  place-items:center;
+  color:white;
+  font-size:23px;
+  background:linear-gradient(135deg,#667eea,#8e7dff 45%,#c77dff);
+  box-shadow:0 9px 25px rgba(102,126,234,.28);
 }
 
-.brand h1{
-margin:0;
-font-size:18px;
-letter-spacing:-.3px
+.brand-text{
+  min-width:0;
 }
 
-.brand p{
-margin:2px 0 0;
-color:var(--muted);
-font-size:11px
+.brand-name{
+  font-weight:800;
+  font-size:17px;
+  line-height:1.1;
+  white-space:nowrap;
+}
+
+.brand-tag{
+  margin-top:3px;
+  font-size:10px;
+  color:#78839a;
+  white-space:nowrap;
 }
 
 .menu{
-width:44px;
-height:44px;
-border:1px solid var(--line);
-border-radius:15px;
-background:var(--glass);
-backdrop-filter:blur(15px);
-display:grid;
-place-items:center;
-font-size:21px;
-color:#53617c;
-box-shadow:var(--shadow);
-position:relative;
-z-index:300!important;
-pointer-events:auto!important;
-touch-action:manipulation
+  width:46px;
+  height:46px;
+  flex:0 0 46px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  color:#26324a;
+  background:rgba(255,255,255,.9);
+  border:1px solid rgba(100,120,160,.15);
+  box-shadow:0 7px 20px rgba(40,65,110,.08);
+  font-size:24px;
+  line-height:1;
+  position:relative;
+  z-index:1100!important;
 }
 
-.hero{
-padding:40px 5px 27px;
-position:relative;
-z-index:1;
-pointer-events:auto
+.menu:hover{
+  transform:translateY(-1px);
 }
 
-.hero h2{
-margin:0 0 12px;
-font-size:clamp(31px,7vw,52px);
-line-height:1.02;
-letter-spacing:-1.8px
+#menuIcon{
+  display:block;
+  transition:.2s ease;
 }
 
-.grad{
-background:linear-gradient(90deg,#5b7cff,#a468ed,#ef79bf);
--webkit-background-clip:text;
-background-clip:text;
-color:transparent
-}
-
-.hero p{
-max-width:720px;
-margin:0;
-color:#65738d;
-line-height:1.7;
-font-size:15px
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:15px;
-margin-bottom:18px;
-position:relative;
-z-index:2;
-pointer-events:auto!important
-}
-
-.feature,
-.chat,
-.side{
-border:1px solid rgba(120,140,180,.15);
-background:var(--glass);
-backdrop-filter:blur(20px);
-box-shadow:var(--shadow);
-pointer-events:auto!important
-}
-
-.feature{
-position:relative;
-min-height:145px;
-padding:19px;
-border-radius:24px;
-overflow:hidden;
-transition:.22s transform,.22s box-shadow;
-cursor:pointer;
-z-index:2;
-touch-action:manipulation
-}
-
-.feature:hover{
-transform:translateY(-4px);
-box-shadow:0 22px 55px rgba(74,91,140,.17)
-}
-
-.feature:nth-child(1){
-background:linear-gradient(135deg,rgba(224,239,255,.9),rgba(255,255,255,.72))
-}
-
-.feature:nth-child(2){
-background:linear-gradient(135deg,rgba(229,225,255,.9),rgba(255,255,255,.72))
-}
-
-.feature:nth-child(3){
-background:linear-gradient(135deg,rgba(255,229,247,.9),rgba(255,255,255,.72))
-}
-
-.feature:nth-child(4){
-background:linear-gradient(135deg,rgba(222,250,246,.9),rgba(255,255,255,.72))
-}
-
-.feature:nth-child(5){
-background:linear-gradient(135deg,rgba(222,241,255,.9),rgba(255,255,255,.72))
-}
-
-.feature:nth-child(6){
-background:linear-gradient(135deg,rgba(234,255,229,.9),rgba(255,255,255,.72))
-}
-
-.icon{
-width:43px;
-height:43px;
-border-radius:15px;
-display:grid;
-place-items:center;
-background:rgba(255,255,255,.7);
-font-size:20px;
-margin-bottom:13px;
-pointer-events:none
-}
-
-.feature h3{
-margin:0 0 5px;
-font-size:15px
-}
-
-.feature p{
-margin:0;
-color:var(--muted);
-font-size:12px
-}
-
-.arrow{
-position:absolute;
-right:18px;
-bottom:17px;
-color:#687898;
-pointer-events:none
-}
+/* MAIN LAYOUT */
 
 .layout{
-display:grid;
-grid-template-columns:250px 1fr;
-gap:16px;
-position:relative;
-z-index:3;
-pointer-events:auto!important
+  width:min(1380px,100%);
+  margin:0 auto;
+  min-height:calc(100vh - 74px);
+  display:grid;
+  grid-template-columns:290px minmax(0,1fr);
+  position:relative;
 }
 
+/* SIDEBAR */
+
 .side{
-border-radius:24px;
-padding:14px;
-display:none
+  position:fixed;
+  left:0;
+  top:74px;
+  bottom:0;
+  width:290px;
+  padding:18px;
+  overflow-y:auto;
+  z-index:900;
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-right:1px solid rgba(110,130,170,.13);
+  transform:translateX(-105%);
+  transition:transform .25s ease,box-shadow .25s ease;
+  pointer-events:none;
 }
 
 .side.open{
-display:block;
-position:fixed;
-z-index:500!important;
-left:12px;
-right:12px;
-top:76px;
-max-height:calc(100vh - 95px);
-overflow:auto
+  transform:translateX(0);
+  pointer-events:auto!important;
+  box-shadow:18px 0 45px rgba(39,57,95,.12);
 }
 
-.side button{
-width:100%;
-border:0;
-border-radius:14px;
-background:rgba(255,255,255,.65);
-padding:11px;
-margin-bottom:8px;
-text-align:left;
-color:#465571;
-position:relative;
-z-index:501;
-pointer-events:auto!important;
-touch-action:manipulation
+.new{
+  width:100%;
+  min-height:48px;
+  border-radius:15px;
+  color:white;
+  font-weight:750;
+  background:linear-gradient(135deg,#667eea,#8e7dff);
+  box-shadow:0 9px 22px rgba(102,126,234,.22);
+  margin-bottom:12px;
 }
 
-.side .new{
-background:linear-gradient(135deg,#6d87ff,#a16bea);
-color:#fff
+.new:active{
+  transform:scale(.98);
 }
 
-.side input{
-width:100%;
-border:1px solid var(--line);
-background:#fff8;
-padding:11px;
-border-radius:13px;
-margin:3px 0 12px;
-position:relative;
-z-index:501;
-pointer-events:auto!important
+.voice-side{
+  width:100%;
+  min-height:44px;
+  border-radius:14px;
+  color:#4f5f85;
+  background:#f1f4ff;
+  border:1px solid #e2e7fa;
+  margin-bottom:12px;
+  font-weight:700;
 }
 
-.toggle{
-display:flex;
-align-items:center;
-justify-content:space-between
+.voice-side.active{
+  color:#fff;
+  background:linear-gradient(135deg,#667eea,#b06cff);
 }
 
-.toggle input{
-width:auto;
-margin:0
+.search-wrap{
+  position:relative;
+  margin-bottom:12px;
 }
+
+.search-wrap span{
+  position:absolute;
+  left:13px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
+  opacity:.55;
+}
+
+#recentSearch{
+  width:100%;
+  height:43px;
+  border:1px solid #e4e9f2;
+  background:#fff;
+  border-radius:13px;
+  padding:0 12px 0 38px;
+  color:#28334a;
+}
+
+.temporary-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 4px;
+  color:#59657b;
+  font-size:13px;
+  font-weight:700;
+}
+
+.switch{
+  position:relative;
+  width:42px;
+  height:24px;
+  flex:0 0 42px;
+}
+
+.switch input{
+  opacity:0;
+  width:0;
+  height:0;
+}
+
+.slider{
+  position:absolute;
+  inset:0;
+  border-radius:30px;
+  background:#dce2ee;
+  transition:.2s;
+  cursor:pointer;
+}
+
+.slider:before{
+  content:"";
+  position:absolute;
+  width:18px;
+  height:18px;
+  left:3px;
+  top:3px;
+  border-radius:50%;
+  background:white;
+  box-shadow:0 2px 6px rgba(0,0,0,.15);
+  transition:.2s;
+}
+
+.switch input:checked + .slider{
+  background:#7388ee;
+}
+
+.switch input:checked + .slider:before{
+  transform:translateX(18px);
+}
+
+.recent-title{
+  font-size:11px;
+  font-weight:800;
+  color:#9aa4b7;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  padding:10px 4px 8px;
+}
+
+.recent-empty{
+  padding:18px 7px;
+  color:#98a2b5;
+  font-size:13px;
+  text-align:center;
+}
+
+.recent-chat{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin-bottom:6px;
+}
+
+.recent-open{
+  flex:1;
+  min-width:0;
+  text-align:left;
+  padding:10px 11px;
+  border-radius:12px;
+  background:transparent;
+  color:#536078;
+  overflow:hidden;
+}
+
+.recent-open span{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.recent-chat.active .recent-open{
+  background:#eef1ff;
+  color:#5369d9;
+  font-weight:700;
+}
+
+.recent-open:hover{
+  background:#f4f6fb;
+}
+
+.recent-more{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:transparent;
+  color:#7e899e;
+  font-size:19px;
+}
+
+.recent-more:hover{
+  background:#f1f4fa;
+}
+
+/* CHAT */
 
 .chat{
-border-radius:28px;
-min-width:0;
-overflow:hidden;
-position:relative;
-z-index:3;
-pointer-events:auto!important
-}
-
-.chathead{
-padding:17px 18px;
-border-bottom:1px solid var(--line);
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:10px;
-position:relative;
-z-index:4
-}
-
-.chathead strong{
-font-size:14px
-}
-
-.chathead small{
-display:block;
-color:var(--muted);
-font-size:10px;
-margin-top:2px
-}
-
-#status{
-font-size:11px;
-color:#5c7b70;
-white-space:nowrap
-}
-
-#messages{
-height:420px;
-overflow-y:auto;
-padding:20px;
-position:relative;
-z-index:1;
-pointer-events:auto!important
-}
-
-.empty{
-text-align:center;
-color:var(--muted);
-padding:80px 20px 40px
-}
-
-.empty-chat{
-text-align:center;
-color:var(--muted);
-padding:80px 20px 40px
-}
-
-.empty-chat h2{
-color:var(--text);
-margin:12px 0 8px
-}
-
-.empty-chat p{
-line-height:1.6
-}
-
-.msg{
-display:flex;
-margin:0 0 15px
-}
-
-.msg.user{
-justify-content:flex-end
-}
-
-.bubble{
-max-width:min(82%,680px);
-padding:12px 14px;
-border-radius:18px;
-background:#fff;
-box-shadow:0 7px 24px rgba(80,100,150,.08);
-white-space:pre-wrap;
-overflow-wrap:anywhere;
-line-height:1.55;
-font-size:14px
-}
-
-.msg.user .bubble{
-background:linear-gradient(135deg,#6b86ff,#8c6bea);
-color:#fff;
-border-bottom-right-radius:6px
-}
-
-.msg.ai .bubble{
-border-bottom-left-radius:6px
-}
-
-.actions{
-display:flex;
-gap:6px;
-margin-top:7px
-}
-
-.actions button{
-border:0;
-background:rgba(120,140,180,.1);
-border-radius:9px;
-padding:5px 8px;
-font-size:11px;
-color:#687895;
-pointer-events:auto!important
-}
-
-.message{
-margin-bottom:15px
-}
-
-.message-bubble{
-padding:12px 14px;
-border-radius:18px;
-background:#fff;
-box-shadow:0 7px 24px rgba(80,100,150,.08);
-line-height:1.55;
-font-size:14px;
-overflow-wrap:anywhere
-}
-
-.user-message{
-text-align:right
-}
-
-.user-message .message-bubble{
-display:inline-block;
-max-width:88%;
-background:linear-gradient(135deg,#6b86ff,#8c6bea);
-color:#fff;
-border-bottom-right-radius:6px;
-text-align:left
-}
-
-.ai-message .message-bubble{
-display:inline-block;
-max-width:88%;
-border-bottom-left-radius:6px
-}
-
-.message-actions{
-display:flex;
-gap:6px;
-margin-top:7px
-}
-
-.message-actions button{
-border:0;
-background:rgba(120,140,180,.1);
-border-radius:9px;
-padding:5px 8px;
-font-size:11px;
-color:#687895;
-pointer-events:auto!important
-}
-
-#filePreview{
-padding:0 16px;
-position:relative;
-z-index:10;
-pointer-events:auto!important
-}
-
-.file-chip{
-display:inline-flex;
-align-items:center;
-gap:7px;
-padding:7px 9px;
-margin:3px;
-background:#f1f5ff;
-border:1px solid #dbe3ff;
-border-radius:12px;
-font-size:11px
-}
-
-.file-chip button{
-border:0;
-background:transparent;
-font-size:16px;
-color:#687895;
-padding:0 3px
-}
-
-.composer{
-margin:12px;
-border:1px solid var(--line);
-border-radius:23px;
-background:rgba(255,255,255,.88);
-padding:9px;
-box-shadow:0 10px 30px rgba(74,91,140,.08);
-position:relative;
-z-index:100!important;
-pointer-events:auto!important;
-touch-action:manipulation
-}
-
-.tools{
-display:flex;
-align-items:center;
-gap:6px;
-margin-bottom:7px;
-position:relative;
-z-index:101!important;
-pointer-events:auto!important
-}
-
-.tool,
-.send{
-border:0;
-width:38px;
-height:38px;
-border-radius:13px;
-display:grid;
-place-items:center;
-background:#f3f6fc;
-color:#596783;
-position:relative;
-z-index:102!important;
-pointer-events:auto!important;
-touch-action:manipulation;
--webkit-user-select:none;
-user-select:none
-}
-
-.tool:hover{
-background:#eaf0ff
-}
-
-.send{
-margin-left:auto;
-background:linear-gradient(135deg,#5e7fff,#a066ea);
-color:#fff;
-box-shadow:0 8px 18px rgba(94,127,255,.25)
-}
-
-.send:disabled{
-opacity:.7;
-cursor:wait
-}
-
-.composer textarea{
-width:100%;
-resize:none;
-border:0;
-outline:0;
-background:transparent;
-padding:8px 6px;
-color:var(--text);
-min-height:48px;
-max-height:130px;
-position:relative;
-z-index:101!important;
-pointer-events:auto!important
-}
-
-.bottom{
-display:flex;
-align-items:center;
-gap:7px
-}
-
-.lang{
-border:1px solid var(--line);
-background:#fff;
-border-radius:12px;
-padding:8px 9px;
-color:#56647d;
-max-width:150px;
-position:relative;
-z-index:103!important;
-pointer-events:auto!important
-}
-
-.hidden{
-display:none!important
-}
-
-.footer{
-text-align:center;
-color:#8490a5;
-font-size:11px;
-padding:22px 0 3px;
-position:relative;
-z-index:1
-}
-
-.toast{
-position:fixed;
-left:50%;
-bottom:22px;
-transform:translate(-50%,20px);
-opacity:0;
-pointer-events:none!important;
-background:#202a42;
-color:#fff;
-padding:10px 15px;
-border-radius:13px;
-font-size:12px;
-transition:.25s;
-z-index:1000
-}
-
-.toast.show{
-opacity:1;
-transform:translate(-50%,0);
-pointer-events:none!important
-}
-
-/* IMPORTANT CLICK / TOUCH PROTECTION */
-html,
-body,
-.app,
-.top,
-.hero,
-.grid,
-.layout,
-.chat,
-.chathead,
-#messages,
-.composer,
-.tools,
-.footer{
-pointer-events:auto!important
-}
-
-button,
-input,
-textarea,
-select{
-pointer-events:auto!important
-}
-
-button:disabled{
-opacity:.7
-}
-
-@media(max-width:800px){
-.grid{
-grid-template-columns:repeat(2,1fr)
-}
-
-.layout{
-grid-template-columns:1fr
+  min-width:0;
+  grid-column:2;
+  min-height:calc(100vh - 74px);
+  display:flex;
+  flex-direction:column;
+  padding:30px clamp(15px,4vw,48px) 20px;
+  position:relative;
+  z-index:2;
 }
 
 .hero{
-padding-top:31px
-}
-}
-
-@media(max-width:520px){
-.app{
-padding:12px 11px 24px
+  max-width:850px;
+  width:100%;
+  margin:0 auto 24px;
 }
 
-.brand p{
-display:none
+.hero h1{
+  font-size:clamp(30px,5vw,48px);
+  line-height:1.08;
+  letter-spacing:-1.5px;
+  margin-bottom:12px;
 }
 
-.logo{
-width:42px;
-height:42px
-}
-
-.menu{
-width:42px;
-height:42px
-}
-
-.hero h2{
-font-size:34px
+.gradient-text{
+  background:linear-gradient(90deg,#6478e9,#9c73f4,#d66fd0);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
 }
 
 .hero p{
-font-size:13px
+  max-width:720px;
+  color:#69758c;
+  line-height:1.65;
+  font-size:15px;
 }
 
-.grid{
-gap:10px
+/* FEATURES */
+
+.features{
+  width:100%;
+  max-width:1000px;
+  margin:0 auto 26px;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:13px;
 }
 
 .feature{
-min-height:138px;
-padding:15px;
-border-radius:20px
+  min-height:125px;
+  padding:18px;
+  border-radius:21px;
+  border:1px solid rgba(130,150,190,.14);
+  background:rgba(255,255,255,.72);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 9px 28px rgba(58,80,120,.07);
+  transition:transform .2s ease,box-shadow .2s ease;
+  cursor:pointer;
 }
 
-.feature h3{
-font-size:14px
+.feature:hover{
+  transform:translateY(-3px);
+  box-shadow:0 14px 32px rgba(58,80,120,.11);
 }
 
-.feature p{
-font-size:11px
+.feature:active{
+  transform:scale(.985);
 }
 
 .icon{
-width:39px;
-height:39px;
-font-size:18px
+  width:40px;
+  height:40px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  margin-bottom:12px;
+  font-size:20px;
 }
 
-.chat{
-border-radius:22px
+.i1{background:#e8eeff}
+.i2{background:#e9f8f4}
+.i3{background:#fff3db}
+.i4{background:#f5eaff}
+.i5{background:#e7f4ff}
+.i6{background:#eaf8e8}
+
+.feature h3{
+  font-size:14px;
+  margin-bottom:4px;
+  color:#27334b;
 }
 
-#messages{
-height:390px;
-padding:14px
+.feature p{
+  font-size:11px;
+  color:#8791a5;
 }
 
-.bubble,
+/* MESSAGES */
+
+.messages{
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  flex:1;
+  min-height:150px;
+  padding:8px 0 15px;
+  overflow-y:auto;
+  scroll-behavior:smooth;
+}
+
+.empty-chat{
+  text-align:center;
+  padding:28px 12px;
+  color:#7d8799;
+}
+
+.empty-icon{
+  width:65px;
+  height:65px;
+  margin:0 auto 15px;
+  border-radius:22px;
+  display:grid;
+  place-items:center;
+  font-size:31px;
+  background:linear-gradient(135deg,#edf1ff,#f9eaff);
+  box-shadow:0 10px 28px rgba(104,119,190,.12);
+}
+
+.empty-chat h2{
+  color:#33405a;
+  font-size:23px;
+  margin-bottom:9px;
+}
+
+.empty-chat p{
+  font-size:13px;
+  line-height:1.65;
+}
+
+.message{
+  display:flex;
+  flex-direction:column;
+  margin:10px 0;
+}
+
+.user-message{
+  align-items:flex-end;
+}
+
+.ai-message{
+  align-items:flex-start;
+}
+
 .message-bubble{
-max-width:88%;
-font-size:13px
+  max-width:min(82%,700px);
+  padding:12px 15px;
+  border-radius:18px;
+  line-height:1.55;
+  font-size:14px;
+  overflow-wrap:anywhere;
 }
+
+.user-message .message-bubble{
+  color:white;
+  background:linear-gradient(135deg,#667eea,#8c78ee);
+  border-bottom-right-radius:6px;
+  box-shadow:0 8px 20px rgba(102,126,234,.18);
+}
+
+.ai-message .message-bubble{
+  color:#354057;
+  background:white;
+  border:1px solid #e8ecf4;
+  border-bottom-left-radius:6px;
+  box-shadow:0 7px 20px rgba(55,75,110,.06);
+}
+
+.message-actions{
+  display:flex;
+  gap:5px;
+  margin:5px 2px 0;
+}
+
+.message-actions button{
+  width:30px;
+  height:30px;
+  border-radius:9px;
+  background:#f0f3f9;
+  color:#6f7b91;
+}
+
+.message-actions button:hover{
+  background:#e6eafa;
+}
+
+.typing .message-bubble{
+  color:#7d8799;
+}
+
+.typing span{
+  animation:blink 1.1s infinite;
+}
+
+.typing span:nth-child(2){
+  animation-delay:.15s;
+}
+
+.typing span:nth-child(3){
+  animation-delay:.3s;
+}
+
+@keyframes blink{
+  0%,70%,100%{opacity:.2}
+  35%{opacity:1}
+}
+
+/* FILE PREVIEW */
+
+.file-preview{
+  max-width:900px;
+  width:100%;
+  margin:0 auto 8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.file-chip{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  max-width:100%;
+  padding:6px 8px 6px 10px;
+  border-radius:11px;
+  background:white;
+  border:1px solid #e2e7f0;
+  font-size:11px;
+  color:#657188;
+}
+
+.file-chip span{
+  max-width:220px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.file-chip button{
+  width:22px;
+  height:22px;
+  border-radius:7px;
+  background:#f0f2f7;
+  color:#69748a;
+}
+
+/* COMPOSER */
 
 .composer{
-margin:8px;
-border-radius:19px
+  width:100%;
+  max-width:900px;
+  margin:0 auto;
+  padding:10px;
+  border-radius:23px;
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(120,140,180,.18);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  box-shadow:0 15px 42px rgba(45,68,110,.10);
+  position:relative;
+  z-index:100;
+  pointer-events:auto!important;
 }
 
-.tool,
-.send{
-width:36px;
-height:36px
+#messageInput{
+  width:100%;
+  min-height:54px;
+  max-height:160px;
+  resize:none;
+  overflow-y:auto;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:#27334b;
+  padding:8px 9px 7px;
+  line-height:1.5;
 }
 
-.lang{
-max-width:105px;
-font-size:12px;
-padding:7px
-}
-
-.hero{
-padding-bottom:21px
-}
-}
-
-@media(max-width:370px){
-.grid{
-grid-template-columns:1fr
-}
-
-.hero h2{
-font-size:31px
+#messageInput::placeholder{
+  color:#a1a9b8;
 }
 
 .tools{
-gap:4px
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+  padding-top:5px;
 }
 
 .tool,
 .send{
-width:34px;
-height:34px
+  width:40px;
+  height:40px;
+  flex:0 0 40px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  position:relative;
+  z-index:102!important;
+  pointer-events:auto!important;
+}
+
+.tool{
+  color:#69758b;
+  background:#f2f4f9;
+}
+
+.tool:hover{
+  background:#e9edf6;
+  transform:translateY(-1px);
+}
+
+.tool.active{
+  color:white;
+  background:#7082e9;
 }
 
 .lang{
-max-width:88px
+  min-width:0;
+  width:104px;
+  height:40px;
+  flex:1 1 auto;
+  border:1px solid #e4e8f0;
+  border-radius:12px;
+  padding:0 7px;
+  color:#58647a;
+  background:#f7f8fb;
+  outline:none;
 }
+
+.send{
+  color:white;
+  background:linear-gradient(135deg,#667eea,#9a72ef);
+  box-shadow:0 7px 17px rgba(102,126,234,.25);
+  font-size:20px;
+}
+
+.send:hover{
+  transform:translateY(-1px);
+}
+
+.send:active{
+  transform:scale(.94);
+}
+
+.hidden{
+  display:none!important;
+}
+
+/* FOOTER */
+
+.footer{
+  text-align:center;
+  color:#a1a9b8;
+  font-size:11px;
+  padding:14px 0 4px;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  transform:translate(-50%,20px);
+  opacity:0;
+  pointer-events:none!important;
+  z-index:2000;
+  padding:10px 15px;
+  border-radius:12px;
+  background:#26324a;
+  color:white;
+  font-size:12px;
+  box-shadow:0 10px 28px rgba(0,0,0,.18);
+  transition:.2s ease;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+
+/* MOBILE */
+
+@media(max-width:900px){
+
+  .layout{
+    display:block;
+  }
+
+  .chat{
+    grid-column:auto;
+    padding:24px 14px 16px;
+  }
+
+  .side{
+    width:min(310px,88vw);
+    box-shadow:18px 0 45px rgba(39,57,95,.15);
+  }
+
+  .features{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:600px){
+
+  .top{
+    height:68px;
+    padding:9px 12px;
+  }
+
+  .side{
+    top:68px;
+  }
+
+  .logo{
+    width:42px;
+    height:42px;
+    flex-basis:42px;
+  }
+
+  .brand-name{
+    font-size:15px;
+  }
+
+  .brand-tag{
+    font-size:9px;
+  }
+
+  .menu{
+    width:43px;
+    height:43px;
+    flex-basis:43px;
+  }
+
+  .chat{
+    min-height:calc(100vh - 68px);
+    padding:20px 10px 12px;
+  }
+
+  .hero{
+    margin-bottom:19px;
+  }
+
+  .hero h1{
+    font-size:31px;
+  }
+
+  .hero p{
+    font-size:13px;
+  }
+
+  .features{
+    gap:9px;
+    margin-bottom:16px;
+  }
+
+  .feature{
+    min-height:116px;
+    padding:14px;
+    border-radius:18px;
+  }
+
+  .icon{
+    width:36px;
+    height:36px;
+    font-size:18px;
+    margin-bottom:9px;
+  }
+
+  .feature h3{
+    font-size:12px;
+  }
+
+  .feature p{
+    font-size:10px;
+  }
+
+  .messages{
+    min-height:130px;
+  }
+
+  .message-bubble{
+    max-width:88%;
+    font-size:13px;
+  }
+
+  .composer{
+    border-radius:20px;
+    padding:8px;
+  }
+
+  #messageInput{
+    min-height:49px;
+    font-size:14px;
+  }
+
+  .tools{
+    gap:5px;
+  }
+
+  .tool,
+  .send{
+    width:37px;
+    height:37px;
+    flex-basis:37px;
+    border-radius:11px;
+    font-size:15px;
+  }
+
+  .lang{
+    height:37px;
+    font-size:11px;
+    width:auto;
+  }
+
+  .footer{
+    padding-bottom:3px;
+  }
+}
+
+@media(max-width:375px){
+
+  .brand-tag{
+    display:none;
+  }
+
+  .features{
+    gap:7px;
+  }
+
+  .feature{
+    padding:12px;
+  }
+
+  .tool,
+  .send{
+    width:35px;
+    height:35px;
+    flex-basis:35px;
+  }
+
+  .lang{
+    font-size:10px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="app">
-
 <header class="top">
 
-<div class="brand">
-<div class="logo">✦</div>
+  <div class="brand">
 
-<div>
-<h1>Global AI Mahlet</h1>
-<p>Your AI Partner for a Smarter Future</p>
-</div>
-</div>
+    <div class="logo" aria-hidden="true">
+      ✨
+    </div>
 
-<button class="menu" id="menuBtn" type="button" aria-label="Menu">
-  <span id="menuIcon">☰</span>
-</button>
+    <div class="brand-text">
+      <div class="brand-name">
+        Global AI Mahlet
+      </div>
+
+      <div class="brand-tag">
+        Your AI Partner for a Smarter Future
+      </div>
+    </div>
+
+  </div>
+
+  <button
+    class="menu"
+    id="menuBtn"
+    type="button"
+    aria-label="Open menu"
+    aria-expanded="false">
+
+    <span id="menuIcon">☰</span>
+
+  </button>
 
 </header>
 
-<section class="hero">
-
-<h2>Hello, <span class="grad">Mahlet</span> ✨</h2>
-
-<p>
-I'm Global AI Mahlet — your smart assistant.
-Ask me anything, anytime. I'm here to help you learn,
-create, solve, and grow! 💙
-</p>
-
-</section>
-
-<section class="grid">
-
-<article class="feature">
-<div class="icon">🎓</div>
-<h3>Study Help</h3>
-<p>Learn faster &amp; better</p>
-<span class="arrow">→</span>
-</article>
-
-<article class="feature">
-<div class="icon">💻</div>
-<h3>Coding &amp; Tech</h3>
-<p>Build your skills</p>
-<span class="arrow">→</span>
-</article>
-
-<article class="feature">
-<div class="icon">💡</div>
-<h3>Ideas &amp; Creativity</h3>
-<p>Turn ideas into reality</p>
-<span class="arrow">→</span>
-</article>
-
-<article class="feature">
-<div class="icon">📝</div>
-<h3>Write &amp; Improve</h3>
-<p>Better writing, clearer</p>
-<span class="arrow">→</span>
-</article>
-
-<article class="feature">
-<div class="icon">🌍</div>
-<h3>Global Information</h3>
-<p>Explore the world</p>
-<span class="arrow">→</span>
-</article>
-
-<article class="feature">
-<div class="icon">🎯</div>
-<h3>Your Goals</h3>
-<p>Plan. Learn. Achieve.</p>
-<span class="arrow">→</span>
-</article>
-
-</section>
 
 <div class="layout">
 
-<aside class="side" id="sidebar">
+  <aside
+    class="side"
+    id="sidebar"
+    aria-label="Navigation">
 
-<button class="new" id="newChat" type="button">
-＋ New Chat
-</button>
+    <button
+      class="new"
+      id="newChat"
+      type="button">
+      ＋ New Chat
+    </button>
 
-<button id="voiceMode" type="button">
-🎙️ Voice Mode
-</button>
+    <button
+      class="voice-side"
+      id="voiceMode"
+      type="button"
+      data-voice-mode
+      aria-pressed="false">
+      🎙️ Voice Mode
+    </button>
+
+    <div class="search-wrap">
+      <span>🔎</span>
+
+      <input
+        id="recentSearch"
+        type="search"
+        placeholder="Search recent chats..."
+        autocomplete="off">
+    </div>
+
+    <div class="temporary-row">
+
+      <span>
+        Temporary Chat
+      </span>
+
+      <label class="switch">
+        <input
+          id="temporaryChat"
+          type="checkbox">
+
+        <span class="slider"></span>
+      </label>
+
+    </div>
+
+    <div class="recent-title">
+      Recent Chats
+    </div>
+
+    <div id="recentChats">
+      <div class="recent-empty">
+        No recent chats yet.
+      </div>
+    </div>
+
+  </aside>
+
+
+  <main class="chat">
+
+    <section class="hero">
+
+      <h1>
+        Hello, <span class="gradient-text">Mahlet</span> ✨
+      </h1>
+
+      <p>
+        I'm Global AI Mahlet — your smart assistant.
+        Ask me anything, anytime. I'm here to help you
+        learn, create, solve, and grow! 💙
+      </p>
+
+    </section>
+
+
+    <section class="features">
+
+      <article
+        class="feature"
+        tabindex="0">
+
+        <div class="icon i1">
+          🎓
+        </div>
+
+        <h3>
+          Study Help
+        </h3>
+
+        <p>
+          Learn faster &amp; better
+        </p>
+
+      </article>
+
+
+      <article
+        class="feature"
+        tabindex="0">
+
+        <div class="icon i2">
+          &lt;/&gt;
+        </div>
+
+        <h3>
+          Coding &amp; Tech
+        </h3>
+
+        <p>
+          Build your skills
+        </p>
+
+      </article>
+
+
+      <article
+        class="feature"
+        tabindex="0">
+
+        <div class="icon i3">
+          💡
+        </div>
+
+        <h3>
+          Ideas &amp; Creativity
+        </h3>
+
+        <p>
+          Turn ideas into reality
+        </p>
+
+      </article>
+
+
+      <article
+        class="feature"
+        tabindex="0">
+
+        <div class="icon i4">
+          📄
+        </div>
+
+        <h3>
+          Write &amp; Improve
+        </h3>
+
+        <p>
+          Better writing, clearer
+        </p>
+
+      </article>
+
+
+      <article
+        class="feature"
+        tabindex="0">
+
+        <div class="icon i5">
+          🌍
+        </div>
+
+        <h3>
+          Global Information
+        </h3>
+
+        <p>
+          Explore the world
+        </p>
+
+      </article>
+
+
+      <article
+        class="feature"
+        tabindex="0">
+
+        <div class="icon i6">
+          🎯
+        </div>
+
+        <h3>
+          Your Goals
+        </h3>
+
+        <p>
+          Plan. Learn. Achieve.
+        </p>
+
+      </article>
+
+    </section>
+
+
+    <section
+      class="messages"
+      id="messages"
+      aria-live="polite">
+    </section>
+
+
+    <div
+      class="file-preview"
+      id="filePreview">
+    </div>
+
+
+    <div class="composer">
+
+      <textarea
+        id="messageInput"
+        rows="1"
+        placeholder="Message Global AI Mahlet..."
+        aria-label="Message Global AI Mahlet"></textarea>
+
+
+      <div class="tools">
+
+        <button
+          class="tool"
+          type="button"
+          data-camera
+          aria-label="Camera"
+          title="Camera">
+          📷
+        </button>
+
+
+        <button
+          class="tool"
+          type="button"
+          data-attach
+          aria-label="Attach file"
+          title="Attach file">
+          📎
+        </button>
+
+
+        <button
+          class="tool"
+          type="button"
+          id="imageButton"
+          aria-label="Image"
+          title="Add image">
+          🖼️
+        </button>
+
+
+        <button
+          class="tool"
+          type="button"
+          id="micButton"
+          aria-label="Microphone"
+          title="Voice input">
+          🎙️
+        </button>
+
+
+        <select
+          class="lang"
+          data-language
+          aria-label="Language">
+          <option value="en">
+            English
+          </option>
+        </select>
+
+
+        <button
+          class="send"
+          type="button"
+          id="sendButton"
+          aria-label="Send"
+          title="Send">
+          ➤
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="footer">
+      Made for a better tomorrow 💙
+    </div>
+
+  </main>
+
+</div>
+
+
+<!-- Hidden upload controls -->
 
 <input
-id="recentSearch"
-type="search"
-placeholder="Search recent chats..."
-autocomplete="off"
->
-
-<div class="toggle">
-<span>Temporary Chat</span>
-<input id="temporaryChat" type="checkbox">
-</div>
-
-<div id="recentChats"></div>
-
-</aside>
-
-<main class="chat">
-
-<div class="chathead">
-
-<div>
-<strong>Global AI Mahlet</strong>
-<small>Ready to help you ✨</small>
-</div>
-
-<span id="status">● Online</span>
-
-</div>
-
-<div id="messages">
-
-<div class="empty" id="emptyState">
-Start a conversation with Global AI Mahlet 💙
-<br>
-<small>
-Ask a question, learn something, or share an idea.
-</small>
-</div>
-
-</div>
-
-<div id="filePreview"></div>
-
-<div class="composer">
-
-<textarea
-id="messageInput"
-rows="1"
-placeholder="Message Global AI Mahlet..."
-></textarea>
-
-<div class="tools">
-
-<button
-class="tool"
-type="button"
-data-camera
-aria-label="Camera"
->📷</button>
-
-<button
-class="tool"
-type="button"
-data-attach
-aria-label="Attach file"
->📎</button>
-
-<button
-class="tool"
-type="button"
-id="imageButton"
-aria-label="Image"
->🖼️</button>
-
-<button
-class="tool"
-type="button"
-id="micButton"
-aria-label="Microphone"
->🎙️</button>
-
-<select
-class="lang"
-data-language
-aria-label="Language"
-></select>
-
-<button
-class="send"
-type="button"
-id="sendButton"
-aria-label="Send"
->➤</button>
-
-</div>
-</div>
-
-</main>
-</div>
-
-<footer class="footer">
-Made for a better tomorrow 💙
-</footer>
-
-</div>
+  class="hidden"
+  id="fileInput"
+  type="file"
+  data-file-input
+  multiple>
 
 <input
-class="hidden"
-id="fileInput"
-type="file"
-data-file-input
-multiple
->
+  class="hidden"
+  id="cameraInput"
+  type="file"
+  accept="image/*"
+  capture="environment">
 
 <input
-class="hidden"
-id="cameraInput"
-type="file"
-accept="image/*"
-capture="environment"
->
+  class="hidden"
+  id="imageInput"
+  type="file"
+  accept="image/*"
+  multiple>
 
-<input
-class="hidden"
-id="imageInput"
-type="file"
-accept="image/*"
-multiple
->
 
 <div
-class="toast"
-id="toast"
-style="pointer-events:none!important"
-></div>
+  class="toast"
+  id="toast"
+  role="status">
+</div>
+
 
 <script>
-(()=>{
-"use strict";
+(() => {
+  "use strict";
 
-const sidebar=document.getElementById("sidebar");
-const menu=document.getElementById("menuBtn");
-const newChat=document.getElementById("newChat");
-const voiceMode=document.getElementById("voiceMode");
-const imageInput=document.getElementById("imageInput");
-const imageButton=document.getElementById("imageButton");
-const toast=document.getElementById("toast");
+  const sidebar =
+    document.getElementById("sidebar");
 
-if(menu){
-menu.addEventListener("click",e=>{
-e.preventDefault();
-e.stopPropagation();
+  const menu =
+    document.getElementById("menuBtn");
 
-if(sidebar){
-sidebar.classList.toggle("open");
-}
-});
-}
+  const icon =
+    document.getElementById("menuIcon");
 
-if(imageButton){
-imageButton.addEventListener("click",e=>{
-e.preventDefault();
-e.stopPropagation();
+  const newChat =
+    document.getElementById("newChat");
 
-if(imageInput){
-imageInput.click();
-}
-});
-}
+  const voiceMode =
+    document.getElementById("voiceMode");
 
-if(newChat){
-newChat.addEventListener("click",e=>{
-e.preventDefault();
-e.stopPropagation();
+  const toast =
+    document.getElementById("toast");
 
-if(window.GlobalAIMahlet?.newChat){
-window.GlobalAIMahlet.newChat();
-}
 
-if(sidebar){
-sidebar.classList.remove("open");
-}
-});
-}
+  /* MENU: ☰ <-> ✕ */
 
-if(voiceMode){
-voiceMode.addEventListener("click",e=>{
-e.preventDefault();
-e.stopPropagation();
+  if (menu) {
 
-if(window.GlobalAIMahlet?.toggleVoiceMode){
-window.GlobalAIMahlet.toggleVoiceMode();
-}
-});
-}
+    menu.addEventListener("click", e => {
 
-window.showToast=function(message){
+      e.preventDefault();
+      e.stopPropagation();
 
-if(!toast)return;
+      if (!sidebar) return;
 
-toast.textContent=message;
-
-toast.classList.add("show");
-
-setTimeout(()=>{
-toast.classList.remove("show");
-},2200);
-
-};
-
-})();
-</script>
-
-<script src="./chat.js"></script>
-
-</body>
-</html>
+      const opened =
+        sidebar.classList.t
