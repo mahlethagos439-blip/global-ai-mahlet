@@ -1,257 +1,239 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global AI Mahlet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7ff 0%, #fdfcff 50%, #f4f8ff 100%);
+            background: linear-gradient(180deg, #f0f4ff 0%, #fefdff 40%, #f2f7ff 100%);
             color: #1e293b;
+            margin: 0;
+            overflow-x: hidden;
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
         }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(203, 213, 225, 0.6); border-radius: 9999px; }
+        /* Exact background subtle wave curves */
+        .bg-wave-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 380px;
+            background: radial-gradient(circle at 90% 10%, rgba(216, 226, 255, 0.5) 0%, rgba(235, 223, 255, 0.3) 40%, transparent 70%);
+            z-index: -10;
+            border-bottom-left-radius: 60px;
+            border-bottom-right-radius: 60px;
+        }
+        .bg-wave-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            background: radial-gradient(circle at 10% 100%, rgba(210, 224, 255, 0.5) 0%, rgba(230, 215, 255, 0.3) 60%, transparent 100%);
+            z-index: -10;
+            pointer-events: none;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between relative overflow-x-hidden pb-6">
+<body class="min-h-screen flex flex-col justify-between pb-8 relative">
 
-    <!-- Top Background Decorative Gradient Glows -->
-    <div class="absolute top-0 left-0 w-full h-72 bg-gradient-to-r from-blue-100/40 via-purple-100/40 to-pink-100/20 -z-10 rounded-b-[40px]"></div>
+    <!-- Decorative background elements -->
+    <div class="bg-wave-top"></div>
+    <div class="bg-wave-bottom"></div>
 
-    <!-- Hidden File Inputs -->
+    <!-- Hidden file upload inputs -->
     <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
     <input type="file" id="fileInput" class="hidden">
     <input type="file" id="galleryInput" accept="image/*" class="hidden">
 
-    <!-- Main Container -->
-    <div class="max-w-4xl mx-auto w-full px-4 pt-6 flex-1 flex flex-col justify-between">
+    <!-- Main Content Wrapper -->
+    <div class="max-w-4xl mx-auto w-full px-4 pt-5 flex-1 flex flex-col justify-between">
         
         <div>
-            <!-- Header -->
+            <!-- Header Section -->
             <header class="flex items-center justify-between mb-8">
                 <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-full overflow-hidden shadow-md shadow-indigo-200 bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-white">
-                        <i data-lucide="bot" style="width:24px;height:24px;"></i>
+                    <!-- Exact Logo Icon from Photo -->
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 shrink-0">
+                        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 10l1.5-1.5M20.5 8.5L19 7M19 8.5h3"/>
+                        </svg>
                     </div>
                     <div>
-                        <h1 id="headerTitle" class="text-xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent">Global AI Mahlet</h1>
-                        <p id="headerSubtitle" class="text-xs text-slate-500 font-medium">Your AI Partner for a Smarter Future</p>
+                        <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight">Global AI Mahlet</h1>
+                        <p class="text-xs text-slate-500 font-medium">Your AI Partner for a Smarter Future</p>
                     </div>
                 </div>
-                <button id="menuBtn" class="w-11 h-11 rounded-full glass-card flex items-center justify-center text-slate-700 shadow-sm border border-slate-200/65 active:scale-95 transition cursor-pointer" title="Menu">
-                    <i data-lucide="menu" style="width:20px;height:20px;"></i>
+                <button id="menuBtn" class="w-11 h-11 rounded-full glass-card flex items-center justify-center text-slate-700 shadow-sm border border-slate-200/80 active:scale-95 transition cursor-pointer">
+                    <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
                 </button>
             </header>
 
-            <!-- Greeting Section -->
+            <!-- Greeting Text Section -->
             <section class="text-center mb-8 px-2 max-w-xl mx-auto">
-                <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
+                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
                     <span id="greetingHello">Hello</span>, <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Mahlet</span> ✨
                 </h2>
-                <p id="greetingDesc" class="text-sm text-slate-500 leading-relaxed font-normal">
-                    I'm Global AI Mahlet — your smart assistant. Ask me anything, anytime. I'm here to help you learn, create, solve, and grow! <span class="text-indigo-500">💜</span>
+                <p id="greetingDesc" class="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
+                    I'm Global AI Mahlet — your smart assistant. Ask me anything, anytime. I'm here to help you learn, create, solve, and grow! <span class="text-indigo-500 font-bold">💜</span>
                 </p>
             </section>
 
-            <!-- Feature Cards Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                <!-- 1. Study Help -->
-                <div data-feature="Study Help" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-blue-100/60 bg-gradient-to-br from-blue-50/50 to-white">
-                    <div>
-                        <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3"><i data-lucide="graduation-cap" style="width:20px;height:20px;"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Study Help</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight">Learn faster & better</p>
+            <!-- 6 Feature Cards Grid (Matching exact colors and layouts) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
+                
+                <!-- 1. Study Help (Blue) -->
+                <div data-feature="Study Help" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-blue-100 bg-gradient-to-br from-blue-50/60 to-white h-32">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/></svg>
+                        </div>
+                        <div class="w-7 h-7 rounded-full bg-blue-100/70 text-blue-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
                     </div>
-                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Study Help</h3>
+                        <p class="text-[11px] text-slate-500 font-normal">Learn faster & better</p>
+                    </div>
                 </div>
 
-                <!-- 2. Coding & Tech -->
-                <div data-feature="Coding & Tech" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-purple-100/60 bg-gradient-to-br from-purple-50/50 to-white">
-                    <div>
-                        <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3"><i data-lucide="code" style="width:20px;height:20px;"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Coding & Tech</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight">Build your skills</p>
+                <!-- 2. Coding & Tech (Purple) -->
+                <div data-feature="Coding & Tech" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-purple-100 bg-gradient-to-br from-purple-50/60 to-white h-32">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                        </div>
+                        <div class="w-7 h-7 rounded-full bg-purple-100/70 text-purple-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
                     </div>
-                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Coding & Tech</h3>
+                        <p class="text-[11px] text-slate-500 font-normal">Build your skills</p>
+                    </div>
                 </div>
 
-                <!-- 3. Ideas & Creativity -->
-                <div data-feature="Ideas & Creativity" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-emerald-100/60 bg-gradient-to-br from-emerald-50/50 to-white">
-                    <div>
-                        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3"><i data-lucide="lightbulb" style="width:20px;height:20px;"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Ideas & Creativity</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight">Turn ideas into reality</p>
+                <!-- 3. Ideas & Creativity (Green) -->
+                <div data-feature="Ideas & Creativity" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-emerald-100 bg-gradient-to-br from-emerald-50/60 to-white h-32">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                        </div>
+                        <div class="w-7 h-7 rounded-full bg-emerald-100/70 text-emerald-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
                     </div>
-                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Ideas & Creativity</h3>
+                        <p class="text-[11px] text-slate-500 font-normal">Turn ideas into reality</p>
+                    </div>
                 </div>
 
-                <!-- 4. Write & Improve -->
-                <div data-feature="Write & Improve" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-amber-100/60 bg-gradient-to-br from-amber-50/50 to-white">
-                    <div>
-                        <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3"><i data-lucide="file-text" style="width:20px;height:20px;"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Write & Improve</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight">Better writing, clearer</p>
+                <!-- 4. Write & Improve (Yellow/Amber) -->
+                <div data-feature="Write & Improve" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-amber-100 bg-gradient-to-br from-amber-50/60 to-white h-32">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </div>
+                        <div class="w-7 h-7 rounded-full bg-amber-100/70 text-amber-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
                     </div>
-                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Write & Improve</h3>
+                        <p class="text-[11px] text-slate-500 font-normal">Better writing, clearer</p>
+                    </div>
                 </div>
 
-                <!-- 5. Global Information -->
-                <div data-feature="Global Information" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-rose-100/60 bg-gradient-to-br from-rose-50/50 to-white">
-                    <div>
-                        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3"><i data-lucide="globe" style="width:20px;height:20px;"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Global Information</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight">Explore the world</p>
+                <!-- 5. Global Information (Pink/Rose) -->
+                <div data-feature="Global Information" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-rose-100 bg-gradient-to-br from-rose-50/60 to-white h-32">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                        </div>
+                        <div class="w-7 h-7 rounded-full bg-rose-100/70 text-rose-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
                     </div>
-                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Global Information</h3>
+                        <p class="text-[11px] text-slate-500 font-normal">Explore the world</p>
+                    </div>
                 </div>
 
-                <!-- 6. Your Goals -->
-                <div data-feature="Your Goals" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-sky-100/60 bg-gradient-to-br from-sky-50/50 to-white">
-                    <div>
-                        <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3"><i data-lucide="target" style="width:20px;height:20px;"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Your Goals</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight">Plan. Learn. Achieve.</p>
+                <!-- 6. Your Goals (Sky Blue) -->
+                <div data-feature="Your Goals" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-sky-100 bg-gradient-to-br from-sky-50/60 to-white h-32">
+                    <div class="flex items-start justify-between">
+                        <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        </div>
+                        <div class="w-7 h-7 rounded-full bg-sky-100/70 text-sky-600 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+                        </div>
                     </div>
-                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Your Goals</h3>
+                        <p class="text-[11px] text-slate-500 font-normal">Plan. Learn. Achieve.</p>
+                    </div>
                 </div>
+
             </div>
         </div>
 
-        <!-- Bottom Input & Navigation Bar -->
+        <!-- Bottom Message & Tools Bar -->
         <div class="w-full max-w-2xl mx-auto">
-            <div class="glass-card p-4 rounded-3xl shadow-xl shadow-indigo-100/50 border border-white">
+            <div class="glass-card p-4 rounded-[28px] shadow-2xl shadow-indigo-200/50 border border-white">
                 
-                <!-- Input Box Row -->
-                <div class="flex items-center justify-between mb-4 px-2">
+                <!-- Input Message Row -->
+                <div class="flex items-center justify-between mb-3 px-1">
                     <div class="flex items-center space-x-3 flex-1">
-                        <span class="text-indigo-500 flex items-center"><i data-lucide="sparkles" style="width:18px;height:18px;"></i></span>
-                        <input type="text" id="userInput" placeholder="Message Global AI Mahlet..." class="w-full bg-transparent text-sm text-slate-800 placeholder-slate-400 focus:outline-none">
+                        <span class="text-indigo-400 flex items-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                        </span>
+                        <input type="text" id="userInput" placeholder="Message Global AI Mahlet..." class="w-full bg-transparent text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none">
                     </div>
-                    <button id="sendBtn" class="w-11 h-11 rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 active:scale-95 transition cursor-pointer" title="Send">
-                        <i data-lucide="send" style="width:18px;height:18px;"></i>
+                    <button id="sendBtn" class="w-11 h-11 rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-indigo-300 active:scale-95 transition cursor-pointer shrink-0">
+                        <svg class="w-4 h-4 transform rotate-45" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                     </button>
                 </div>
 
-                <!-- Action Tools Row -->
-                <div class="flex items-center justify-between pt-3 border-t border-slate-100/80 relative">
+                <!-- Action Tools & Language Selector Row -->
+                <div class="flex items-center justify-between pt-3 border-t border-slate-100/90 relative">
                     <div class="flex items-center space-x-2">
-                        <button id="cameraBtn" class="w-10 h-10 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Take Photo">
-                            <i data-lucide="camera" style="width:18px;height:18px;"></i>
+                        <button id="cameraBtn" class="w-9 h-9 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Camera">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         </button>
-                        <button id="fileBtn" class="w-10 h-10 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Attach File">
-                            <i data-lucide="paperclip" style="width:18px;height:18px;"></i>
+                        <button id="fileBtn" class="w-9 h-9 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Attach">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
                         </button>
-                        <button id="galleryBtn" class="w-10 h-10 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Upload Image">
-                            <i data-lucide="image" style="width:18px;height:18px;"></i>
+                        <button id="galleryBtn" class="w-9 h-9 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Gallery">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                         </button>
-                        <button id="micBtn" class="w-10 h-10 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Voice Message">
-                            <i data-lucide="mic" style="width:18px;height:18px;"></i>
+                        <button id="micBtn" class="w-9 h-9 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Microphone">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
                         </button>
                     </div>
 
-                    <!-- Language Selector (80+ Languages) -->
+                    <!-- Language Button & 80+ Dropdown Menu -->
                     <div class="relative">
-                        <button id="langBtn" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-full bg-slate-100/80 hover:bg-slate-200 text-xs font-medium text-slate-700 transition cursor-pointer">
-                            <i data-lucide="globe" style="width:14px;height:14px;"></i>
+                        <button id="langBtn" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-full bg-slate-100/90 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-sm">
+                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
                             <span id="currentLangLabel">EN</span>
-                            <i data-lucide="chevron-down" style="width:12px;height:12px;" class="text-slate-500"></i>
+                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
                         </button>
 
-                        <!-- Dropdown List with 80+ Languages -->
-                        <div id="langDropdown" class="hidden absolute bottom-12 right-0 w-64 max-h-72 overflow-y-auto bg-white rounded-2xl shadow-2xl border border-slate-100 p-1.5 z-50 text-xs">
-                            <div class="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Language (80+)</div>
-                            <div id="langListContainer"></div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Footer Credit -->
-            <div class="text-center mt-4">
-                <p id="footerText" class="text-[11px] text-slate-400 tracking-wide flex items-center justify-center space-x-1">
-                    <span>—</span>
-                    <span class="text-rose-400">♥</span>
-                    <span id="footerMade">Made for a better tomorrow</span>
-                    <span>—</span>
-                </p>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Menu Drawer Modal -->
-    <div id="menuModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-card bg-white/95 w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-white relative animate-in fade-in zoom-in duration-200">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold text-slate-800 flex items-center space-x-2">
-                    <i data-lucide="compass" class="text-indigo-600" style="width:20px;height:20px;"></i>
-                    <span>Navigation & Features</span>
-                </h3>
-                <button id="closeMenuBtn" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition cursor-pointer">
-                    <i data-lucide="x" style="width:16px;height:16px;"></i>
-                </button>
-            </div>
-            <div class="space-y-2 text-xs">
-                <button onclick="window.location.href='/chat.html'" class="menu-item w-full text-left px-4 py-3 rounded-2xl bg-indigo-50/60 hover:bg-indigo-100 text-indigo-700 font-semibold transition flex items-center space-x-3 cursor-pointer">
-                    <i data-lucide="sparkles" style="width:16px;height:16px;"></i>
-                    <span>Start New Chat Session</span>
-                </button>
-                <button class="menu-item w-full text-left px-4 py-3 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition flex items-center space-x-3 cursor-pointer">
-                    <i data-lucide="history" style="width:16px;height:16px;"></i>
-                    <span>Chat History</span>
-                </button>
-                <button class="menu-item w-full text-left px-4 py-3 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium transition flex items-center space-x-3 cursor-pointer">
-                    <i data-lucide="settings" style="width:16px;height:16px;"></i>
-                    <span>AI Settings & Preferences</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const languages = [
-            { code: "en", label: "English", native: "English", hello: "Hello", desc: "I'm Global AI Mahlet — your smart assistant. Ask me anything, anytime. I'm here to help you learn, create, solve, and grow!", placeholder: "Message Global AI Mahlet...", made: "Made for a better tomorrow" },
-            { code: "ti", label: "Tigrigna", native: "ትግርኛ", hello: "ሰላም", desc: "ኣነ ግሎባል ኣይ ማህለት — እቲ ለባብ ረዳኢኻ እየ። ዝኾነ ነገር ብዝኾነ ሰዓት ሕተተኒ። ክትመሃር፡ ክትፈጥር፡ ክትፈትሕን ክትዓብን እዚኣ መጺአ!", placeholder: "መልእኽቲ ናብ ግሎባል ኣይ ማህለት...", made: "ንሕጉስ መጻኢ ዝተሰርሐ" },
-            { code: "am", label: "Amharic", native: "አማርኛ", hello: "ሰላም", desc: "እኔ ግሎባል ኤአይ ማህለት — የእርስዎ ብልህ ረዳት ነኝ። በማንኛውም ጊዜ ማንኛውንም ነገር ይጠይቁኝ። ለመማር፣ ለመፍጠር፣ ለመፍታት እና ለማደግ እዚህ መጥቻለሁ!", placeholder: "መልእክት ለግሎባል ኤአይ ማህለት...", made: "ለተሻለ ነገ የተሰራ" },
-            { code: "ar", label: "Arabic", native: "العربية", hello: "مرحباً", desc: "أنا Global AI Mahlet — مساعدك الذكي. اسألني أي شيء وفي أي وقت. أنا هنا لمساعدتك على التعلم والإبداع والحل والنمو!", placeholder: "أرسل رسالة إلى Global AI Mahlet...", made: "مصنوع من أجل غد أفضل" },
-            { code: "es", label: "Spanish", native: "Español", hello: "Hola", desc: "Soy Global AI Mahlet — tu asistente inteligente. Pregúntame lo que sea, cuando sea. ¡Estoy aquí para ayudarte a aprender, crear, resolver y crecer!", placeholder: "Mensaje a Global AI Mahlet...", made: "Hecho para un mañana mejor" },
-            { code: "fr", label: "French", native: "Français", hello: "Bonjour", desc: "Je suis Global AI Mahlet — votre assistant intelligent. Demandez-moi n'importe quoi, n'importe quand. Je suis là pour vous aider à apprendre, créer, résoudre et grandir !", placeholder: "Envoyer un message...", made: "Conçu pour un avenir meilleur" },
-            { code: "zh", label: "Chinese", native: "中文", hello: "你好", desc: "我是 Global AI Mahlet — 您的智能助手。随时随地向我提问。我在这里帮助您学习、创造、解决问题并不断成长！", placeholder: "给 Global AI Mahlet 发送消息...", made: "为更美好的明天而造" }
-        ];
-
-        // Fill out 80+ languages
-        const extraLangs = ["de","it","pt","ru","hi","bn","ko","tr","vi","nl","pl","uk","fa","id","ms","th","el","he","ro","hu","sv","cs","da","fi","no","fil","ur","af","sq","hy","az","eu","be","bs","bg","ca","ceb","ny","co","hr","et","eo","fy","gl","ka","gu","ht","ha","haw","hmn","is","ig","ga","jw","kn","kk","km","ku","ky","lo","la","lv","lt","lb","mk","mg","ml","mt","mi","mr","mn","my","ne","ps","pa","sm","gd","sr","st","sn","sd","si","sk","sl","so","su","tg","ta","te","uz","cy","xh","yi","yo","zu"];
-        extraLangs.forEach((code) => {
-            if (!languages.some(l => l.code === code)) {
-                languages.push({
-                    code: code,
-                    label: code.toUpperCase(),
-                    native: "Language (" + code.toUpperCase() + ")",
-                    hello: "Hello",
-                    desc: "I'm Global AI Mahlet — your smart assistant in " + code.toUpperCase() + ".",
-                    placeholder: "Message Global AI Mahlet...",
-                    made: "Made for a better tomorrow"
-                });
-            }
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-
-            const listContainer = document.getElementById('langListContainer');
-            if (listContainer) {
-                listContainer.innerHTML = languages.map(l => `
-                    <div data-lang="${l.code}" data-label="${l.code.toUpperCase()}" class="lang-option px-3 py-2 hover:bg-indigo-50 rounded-xl cursor-pointer flex items-center justify-between font-medium text-slate-700 transition">
-                        <span>${l.native}</span>
-  
+                        <div id="langDropdown" class="hidden absolute bottom-12 right-0 w-60 max-h-64 overflow-y-auto bg-white rounded-2xl shadow-2xl border border-slate-100 p-1.5 z-50 text-xs">
+                            <div class="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Select Language (80+)</div>
+                            
