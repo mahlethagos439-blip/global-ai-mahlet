@@ -1339,6 +1339,73 @@ function saveCurrentChat() {
           .slice(0, 60)
       : "New conversation";
 
+  // If this conversation already has a Recent Chat,
+  // update that same item instead of creating another one.
+  if (currentRecentId) {
+
+    const existing =
+      items.find(
+        item =>
+          item.id === currentRecentId
+      );
+
+    if (existing) {
+
+      existing.messages = [...chat];
+      existing.updated = Date.now();
+
+    } else {
+
+      items.unshift({
+        id: currentRecentId,
+        title: title,
+        messages: [...chat],
+        updated: Date.now(),
+        pinned: false
+      });
+
+    }
+
+  } else {
+
+    // Create ONE Recent Chat only when this is
+    // the first message of a new conversation.
+    currentRecentId =
+      Date.now().toString(36);
+
+    items.unshift({
+      id: currentRecentId,
+      title: title,
+      messages: [...chat],
+      updated: Date.now(),
+      pinned: false
+    });
+
+  }
+
+  saveRecents(items.slice(0, 50));
+
+  renderRecents();
+}
+
+  if (temporary || !chat.length) {
+    return;
+  }
+
+  const items = getRecents();
+
+  const firstUserMessage =
+    chat.find(
+      message =>
+        message.role === "user"
+    );
+
+  const title =
+    firstUserMessage
+      ? firstUserMessage.content
+          .slice(0, 60)
+      : "New conversation";
+
 
   if (!currentRecentId) {
 
