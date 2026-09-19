@@ -1,27 +1,96 @@
-(()=>{"use strict";
-const $=id=>document.getElementById(id),I=$("user-input"),S=$("send-button"),C=$("chat-messages"),W=$("welcome"),T=$("typing-indicator"),V=$("voice-button"),OT=$("temporary-chat-button"),L=$("language-select"),R=$("recent-chats"),P=$("photo-button"),PI=$("photo-input"),CA=$("camera-button"),CI=$("camera-input"),F=$("file-button"),FI=$("file-input"),N=$("new-chat-button"),M=$("menu-button"),SB=$("sidebar"),Q=$("recent-search"),FN=$("file-name");
-let ms=[],tmp=false,vm=false,listening=false,rec=null,cid=Date.now()+"",img=null;
-const LG={English:"en-US",Amharic:"am-ET",Arabic:"ar-SA",Chinese:"zh-CN",Spanish:"es-ES",French:"fr-FR",Portuguese:"pt-BR",Russian:"ru-RU",German:"de-DE",Italian:"it-IT",Japanese:"ja-JP",Korean:"ko-KR",Hindi:"hi-IN",Urdu:"ur-PK",Bengali:"bn-BD",Turkish:"tr-TR",Dutch:"nl-NL",Swedish:"sv-SE",Norwegian:"no-NO",Danish:"da-DK",Finnish:"fi-FI",Polish:"pl-PL",Ukrainian:"uk-UA",Greek:"el-GR",Hebrew:"he-IL",Persian:"fa-IR",Swahili:"sw-KE",Hausa:"ha-NG",Yoruba:"yo-NG",Igbo:"ig-NG",Somali:"so-SO",Oromo:"om-ET",Tigrigna:"ti-ET",Vietnamese:"vi-VN",Thai:"th-TH",Indonesian:"id-ID",Malay:"ms-MY",Filipino:"fil-PH",Romanian:"ro-RO",Czech:"cs-CZ",Slovak:"sk-SK",Hungarian:"hu-HU",Bulgarian:"bg-BG",Serbian:"sr-RS",Croatian:"hr-HR",Slovenian:"sl-SI",Lithuanian:"lt-LT",Latvian:"lv-LV",Estonian:"et-EE",Icelandic:"is-IS",Afrikaans:"af-ZA",Albanian:"sq-AL",Armenian:"hy-AM",Azerbaijani:"az-AZ",Basque:"eu-ES",Belarusian:"be-BY",Bosnian:"bs-BA",Catalan:"ca-ES",Georgian:"ka-GE",Gujarati:"gu-IN",Kannada:"kn-IN",Kazakh:"kk-KZ",Khmer:"km-KH",Kyrgyz:"ky-KG",Lao:"lo-LA",Macedonian:"mk-MK",Malayalam:"ml-IN",Marathi:"mr-IN",Mongolian:"mn-MN",Nepali:"ne-NP",Pashto:"ps-AF",Punjabi:"pa-IN",Sinhala:"si-LK",Tamil:"ta-IN",Telugu:"te-IN",Uzbek:"uz-UZ",Welsh:"cy-GB",Zulu:"zu-ZA",Burmese:"my-MM",Galician:"gl-ES"};
-const css=`html,body{width:100%!important;max-width:100%!important;margin:0!important;overflow-x:hidden!important}body{height:100%;overflow:hidden!important}.main{width:100%!important;min-width:0!important;height:100%;display:flex;flex-direction:column}.main-header,header{position:relative!important;width:100%!important;box-sizing:border-box!important}#chat-messages{width:100%!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;padding-bottom:145px!important}.chat-inner{max-width:900px!important;margin:auto!important;padding:18px 16px 150px!important;box-sizing:border-box!important}#welcome{max-width:850px!important;margin:auto!important;text-align:center!important;box-sizing:border-box!important;padding:28px 16px!important}#welcome h1,#welcome h2{max-width:800px!important;margin:18px auto!important;line-height:1.2!important}#welcome p{max-width:700px!important;margin:12px auto!important;line-height:1.6!important}.message{max-width:850px!important;margin:10px auto!important;display:flex!important;flex-direction:row!important;align-items:flex-start!important;gap:12px!important;box-sizing:border-box!important;padding:12px 14px!important;border-radius:16px!important}.message .avatar{flex:0 0 42px!important;width:42px!important;height:42px!important;min-width:42px!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:50%!important;font-size:22px!important}.message-content{flex:1 1 auto!important;min-width:0!important;max-width:calc(100% - 54px)!important}.message-name{font-weight:700!important;margin-bottom:6px!important}.message-text{white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.55!important;font-size:15px!important}.user-message{background:linear-gradient(135deg,#edf3ff,#f5f0ff)!important;border:1px solid #dce4fa!important}.assistant-message{background:#fff!important;border:1px solid #e3e7ef!important;box-shadow:0 3px 14px #1e28460f!important}.assistant-message button{min-height:36px!important;border:1px solid #d9deea!important;border-radius:10px!important;background:#fff!important;padding:7px 12px!important;font-weight:600!important}#photo-button,#camera-button,#file-button,#voice-button,#send-button{visibility:visible!important;opacity:1!important}#voice-button.active{box-shadow:0 0 0 4px #5a6eff29!important}.composer{position:fixed!important;left:0!important;right:0!important;bottom:0!important;width:100%!important;z-index:9999!important;box-sizing:border-box!important;padding:9px 8px calc(14px + env(safe-area-inset-bottom,0px))!important;background:#fff!important;border-top:1px solid #dfe5f0!important;box-shadow:0 -6px 22px #0000001a!important}.composer button{min-width:46px!important;width:auto!important;min-height:46px!important;height:46px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;flex-shrink:0!important;border-radius:13px!important;font-size:21px!important;padding:6px!important;touch-action:manipulation!important}.composer #send-button{min-width:54px!important;width:54px!important;font-size:22px!important}.composer #user-input{min-height:44px!important;width:100%!important;box-sizing:border-box!important}@media(max-width:700px){#sidebar:not(.open){transform:translateX(-110%)!important;width:85vw!important;max-width:330px!important}#sidebar.open{transform:translateX(0)!important}.main,#chat-messages{width:100vw!important}.chat-inner{width:100%!important;padding:12px 10px 150px!important}.message{width:100%!important;margin:9px 0!important;padding:12px!important;gap:10px!important;border-radius:16px!important}.message .avatar{flex-basis:38px!important;width:38px!important;height:38px!important;min-width:38px!important;font-size:19px!important}.message-content{max-width:calc(100% - 48px)!important}.message-text{font-size:14px!important;line-height:1.5!important}#welcome{width:100%!important;padding:28px 16px!important}#welcome h1,#welcome h2{font-size:30px!important}.composer{padding:8px 6px calc(14px + env(safe-area-inset-bottom,0px))!important}.composer button{min-width:46px!important;width:auto!important;height:46px!important}.composer #send-button{min-width:54px!important;width:54px!important}#gai-language-box{right:8px!important;top:7px!important}#gai-language-box select{max-width:120px!important;font-size:12px!important}}`;
-function style(){let s=document.createElement("style");s.textContent=css;document.head.append(s)}
-function setupLang(){let old=L?.value;L.innerHTML="";Object.keys(LG).forEach(x=>{let o=document.createElement("option");o.value=x;o.textContent=x;L.append(o)});L.value=LG[old]?old:"English";let h=L.closest("header")||L.closest(".topbar")||L.parentElement;if(h&&!document.getElementById("gai-language-box")){h.style.position="relative";let b=document.createElement("div");b.id="gai-language-box";b.style.cssText="position:absolute;right:10px;top:7px;z-index:500";L.style.cssText="display:block!important;width:auto;max-width:145px;min-height:40px;padding:6px 28px 6px 10px;border:1px solid #d8dfeb;border-radius:12px;background:#fff;color:#172033;font-size:13px;font-weight:600;box-shadow:0 3px 12px #0000000f";b.append(L);h.append(b)}}
-function recent(){try{return JSON.parse(localStorage.getItem("gai_recent")||"[]")}catch(e){return[]}}function setRecent(a){localStorage.setItem("gai_recent",JSON.stringify(a))}
-function chatTitle(){return(ms.find(x=>x.role==="user")?.content||"New Chat").replace(/^📷 .*?\n/,"").slice(0,45)||"New Chat"}
-function save(){if(tmp)return;localStorage.setItem("gai_"+cid,JSON.stringify(ms));let a=recent(),o=a.find(x=>x.id===cid);a=a.filter(x=>x.id!==cid);a.unshift({id:cid,title:chatTitle(),pinned:o?.pinned||false});setRecent(a.slice(0,30));renderRecent(Q?.value||"")}
-function renderRecent(f=""){if(!R)return;R.innerHTML="";recent().filter(x=>x.title.toLowerCase().includes(f.toLowerCase())).sort((a,b)=>+b.pinned-+a.pinned).forEach(x=>{let d=document.createElement("div");d.className="recent-chat"+(x.id===cid?" active":"");d.style.cssText="position:relative;display:flex;align-items:center;gap:6px;padding:10px;min-height:44px;border-radius:11px";let t=document.createElement("span");t.textContent=(x.pinned?"📌 ":"")+x.title;t.style.cssText="flex:1;overflow:hidden;white-space:nowrap";let b=document.createElement("button");b.textContent="⋮";b.style.cssText="border:0;background:none;font-size:22px;min-width:38px;min-height:38px";b.onclick=e=>{e.stopPropagation();document.querySelectorAll(".chat-actions").forEach(z=>z.remove());let q=document.createElement("div");q.className="chat-actions";q.style.cssText="position:absolute;right:4px;top:44px;z-index:9999;background:#fff;border:1px solid #ddd;border-radius:13px;padding:5px;box-shadow:0 10px 30px #0002";[["📌",x.pinned?"Unpin":"Pin",()=>{x.pinned=!x.pinned;setRecent(recent().map(z=>z.id===x.id?x:z));renderRecent(Q?.value||"")}],["✏️","Rename",()=>{let n=prompt("Rename chat:",x.title);if(n?.trim()){x.title=n.trim();setRecent(recent().map(z=>z.id===x.id?x:z));renderRecent(Q?.value||"")} }],["🗑️","Delete",()=>{localStorage.removeItem("gai_"+x.id);setRecent(recent().filter(z=>z.id!==x.id));x.id===cid?newChat():renderRecent(Q?.value||"")}]].forEach(v=>{let z=document.createElement("button");z.textContent=v[0]+" "+v[1];z.style.cssText="display:block;width:135px;text-align:left;border:0;background:none;padding:10px";z.onclick=e=>{e.stopPropagation();v[2]();q.remove()};q.append(z)});d.append(q)};d.onclick=()=>loadChat(x.id);d.append(t,b);R.append(d)})}
-function clear(){C?.querySelectorAll(".message").forEach(x=>x.remove())}
-function loadChat(id){stopVoice();cid=id;ms=JSON.parse(localStorage.getItem("gai_"+id)||"[]");img=null;document.getElementById("gai-preview")?.remove();clear();W.style.display=ms.length?"none":"block";ms.forEach(x=>addMessage(x.role,x.content));renderRecent(Q?.value||"");SB?.classList.remove("open")}
-function addMessage(role,text){W.style.display="none";let r=document.createElement("div");r.className="message "+(role==="user"?"user-message":"assistant-message");r.innerHTML='<div class="avatar">'+(role==="user"?"👤":"🤖")+'</div><div class="message-content"><div class="message-name">'+(role==="user"?"You":"Global AI Mahlet")+'</div></div>';let box=document.createElement("div");box.className="message-text";String(text).split("\n").forEach(line=>{let p=document.createElement("div");p.textContent=line;box.append(p)});let con=r.querySelector(".message-content");con.append(box);if(role!=="user"){let bar=document.createElement("div");bar.style.cssText="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap";let sp=document.createElement("button"),sh=document.createElement("button");sp.textContent="🔊 Speaker";sh.textContent="🔗 Share";sp.onclick=()=>speakNow(text);sh.onclick=async()=>{try{if(navigator.share)await navigator.share({title:"Global AI Mahlet",text:String(text)});else if(navigator.clipboard){await navigator.clipboard.writeText(String(text));alert("Answer copied. You can share it now.")}}catch(e){}};bar.append(sp,sh);con.append(bar)}let inner=C?.querySelector(".chat-inner");(inner||C)?.append(r);C.scrollTop=C.scrollHeight;return r}
-function speakNow(text){if(!("speechSynthesis"in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(String(text));u.lang=LG[L.value]||"en-US";speechSynthesis.speak(u)}
-function stopVoice(){vm=false;listening=false;V?.classList.remove("active");try{rec?.stop()}catch(e){}if("speechSynthesis"in window)speechSynthesis.cancel()}
-function listen(){if(!vm||listening)return;let SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("Voice recognition is not supported by this browser.");return}if(!rec){rec=new SR;rec.continuous=false;rec.interimResults=false;rec.onstart=()=>{listening=true;V?.classList.add("active")};rec.onresult=e=>{let t=e.results[e.results.length-1][0].transcript.trim();if(t){I.value=t;sendMessage()}};rec.onend=()=>{listening=false;V?.classList.remove("active");if(vm)setTimeout(listen,500)};rec.onerror=e=>{listening=false;V?.classList.remove("active");if(vm&&e.error!=="not-allowed")setTimeout(listen,800)}}rec.lang=LG[L.value]||"en-US";try{rec.start()}catch(e){}}
-if(V)V.onclick=()=>{if(vm){stopVoice();return}let SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert("Voice recognition is not supported by this browser.");return}vm=true;speakNow("Voice mode is on.");setTimeout(listen,900)};
-function pick(f){if(!f)return;if(!f.type.startsWith("image/")){alert("Please select an image.");return}let rd=new FileReader;rd.onload=()=>{img={name:f.name,data:rd.result};document.getElementById("gai-preview")?.remove();let p=document.createElement("div");p.id="gai-preview";p.style.cssText="display:flex;align-items:center;gap:9px;margin:6px 0;padding:8px;border-radius:13px;background:#f1f5ff;border:1px solid #dbe3ff";let im=document.createElement("img");im.src=rd.result;im.style.cssText="width:58px;height:58px;object-fit:cover;border-radius:10px";let tx=document.createElement("span");tx.textContent="📷 "+f.name+" — ready to send";tx.style.cssText="font-size:13px;font-weight:600;overflow:hidden";p.append(im,tx);let par=I.closest(".composer")||I.parentElement;if(par)par.insertBefore(p,I)};rd.readAsDataURL(f)}
-if(P)P.onclick=()=>PI.click();if(CA)CA.onclick=()=>CI.click();if(PI)PI.onchange=()=>pick(PI.files[0]);if(CI)CI.onchange=()=>pick(CI.files[0]);if(F)F.onclick=()=>FI.click();if(FI)FI.onchange=()=>{let f=FI.files[0];if(f){FN.textContent="📎 "+f.name;I.value="Please help me with this file: "+f.name;I.focus()}};
-async function sendMessage(){let text=I.value.trim();if(!text&&!img)return;let im=img;img=null;I.value="";document.getElementById("gai-preview")?.remove();let shown=(im?"📷 "+im.name+"\n":"")+text;addMessage("user",shown);ms.push({role:"user",content:shown});save();T.style.display="block";S.disabled=true;try{let endpoint=im?"/api/vision":"/api/chat",body=im?{image:im.data,prompt:text||"Describe and understand this image.",language:L.value}:{messages:ms.map(x=>({role:x.role,content:x.content})),language:L.value};let res=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),raw=await res.text(),data;try{data=JSON.parse(raw)}catch(e){throw Error(raw||"Empty server response")}if(!res.ok)throw Error(data.error||"AI request failed");let ans=data.response||data.text||data.result||"I could not generate a response.";addMessage("assistant",ans);ms.push({role:"assistant",content:ans});save();if(vm)speakNow(ans)}catch(e){addMessage("assistant","AI connection error: "+(e.message||"Unknown error."))}finally{T.style.display="none";S.disabled=false;I.focus()}}
-function tempMenu(){if(OT)OT.style.display="none";if(!SB||document.getElementById("temp-chat-menu"))return;let b=document.createElement("button");b.id="temp-chat-menu";b.innerHTML='<span style="font-size:22px">◯</span><span><b>Temporary Chat</b><small style="display:block;opacity:.65">Messages are not saved</small></span><span class="sw"><i></i></span>';b.style.cssText="width:100%;display:flex;align-items:center;gap:10px;padding:14px;border:0;border-radius:13px;background:linear-gradient(135deg,#eef4ff,#fff0fa);margin-top:14px;text-align:left;min-height:60px";b.onclick=()=>{tmp=!tmp;updateTemp()};let s=document.createElement("style");s.textContent='.sw{margin-left:auto;width:40px;height:23px;border-radius:20px;background:#aaa;position:relative}.sw i{position:absolute;left:2px;top:2px;width:19px;height:19px;border-radius:50%;background:#fff;transition:.2s}';document.head.append(s);SB.append(b);updateTemp()}
-function updateTemp(){let b=$("temp-chat-menu");if(!b)return;let s=b.querySelector(".sw"),i=b.querySelector("i");if(s)s.style.background=tmp?"#172033":"#aaa";if(i)i.style.left=tmp?"19px":"2px"}
-function addClose(){if(!SB||$("gai-sidebar-close"))return;SB.style.position="relative";let x=document.createElement("button");x.id="gai-sidebar-close";x.textContent="✕";x.style.cssText="position:absolute!important;top:10px!important;right:10px!important;width:44px!important;height:44px!important;border:1px solid #d8deea!important;border-radius:12px!important;background:#fff!important;font-size:25px!important;font-weight:700!important;z-index:10000!important";x.onclick=()=>SB.classList.remove("open");SB.append(x)}
-function newChat(){stopVoice();tmp=false;updateTemp();cid=Date.now()+"";ms=[];img=null;clear();W.style.display="block";renderRecent();I.value="";$("gai-preview")?.remove();SB?.classList.remove("open")}
-if(M)M.onclick=()=>{SB?.classList.toggle("open");tempMenu()};if(N)N.onclick=newChat;if(Q)Q.oninput=()=>renderRecent(Q.value);if(L)L.onchange=()=>{if(rec)rec.lang=LG[L.value]||"en-US"};if(S)S.onclick=sendMessage;if(I){I.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage()}});I.addEventListener("input",()=>{I.style.height="auto";I.style.height=Math.min(I.scrollHeight,150)+"px"})}
-style();setupLang();tempMenu();addClose();renderRecent();})();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - Global AI Mahlet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+    <!-- Header -->
+    <header class="flex items-center justify-between px-6 py-4 glass-card border-b sticky top-0 z-20">
+        <div class="flex items-center space-x-3">
+            <button onclick="window.location.href='/'" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 hover:bg-slate-200 transition">
+                <i data-lucide="arrow-left" style="width:18px;height:18px;"></i>
+            </button>
+            <div class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">M</div>
+            <div>
+                <h1 class="text-sm font-bold text-slate-800">Global AI Mahlet</h1>
+                <p class="text-[10px] text-emerald-600 font-medium">● Online & Ready</p>
+            </div>
+        </div>
+        <button onclick="location.reload()" class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 hover:bg-slate-200 transition" title="New Chat">
+            <i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i>
+        </button>
+    </header>
+
+    <!-- Chat Messages Stream -->
+    <main id="chatContainer" class="max-w-3xl mx-auto w-full px-4 py-6 flex-1 space-y-4 overflow-y-auto">
+        <!-- Dynamic messages load here -->
+    </main>
+
+    <!-- Input Box -->
+    <div class="max-w-3xl mx-auto w-full p-4">
+        <div class="glass-card p-3 rounded-3xl shadow-lg flex items-center space-x-3">
+            <input type="text" id="chatInput" placeholder="Reply to Global AI Mahlet..." class="w-full bg-transparent text-sm text-slate-800 focus:outline-none px-2">
+            <button id="sendChatBtn" class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-md hover:bg-indigo-700 transition">
+                <i data-lucide="send" style="width:16px;height:16px;"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q') || "Hello! How can you help me today?";
+            const chatContainer = document.getElementById('chatContainer');
+
+            function appendMessage(sender, text) {
+                const isUser = sender === 'user';
+                const div = document.createElement('div');
+                div.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
+                div.innerHTML = `
+                    <div class="max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${isUser ? 'bg-indigo-600 text-white rounded-br-none' : 'glass-card text-slate-800 rounded-bl-none'}">
+                        <p class="font-medium text-xs opacity-80 mb-1">${isUser ? 'You' : 'Global AI Mahlet'}</p>
+                        <p class="leading-relaxed">${text}</p>
+                    </div>
+                `;
+                chatContainer.appendChild(div);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+
+            // User prompt
+            appendMessage('user', query);
+
+            // AI Response simulation
+            setTimeout(() => {
+                appendMessage('ai', `I've received your request about "${query}". As Global AI Mahlet, I am fully prepared to guide you through this with customized insights and intelligent support! 💜`);
+            }, 600);
+
+            const handleSend = () => {
+                const input = document.getElementById('chatInput');
+                if (input.value.trim()) {
+                    const text = input.value;
+                    appendMessage('user', text);
+                    input.value = '';
+                    setTimeout(() => {
+                        appendMessage('ai', `That's a great follow-up regarding "${text}". Let me help you break that down step-by-step.`);
+                    }, 600);
+                }
+            };
+
+            document.getElementById('sendChatBtn').addEventListener('click', handleSend);
+            document.getElementById('chatInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSend(); });
+        });
+    </script>
+</body>
+</html>
+      
