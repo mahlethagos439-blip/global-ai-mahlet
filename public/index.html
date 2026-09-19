@@ -1,1012 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#f5f7ff">
-  <meta name="description" content="Global AI Mahlet — Your AI Partner for a Smarter Future">
-  <title>Global AI Mahlet</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      --text: #17213d;
-      --muted: #6e7895;
-      --blue: #667eea;
-      --purple: #8b6ee8;
-      --pink: #ec8fca;
-      --cyan: #63c7e8;
-      --green: #8bd6b0;
-      --white: rgba(255,255,255,.78);
-      --border: rgba(255,255,255,.8);
-      --shadow: 0 15px 45px rgba(77,91,150,.13);
-    }
-
-    html, body {
-      width: 100%;
-      min-height: 100%;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system,
-        BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 5% 5%, rgba(141,190,255,.27), transparent 28%),
-        radial-gradient(circle at 95% 8%, rgba(240,170,221,.22), transparent 25%),
-        radial-gradient(circle at 50% 100%, rgba(145,226,199,.20), transparent 30%),
-        #f8f9ff;
-    }
-
-    body {
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    button,
-    input,
-    textarea,
-    select {
-      font: inherit;
-    }
-
-    button {
-      border: 0;
-      cursor: pointer;
-    }
-
-    .page {
-      min-height: 100vh;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .wave {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(35px);
-      opacity: .45;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .wave.one {
-      width: 280px;
-      height: 180px;
-      background: #c9d8ff;
-      top: -70px;
-      left: -80px;
-      transform: rotate(-20deg);
-    }
-
-    .wave.two {
-      width: 300px;
-      height: 180px;
-      background: #f6c7e8;
-      right: -100px;
-      top: 180px;
-      transform: rotate(20deg);
-    }
-
-    .wave.three {
-      width: 320px;
-      height: 190px;
-      background: #c3efd9;
-      left: 20%;
-      bottom: -100px;
-    }
-
-    .app {
-      width: min(1180px, calc(100% - 28px));
-      margin: 0 auto;
-      position: relative;
-      z-index: 1;
-      padding: 18px 0 35px;
-    }
-
-    /* HEADER */
-
-    .topbar {
-      min-height: 72px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      padding: 12px 15px;
-      border: 1px solid var(--border);
-      border-radius: 25px;
-      background: rgba(255,255,255,.62);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      box-shadow: var(--shadow);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .logo {
-      width: 48px;
-      height: 48px;
-      flex: 0 0 48px;
-      border-radius: 17px;
-      display: grid;
-      place-items: center;
-      font-size: 24px;
-      background:
-        linear-gradient(135deg, #dbe5ff, #eadcff 48%, #ffd9ee);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.9),
-        0 9px 22px rgba(117,108,206,.18);
-    }
-
-    .brand-text {
-      min-width: 0;
-    }
-
-    .brand-name {
-      font-weight: 800;
-      font-size: 17px;
-      white-space: nowrap;
-    }
-
-    .brand-tag {
-      color: var(--muted);
-      font-size: 11px;
-      margin-top: 2px;
-      white-space: nowrap;
-    }
-
-    .menu-btn {
-      width: 46px;
-      height: 46px;
-      flex: 0 0 46px;
-      border-radius: 15px;
-      background: rgba(255,255,255,.82);
-      color: var(--text);
-      font-size: 23px;
-      box-shadow: 0 8px 20px rgba(70,80,130,.10);
-    }
-
-    .menu-btn:active,
-    .round-btn:active,
-    .send-button:active,
-    .feature-card:active {
-      transform: scale(.96);
-    }
-
-    /* HERO */
-
-    .hero {
-      text-align: center;
-      padding: 42px 10px 28px;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 8px 13px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.66);
-      border: 1px solid rgba(255,255,255,.85);
-      color: #667099;
-      font-size: 12px;
-      box-shadow: 0 7px 22px rgba(80,90,140,.08);
-      margin-bottom: 17px;
-    }
-
-    .hero h1 {
-      font-size: clamp(30px, 7vw, 54px);
-      line-height: 1.08;
-      letter-spacing: -1.8px;
-      font-weight: 850;
-    }
-
-    .hero h1 span {
-      background: linear-gradient(90deg, #667eea, #9b68df, #e78dc4);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .hero p {
-      max-width: 650px;
-      margin: 15px auto 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.7;
-    }
-
-    /* FEATURES */
-
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-bottom: 22px;
-    }
-
-    .feature-card {
-      position: relative;
-      min-height: 145px;
-      padding: 19px;
-      border-radius: 23px;
-      border: 1px solid rgba(255,255,255,.85);
-      box-shadow: 0 12px 34px rgba(75,86,140,.10);
-      transition: transform .22s ease, box-shadow .22s ease;
-      overflow: hidden;
-      text-align: left;
-    }
-
-    .feature-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 18px 38px rgba(75,86,140,.16);
-    }
-
-    .feature-card:nth-child(1) {
-      background: linear-gradient(135deg, #edf3ff, #e5edff);
-    }
-
-    .feature-card:nth-child(2) {
-      background: linear-gradient(135deg, #f0ebff, #e8e0ff);
-    }
-
-    .feature-card:nth-child(3) {
-      background: linear-gradient(135deg, #fff0fa, #ffe5f4);
-    }
-
-    .feature-card:nth-child(4) {
-      background: linear-gradient(135deg, #eafaff, #e0f5ff);
-    }
-
-    .feature-card:nth-child(5) {
-      background: linear-gradient(135deg, #edfff7, #ddf7eb);
-    }
-
-    .feature-card:nth-child(6) {
-      background: linear-gradient(135deg, #fff7e8, #ffefd7);
-    }
-
-    .feature-icon {
-      width: 43px;
-      height: 43px;
-      display: grid;
-      place-items: center;
-      border-radius: 14px;
-      background: rgba(255,255,255,.73);
-      font-size: 20px;
-      margin-bottom: 14px;
-    }
-
-    .feature-card h3 {
-      font-size: 15px;
-      margin-bottom: 5px;
-    }
-
-    .feature-card p {
-      color: #727c97;
-      font-size: 11px;
-      line-height: 1.45;
-    }
-
-    .feature-arrow {
-      position: absolute;
-      right: 17px;
-      bottom: 16px;
-      color: #7c84a2;
-      font-size: 18px;
-    }
-
-    /* CHAT */
-
-    .chat-card {
-      border: 1px solid rgba(255,255,255,.86);
-      background: rgba(255,255,255,.67);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .chat-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 15px 17px;
-      border-bottom: 1px solid rgba(120,130,170,.10);
-    }
-
-    .chat-title {
-      font-weight: 750;
-      font-size: 14px;
-    }
-
-    .chat-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      color: #73809b;
-      font-size: 11px;
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #72d3a0;
-      box-shadow: 0 0 10px rgba(74,210,140,.6);
-    }
-
-    .messages {
-      min-height: 230px;
-      max-height: 480px;
-      overflow-y: auto;
-      padding: 23px 17px;
-      scroll-behavior: smooth;
-    }
-
-    .empty-chat {
-      text-align: center;
-      padding: 25px 10px;
-      color: var(--muted);
-    }
-
-    .empty-icon {
-      width: 58px;
-      height: 58px;
-      display: grid;
-      place-items: center;
-      margin: 0 auto 13px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, #e4ecff, #f1ddff);
-      font-size: 27px;
-    }
-
-    .empty-chat h2 {
-      color: var(--text);
-      font-size: 20px;
-      margin-bottom: 9px;
-    }
-
-    .empty-chat p {
-      font-size: 12px;
-      line-height: 1.65;
-    }
-
-    .message {
-      max-width: 86%;
-      margin-bottom: 16px;
-    }
-
-    .user-message {
-      margin-left: auto;
-    }
-
-    .message-bubble {
-      padding: 12px 15px;
-      border-radius: 18px;
-      font-size: 13px;
-      line-height: 1.6;
-      word-break: break-word;
-    }
-
-    .user-message .message-bubble {
-      background: linear-gradient(135deg, #7188ed, #8c70db);
-      color: white;
-      border-bottom-right-radius: 6px;
-      box-shadow: 0 9px 20px rgba(103,119,221,.20);
-    }
-
-    .ai-message .message-bubble {
-      background: rgba(255,255,255,.82);
-      border: 1px solid rgba(220,224,240,.75);
-      border-bottom-left-radius: 6px;
-      color: #303a59;
-      box-shadow: 0 7px 18px rgba(70,80,130,.07);
-    }
-
-    .message-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .message-actions button {
-      width: 31px;
-      height: 29px;
-      border-radius: 10px;
-      background: rgba(255,255,255,.78);
-      color: #707b98;
-      font-size: 13px;
-    }
-
-    .typing span {
-      animation: blink 1.1s infinite;
-    }
-
-    .typing span:nth-child(2) {
-      animation-delay: .15s;
-    }
-
-    .typing span:nth-child(3) {
-      animation-delay: .3s;
-    }
-
-    @keyframes blink {
-      0%, 60%, 100% { opacity: .25; }
-      30% { opacity: 1; }
-    }
-
-    /* COMPOSER */
-
-    .composer-area {
-      padding: 13px;
-      border-top: 1px solid rgba(120,130,170,.10);
-      background: rgba(250,251,255,.48);
-    }
-
-    .file-preview {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-bottom: 8px;
-    }
-
-    .file-chip {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      max-width: 100%;
-      padding: 6px 8px 6px 10px;
-      border-radius: 10px;
-      background: white;
-      border: 1px solid #e8eaf2;
-      font-size: 10px;
-    }
-
-    .file-chip span {
-      max-width: 190px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .file-chip button {
-      background: transparent;
-      color: #8b92a9;
-      font-size: 15px;
-    }
-
-    .composer {
-      display: flex;
-      align-items: flex-end;
-      gap: 7px;
-      padding: 8px;
-      border-radius: 21px;
-      background: rgba(255,255,255,.88);
-      border: 1px solid rgba(215,220,237,.85);
-      box-shadow: inset 0 1px 3px rgba(60,70,120,.03);
-    }
-
-    #messageInput {
-      flex: 1;
-      min-width: 0;
-      max-height: 160px;
-      resize: none;
-      border: 0;
-      outline: 0;
-      background: transparent;
-      color: var(--text);
-      padding: 10px 7px;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    #messageInput::placeholder {
-      color: #98a0b7;
-    }
-
-    .composer-tools {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .round-btn {
-      width: 37px;
-      height: 37px;
-      flex: 0 0 37px;
-      border-radius: 13px;
-      background: #f3f5fc;
-      color: #69748f;
-      font-size: 16px;
-      transition: transform .15s;
-    }
-
-    .round-btn.active {
-      background: linear-gradient(135deg, #e6dcff, #dce8ff);
-      color: #6356bf;
-    }
-
-    .send-button {
-      width: 42px;
-      height: 42px;
-      flex: 0 0 42px;
-      border-radius: 15px;
-      color: white;
-      font-size: 17px;
-      background: linear-gradient(135deg, #687ee9, #9a69df);
-      box-shadow: 0 8px 18px rgba(103,113,220,.25);
-      transition: transform .15s;
-    }
-
-    .language-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 6px;
-      padding: 8px 4px 1px;
-    }
-
-    .language-row label {
-      color: #7d87a1;
-      font-size: 10px;
-    }
-
-    select[data-language] {
-      max-width: 170px;
-      border: 0;
-      outline: 0;
-      color: #68728e;
-      background: transparent;
-      font-size: 10px;
-      cursor: pointer;
-    }
-
-    /* SIDEBAR */
-
-    .sidebar {
-      position: fixed;
-      top: 0;
-      right: -330px;
-      width: min(330px, 90vw);
-      height: 100vh;
-      z-index: 50;
-      padding: 18px;
-      background: rgba(248,250,255,.94);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      box-shadow: -15px 0 45px rgba(60,70,120,.16);
-      transition: right .28s ease;
-      overflow-y: auto;
-    }
-
-    .sidebar.open {
-      right: 0;
-    }
-
-    .sidebar-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .sidebar-head h2 {
-      font-size: 18px;
-    }
-
-    .close-menu {
-      width: 40px;
-      height: 40px;
-      border-radius: 13px;
-      background: white;
-      font-size: 19px;
-    }
-
-    .side-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 13px;
-      margin-bottom: 8px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.75);
-      color: #3f4966;
-      text-align: left;
-      font-size: 13px;
-    }
-
-    .side-section {
-      margin-top: 22px;
-    }
-
-    .side-section-title {
-      color: #8b93a9;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: .8px;
-      margin: 0 3px 9px;
-    }
-
-    .search-box {
-      width: 100%;
-      padding: 11px 13px;
-      border-radius: 13px;
-      border: 1px solid #e3e6f0;
-      outline: 0;
-      background: white;
-      font-size: 12px;
-      margin-bottom: 9px;
-    }
-
-    .temporary-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 13px;
-      border-radius: 14px;
-      background: white;
-      font-size: 12px;
-      color: #525c78;
-    }
-
-    .switch {
-      position: relative;
-      width: 42px;
-      height: 23px;
-      display: inline-block;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      inset: 0;
-      border-radius: 30px;
-      background: #d9deeb;
-      cursor: pointer;
-      transition: .2s;
-    }
-
-    .slider:before {
-      content: "";
-      position: absolute;
-      width: 17px;
-      height: 17px;
-      left: 3px;
-      top: 3px;
-      border-radius: 50%;
-      background: white;
-      transition: .2s;
-      box-shadow: 0 2px 5px rgba(0,0,0,.12);
-    }
-
-    .switch input:checked + .slider {
-      background: linear-gradient(135deg, #7186e9, #9b6dde);
-    }
-
-    .switch input:checked + .slider:before {
-      transform: translateX(19px);
-    }
-
-    .recent-chats {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
-    .recent-chat {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      border-radius: 12px;
-      background: rgba(255,255,255,.72);
-    }
-
-    .recent-chat.active {
-      background: #edf0ff;
-    }
-
-    .recent-open {
-      flex: 1;
-      min-width: 0;
-      padding: 11px 10px;
-      background: transparent;
-      color: #505a76;
-      text-align: left;
-      font-size: 11px;
-    }
-
-    .recent-open span {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .recent-more {
-      width: 35px;
-      height: 35px;
-      background: transparent;
-      color: #8b93a9;
-      font-size: 18px;
-    }
-
-    .recent-empty {
-      padding: 15px 5px;
-      color: #9299ac;
-      font-size: 11px;
-      text-align: center;
-    }
-
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(35,40,65,.18);
-      backdrop-filter: blur(2px);
-      z-index: 40;
-      display: none;
-    }
-
-    .overlay.show {
-      display: block;
-    }
-
-    /* FOOTER */
-
-    footer {
-      text-align: center;
-      padding: 22px 0 5px;
-      color: #9299ad;
-      font-size: 11px;
-    }
-
-    /* MOBILE */
-
-    @media (max-width: 760px) {
-      .app {
-        width: min(100% - 18px, 650px);
-        padding-top: 9px;
-      }
-
-      .topbar {
-        border-radius: 20px;
-        padding: 9px 10px;
-      }
-
-      .logo {
-        width: 43px;
-        height: 43px;
-        flex-basis: 43px;
-        border-radius: 14px;
-      }
-
-      .brand-name {
-        font-size: 15px;
-      }
-
-      .brand-tag {
-        font-size: 9px;
-      }
-
-      .menu-btn {
-        width: 42px;
-        height: 42px;
-        flex-basis: 42px;
-      }
-
-      .hero {
-        padding: 30px 7px 21px;
-      }
-
-      .hero h1 {
-        font-size: 31px;
-      }
-
-      .hero p {
-        font-size: 12px;
-        line-height: 1.6;
-      }
-
-      .features {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 9px;
-      }
-
-      .feature-card {
-        min-height: 132px;
-        padding: 14px;
-        border-radius: 18px;
-      }
-
-      .feature-icon {
-        width: 37px;
-        height: 37px;
-        margin-bottom: 10px;
-        border-radius: 12px;
-        font-size: 17px;
-      }
-
-      .feature-card h3 {
-        font-size: 12px;
-      }
-
-      .feature-card p {
-        font-size: 9px;
-      }
-
-      .feature-arrow {
-        right: 11px;
-        bottom: 10px;
-        font-size: 14px;
-      }
-
-      .chat-card {
-        border-radius: 22px;
-      }
-
-      .messages {
-        min-height: 210px;
-        padding: 17px 11px;
-      }
-
-      .message {
-        max-width: 91%;
-      }
-
-      .composer-area {
-        padding: 9px;
-      }
-
-      .composer {
-        gap: 3px;
-        padding: 6px;
-        border-radius: 18px;
-      }
-
-      .round-btn {
-        width: 32px;
-        height: 32px;
-        flex-basis: 32px;
-        border-radius: 10px;
-        font-size: 14px;
-      }
-
-      .send-button {
-        width: 36px;
-        height: 36px;
-        flex-basis: 36px;
-        border-radius: 12px;
-      }
-
-      #messageInput {
-        font-size: 12px;
-        padding: 8px 4px;
-      }
-
-      .hide-small {
-        display: none;
-      }
-    }
-
-    @media (max-width: 390px) {
-      .app {
-        width: calc(100% - 12px);
-      }
-
-      .brand-tag {
-        display: none;
-      }
-
-      .feature-card {
-        min-height: 125px;
-      }
-
-      .composer-tools {
-        gap: 2px;
-      }
-
-      .round-btn {
-        width: 30px;
-        height: 30px;
-        flex-basis: 30px;
-      }
-
-      .send-button {
-        width: 34px;
-        height: 34px;
-        flex-basis: 34px;
-      }
-    }
-
-    @media (max-width: 330px) {
-      .features {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f8fbff">
+<meta name="description" content="Global AI Mahlet — Your AI Partner for a Smarter Future">
+<title>Global AI Mahlet</title>
+<style>
+:root{--bg:#f8fbff;--text:#18233b;--muted:#71809b;--blue:#5b7cff;--purple:#9b6cff;--pink:#ef82c8;--cyan:#63d9e9;--green:#9be7bd;--glass:rgba(255,255,255,.72);--line:rgba(115,132,170,.16);--shadow:0 18px 50px rgba(74,91,140,.13)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:var(--bg)}
+body{overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;z-index:-2;border-radius:50%;filter:blur(60px);opacity:.42;pointer-events:none}
+body:before{width:330px;height:330px;top:-100px;left:-100px;background:#b9d9ff}
+body:after{width:350px;height:350px;right:-120px;bottom:-100px;background:#efc8ed}
+button,input,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(91,124,255,.22);outline-offset:2px}
+.app{width:min(1180px,100%);margin:auto;padding:18px 18px 30px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:46px;height:46px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(135deg,#6e8cff,#b978ef,#67dbe4);box-shadow:0 10px 25px rgba(91,124,255,.22);font-size:22px}
+.brand h1{margin:0;font-size:18px;letter-spacing:-.3px}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
+.menu{width:44px;height:44px;border:1px solid var(--line);border-radius:15px;background:var(--glass);backdrop-filter:blur(15px);display:grid;place-items:center;font-size:21px;color:#53617c;box-shadow:var(--shadow)}
+.hero{padding:40px 5px 27px}
+.hero h2{margin:0 0 12px;font-size:clamp(31px,7vw,52px);line-height:1.02;letter-spacing:-1.8px}
+.grad{background:linear-gradient(90deg,#5b7cff,#a468ed,#ef79bf);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{max-width:720px;margin:0;color:#65738d;line-height:1.7;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:18px}
+.feature,.chat,.side{border:1px solid rgba(120,140,180,.15);background:var(--glass);backdrop-filter:blur(20px);box-shadow:var(--shadow)}
+.feature{position:relative;min-height:145px;padding:19px;border-radius:24px;overflow:hidden;transition:.22s transform,.22s box-shadow}
+.feature:hover{transform:translateY(-4px);box-shadow:0 22px 55px rgba(74,91,140,.17)}
+.feature:nth-child(1){background:linear-gradient(135deg,rgba(224,239,255,.9),rgba(255,255,255,.72))}
+.feature:nth-child(2){background:linear-gradient(135deg,rgba(229,225,255,.9),rgba(255,255,255,.72))}
+.feature:nth-child(3){background:linear-gradient(135deg,rgba(255,229,247,.9),rgba(255,255,255,.72))}
+.feature:nth-child(4){background:linear-gradient(135deg,rgba(222,250,246,.9),rgba(255,255,255,.72))}
+.feature:nth-child(5){background:linear-gradient(135deg,rgba(222,241,255,.9),rgba(255,255,255,.72))}
+.feature:nth-child(6){background:linear-gradient(135deg,rgba(234,255,229,.9),rgba(255,255,255,.72))}
+.icon{width:43px;height:43px;border-radius:15px;display:grid;place-items:center;background:rgba(255,255,255,.7);font-size:20px;margin-bottom:13px}
+.feature h3{margin:0 0 5px;font-size:15px}
+.feature p{margin:0;color:var(--muted);font-size:12px}
+.arrow{position:absolute;right:18px;bottom:17px;color:#687898}
+.layout{display:grid;grid-template-columns:250px 1fr;gap:16px}
+.side{border-radius:24px;padding:14px;display:none}
+.side.open{display:block}
+.side button{width:100%;border:0;border-radius:14px;background:rgba(255,255,255,.65);padding:11px;margin-bottom:8px;text-align:left;color:#465571}
+.side .new{background:linear-gradient(135deg,#6d87ff,#a16bea);color:#fff}
+.side input{width:100%;border:1px solid var(--line);background:#fff8;padding:11px;border-radius:13px;margin:3px 0 12px}
+.toggle{display:flex;align-items:center;justify-content:space-between}
+.chat{border-radius:28px;min-width:0;overflow:hidden}
+.chathead{padding:17px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.chathead strong{font-size:14px}
+.chathead small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+#messages{height:420px;overflow-y:auto;padding:20px}
+.empty{text-align:center;color:var(--muted);padding:80px 20px 40px}
+.msg{display:flex;margin:0 0 15px}
+.msg.user{justify-content:flex-end}
+.bubble{max-width:min(82%,680px);padding:12px 14px;border-radius:18px;background:#fff;box-shadow:0 7px 24px rgba(80,100,150,.08);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;font-size:14px}
+.msg.user .bubble{background:linear-gradient(135deg,#6b86ff,#8c6bea);color:#fff;border-bottom-right-radius:6px}
+.msg.ai .bubble{border-bottom-left-radius:6px}
+.actions{display:flex;gap:6px;margin-top:7px}
+.actions button{border:0;background:rgba(120,140,180,.1);border-radius:9px;padding:5px 8px;font-size:11px;color:#687895}
+#filePreview{padding:0 16px}
+.composer{margin:12px;border:1px solid var(--line);border-radius:23px;background:rgba(255,255,255,.72);padding:9px;box-shadow:0 10px 30px rgba(74,91,140,.08)}
+.tools{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.tool,.send{border:0;width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:#f3f6fc;color:#596783}
+.send{margin-left:auto;background:linear-gradient(135deg,#5e7fff,#a066ea);color:#fff;box-shadow:0 8px 18px rgba(94,127,255,.25)}
+.composer textarea{width:100%;resize:none;border:0;outline:0;background:transparent;padding:8px 6px;color:var(--text);min-height:48px;max-height:130px}
+.bottom{display:flex;align-items:center;gap:7px}
+.lang{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 9px;color:#56647d;max-width:150px}
+.hidden{display:none!important}
+.footer{text-align:center;color:#8490a5;font-size:11px;padding:22px 0 3px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#202a42;color:#fff;padding:10px 15px;border-radius:13px;font-size:12px;transition:.25s;z-index:20}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.side{position:fixed;z-index:10;left:12px;right:12px;top:76px;max-height:calc(100vh - 95px);overflow:auto}.hero{padding-top:31px}}
+@media(max-width:520px){.app{padding:12px 11px 24px}.brand p{display:none}.logo{width:42px;height:42px}.menu{width:42px;height:42px}.hero h2{font-size:34px}.hero p{font-size:13px}.grid{gap:10px}.feature{min-height:138px;padding:15px;border-radius:20px}.feature h3{font-size:14px}.feature p{font-size:11px}.icon{width:39px;height:39px;font-size:18px}.chat{border-radius:22px}#messages{height:390px;padding:14px}.bubble{max-width:88%;font-size:13px}.composer{margin:8px;border-radius:19px}.tool,.send{width:36px;height:36px}.lang{max-width:105px;font-size:12px;padding:7px}.hero{padding-bottom:21px}}
+@media(max-width:370px){.grid{grid-template-columns:1fr}.hero h2{font-size:31px}.tools{gap:4px}.tool,.send{width:34px;height:34px}.lang{max-width:88px}}
+</style>
 </head>
-
 <body>
+<div class="app">
+<header class="top">
+<div class="brand"><div class="logo">✦</div><div><h1>Global AI Mahlet</h1><p>Your AI Partner for a Smarter Future</p></div></div>
+<button class="menu" id="menuBtn" aria-label="Menu">☰</button>
+</header>
 
-  <div class="page">
+<section class="hero">
+<h2>Hello, <span class="grad">Mahlet</span> ✨</h2>
+<p>I'm Global AI Mahlet — your smart assistant. Ask me anything, anytime. I'm here to help you learn, create, solve, and grow! 💙</p>
+</section>
 
-    <div class="wave one"></div>
-    <div class="wave two"></div>
-    <div class="wave three"></div>
+<section class="grid">
+<article class="feature"><div class="icon">🎓</div><h3>Study Help</h3><p>Learn faster &amp; better</p><span class="arrow">→</span></article>
+<article class="feature"><div class="icon">💻</div><h3>Coding &amp; Tech</h3><p>Build your skills</p><span class="arrow">→</span></article>
+<article class="feature"><div class="icon">💡</div><h3>Ideas &amp; Creativity</h3><p>Turn ideas into reality</p><span class="arrow">→</span></article>
+<article class="feature"><div class="icon">📝</div><h3>Write &amp; Improve</h3><p>Better writing, clearer</p><span class="arrow">→</span></article>
+<article class="feature"><div class="icon">🌍</div><h3>Global Information</h3><p>Explore the world</p><span class="arrow">→</span></article>
+<article class="feature"><div class="icon">🎯</div><h3>Your Goals</h3><p>Plan. Learn. Achieve.</p><span class="arrow">→</span></article>
+</section>
 
-    <!-- SIDEBAR OVERLAY -->
-    <div class="overlay" id="menuOverlay"></div>
+<div class="layout">
+<aside class="side" id="sidebar">
+<button class="new" id="newChat">＋ New Chat</button>
+<button id="voiceMode">🎙️ Voice Mode</button>
+<input id="recentSearch" placeholder="Search recent chats...">
+<div class="toggle"><span>Temporary Chat</span><input id="temporaryChat" type="checkbox"></div>
+<div id="recentChats"></div>
+</aside>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
+<main class="chat">
+<div class="chathead">
+<div><strong>Global AI Mahlet</strong><small>Ready to help you ✨</small></div>
+<span id="status">● Online</span>
+</div>
 
-      <div class="sidebar-head">
-        <h2>Global AI Mahlet</h2>
-        <button class="close-menu" id="closeMenu">×</button>
-      </div>
+<div id="messages"><div class="empty" id="emptyState">Start a conversation with Global AI Mahlet 💙<br><small>Ask a question, learn something, or share an idea.</small></div></div>
 
-      <button class="side-btn" data-new-chat>
-        <span>＋</span>
-        <span>New Chat</span>
-      </button>
+<div id="filePreview"></div>
 
-      <button class="side-btn" data-voice-mode>
-        <span>🎙️</span>
-        <span>Voice Mode</span>
-      </button>
+<div class="composer">
+<textarea id="messageInput" rows="1" placeholder="Message Global AI Mahlet..."></textarea>
+<div class="tools">
+<button class="tool" type="button" data-camera aria-label="Camera">📷</button>
+<button class="tool" type="button" data-attach aria-label="Attach file">📎</button>
+<button class="tool" type="button" id="imageButton" aria-label="Image">🖼️</button>
+<button class="tool" type="button" id="micButton" aria-label="Microphone">🎙️</button>
+<select class="lang" data-language aria-label="Language"></select>
+<button class="send" type="button" id="sendButton" aria-label="Send">➤</button>
+</div>
+</div>
+</main>
+</div>
 
-      <div class="side-section">
-        <div class="side-section-title">Chats</div>
+<footer class="footer">Made for a better tomorrow 💙</footer>
+</div>
 
-        <input
-          class="search-box"
-          type="search"
-          placeholder="Search recent chats..."
-          data-search-chats
-        >
+<input class="hidden" id="fileInput" type="file" data-file-input multiple>
+<input class="hidden" id="cameraInput" type="file" accept="image/*" capture="environment">
+<input class="hidden" id="imageInput" type="file" accept="image/*" multiple>
+<div class="toast" id="toast"></div>
 
-        <div class="recent-chats" id="recentChats"></div>
-      </div>
-
-      <div class="side-section">
-        <div class="side-section-title">Privacy</div>
-
-        <div class="temporary-row">
-          <span>Temporary Chat</span>
-
-          <label class="switch">
-            <input type="checkbox" data-temporary>
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-
-    </aside>
-
-    <main class="app">
-
-      <!-- HEADER -->
-      <header class="topbar">
-
-        <div class="brand">
-          <div class="logo">✦</div>
-
-          <div class="brand-text">
-            <div class="brand-name">Global AI Mahlet</div>
-            <div class="brand-tag">Your AI Partner for a Smarter Future</div>
- 
+<script>
+(()=>{const s=document.getElementById("sidebar"),m=document.getElementById("menuBtn"),n=document.getElementById("newChat"),v=document.getElementById("voiceMode"),i=document.getElementById("imageInput"),b=document.getElementById("imageButton"),t=document.getElementById("toast");
+m?.addEventListener("click",()=>s.classList.toggle("open"));
+b?.addEventListener("click",()=>i.click());
+n?.addEventListener("click",()=>{window.GlobalAIMahlet?.newChat?.();s.classList.remove("open")});
+v?.addEventListener("click",()=>window.GlobalAIMahlet?.toggleVoiceMode?.());
+window.showToast=x=>{t.textContent=x;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+})();
+</script>
+<script src="./chat.js"></script>
+</body>
+  </html>
