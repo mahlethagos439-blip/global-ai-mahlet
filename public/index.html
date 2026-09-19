@@ -6,150 +6,1116 @@
 <meta name="theme-color" content="#f8fbff">
 <meta name="description" content="Global AI Mahlet — Your AI Partner for a Smarter Future">
 <title>Global AI Mahlet</title>
+
 <style>
-:root{--bg:#f8fbff;--text:#18233b;--muted:#71809b;--blue:#5b7cff;--purple:#9b6cff;--pink:#ef82c8;--cyan:#63d9e9;--green:#9be7bd;--glass:rgba(255,255,255,.72);--line:rgba(115,132,170,.16);--shadow:0 18px 50px rgba(74,91,140,.13)}
+:root{
+--bg:#f8fbff;
+--text:#18233b;
+--muted:#71809b;
+--blue:#5b7cff;
+--purple:#9b6cff;
+--pink:#ef82c8;
+--cyan:#63d9e9;
+--green:#9be7bd;
+--glass:rgba(255,255,255,.72);
+--line:rgba(115,132,170,.16);
+--shadow:0 18px 50px rgba(74,91,140,.13)
+}
+
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);background:var(--bg)}
-body{overflow-x:hidden}
-body:before,body:after{content:"";position:fixed;z-index:-2;border-radius:50%;filter:blur(60px);opacity:.42;pointer-events:none}
-body:before{width:330px;height:330px;top:-100px;left:-100px;background:#b9d9ff}
-body:after{width:350px;height:350px;right:-120px;bottom:-100px;background:#efc8ed}
-button,input,select{font:inherit}
-button{cursor:pointer}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(91,124,255,.22);outline-offset:2px}
-.app{width:min(1180px,100%);margin:auto;padding:18px 18px 30px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:15px}
-.brand{display:flex;align-items:center;gap:11px}
-.logo{width:46px;height:46px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(135deg,#6e8cff,#b978ef,#67dbe4);box-shadow:0 10px 25px rgba(91,124,255,.22);font-size:22px}
-.brand h1{margin:0;font-size:18px;letter-spacing:-.3px}
-.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}
-.menu{width:44px;height:44px;border:1px solid var(--line);border-radius:15px;background:var(--glass);backdrop-filter:blur(15px);display:grid;place-items:center;font-size:21px;color:#53617c;box-shadow:var(--shadow)}
-.hero{padding:40px 5px 27px}
-.hero h2{margin:0 0 12px;font-size:clamp(31px,7vw,52px);line-height:1.02;letter-spacing:-1.8px}
-.grad{background:linear-gradient(90deg,#5b7cff,#a468ed,#ef79bf);-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{max-width:720px;margin:0;color:#65738d;line-height:1.7;font-size:15px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:18px}
-.feature,.chat,.side{border:1px solid rgba(120,140,180,.15);background:var(--glass);backdrop-filter:blur(20px);box-shadow:var(--shadow)}
-.feature{position:relative;min-height:145px;padding:19px;border-radius:24px;overflow:hidden;transition:.22s transform,.22s box-shadow}
-.feature:hover{transform:translateY(-4px);box-shadow:0 22px 55px rgba(74,91,140,.17)}
-.feature:nth-child(1){background:linear-gradient(135deg,rgba(224,239,255,.9),rgba(255,255,255,.72))}
-.feature:nth-child(2){background:linear-gradient(135deg,rgba(229,225,255,.9),rgba(255,255,255,.72))}
-.feature:nth-child(3){background:linear-gradient(135deg,rgba(255,229,247,.9),rgba(255,255,255,.72))}
-.feature:nth-child(4){background:linear-gradient(135deg,rgba(222,250,246,.9),rgba(255,255,255,.72))}
-.feature:nth-child(5){background:linear-gradient(135deg,rgba(222,241,255,.9),rgba(255,255,255,.72))}
-.feature:nth-child(6){background:linear-gradient(135deg,rgba(234,255,229,.9),rgba(255,255,255,.72))}
-.icon{width:43px;height:43px;border-radius:15px;display:grid;place-items:center;background:rgba(255,255,255,.7);font-size:20px;margin-bottom:13px}
-.feature h3{margin:0 0 5px;font-size:15px}
-.feature p{margin:0;color:var(--muted);font-size:12px}
-.arrow{position:absolute;right:18px;bottom:17px;color:#687898}
-.layout{display:grid;grid-template-columns:250px 1fr;gap:16px}
-.side{border-radius:24px;padding:14px;display:none}
-.side.open{display:block}
-.side button{width:100%;border:0;border-radius:14px;background:rgba(255,255,255,.65);padding:11px;margin-bottom:8px;text-align:left;color:#465571}
-.side .new{background:linear-gradient(135deg,#6d87ff,#a16bea);color:#fff}
-.side input{width:100%;border:1px solid var(--line);background:#fff8;padding:11px;border-radius:13px;margin:3px 0 12px}
-.toggle{display:flex;align-items:center;justify-content:space-between}
-.chat{border-radius:28px;min-width:0;overflow:hidden}
-.chathead{padding:17px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
-.chathead strong{font-size:14px}
-.chathead small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
-#messages{height:420px;overflow-y:auto;padding:20px}
-.empty{text-align:center;color:var(--muted);padding:80px 20px 40px}
-.msg{display:flex;margin:0 0 15px}
-.msg.user{justify-content:flex-end}
-.bubble{max-width:min(82%,680px);padding:12px 14px;border-radius:18px;background:#fff;box-shadow:0 7px 24px rgba(80,100,150,.08);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55;font-size:14px}
-.msg.user .bubble{background:linear-gradient(135deg,#6b86ff,#8c6bea);color:#fff;border-bottom-right-radius:6px}
-.msg.ai .bubble{border-bottom-left-radius:6px}
-.actions{display:flex;gap:6px;margin-top:7px}
-.actions button{border:0;background:rgba(120,140,180,.1);border-radius:9px;padding:5px 8px;font-size:11px;color:#687895}
-#filePreview{padding:0 16px}
-.composer{margin:12px;border:1px solid var(--line);border-radius:23px;background:rgba(255,255,255,.72);padding:9px;box-shadow:0 10px 30px rgba(74,91,140,.08)}
-.tools{display:flex;align-items:center;gap:6px;margin-bottom:7px}
-.tool,.send{border:0;width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:#f3f6fc;color:#596783}
-.send{margin-left:auto;background:linear-gradient(135deg,#5e7fff,#a066ea);color:#fff;box-shadow:0 8px 18px rgba(94,127,255,.25)}
-.composer textarea{width:100%;resize:none;border:0;outline:0;background:transparent;padding:8px 6px;color:var(--text);min-height:48px;max-height:130px}
-.bottom{display:flex;align-items:center;gap:7px}
-.lang{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 9px;color:#56647d;max-width:150px}
-.hidden{display:none!important}
-.footer{text-align:center;color:#8490a5;font-size:11px;padding:22px 0 3px}
-.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#202a42;color:#fff;padding:10px 15px;border-radius:13px;font-size:12px;transition:.25s;z-index:20}
-.toast.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.side{position:fixed;z-index:10;left:12px;right:12px;top:76px;max-height:calc(100vh - 95px);overflow:auto}.hero{padding-top:31px}}
-@media(max-width:520px){.app{padding:12px 11px 24px}.brand p{display:none}.logo{width:42px;height:42px}.menu{width:42px;height:42px}.hero h2{font-size:34px}.hero p{font-size:13px}.grid{gap:10px}.feature{min-height:138px;padding:15px;border-radius:20px}.feature h3{font-size:14px}.feature p{font-size:11px}.icon{width:39px;height:39px;font-size:18px}.chat{border-radius:22px}#messages{height:390px;padding:14px}.bubble{max-width:88%;font-size:13px}.composer{margin:8px;border-radius:19px}.tool,.send{width:36px;height:36px}.lang{max-width:105px;font-size:12px;padding:7px}.hero{padding-bottom:21px}}
-@media(max-width:370px){.grid{grid-template-columns:1fr}.hero h2{font-size:31px}.tools{gap:4px}.tool,.send{width:34px;height:34px}.lang{max-width:88px}}
+
+html,body{
+margin:0;
+min-height:100%;
+font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+color:var(--text);
+background:var(--bg);
+pointer-events:auto!important
+}
+
+body{
+overflow-x:hidden;
+position:relative
+}
+
+body:before,
+body:after{
+content:"";
+position:fixed;
+z-index:-2;
+border-radius:50%;
+filter:blur(60px);
+opacity:.42;
+pointer-events:none
+}
+
+body:before{
+width:330px;
+height:330px;
+top:-100px;
+left:-100px;
+background:#b9d9ff
+}
+
+body:after{
+width:350px;
+height:350px;
+right:-120px;
+bottom:-100px;
+background:#efc8ed
+}
+
+button,input,select,textarea{
+font:inherit
+}
+
+button{
+cursor:pointer;
+-webkit-tap-highlight-color:transparent
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible{
+outline:3px solid rgba(91,124,255,.22);
+outline-offset:2px
+}
+
+.app{
+width:min(1180px,100%);
+margin:auto;
+padding:18px 18px 30px;
+position:relative;
+z-index:1;
+pointer-events:auto!important
+}
+
+.top{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:15px;
+position:relative;
+z-index:200;
+pointer-events:auto!important
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:11px;
+pointer-events:auto
+}
+
+.logo{
+width:46px;
+height:46px;
+display:grid;
+place-items:center;
+border-radius:16px;
+background:linear-gradient(135deg,#6e8cff,#b978ef,#67dbe4);
+box-shadow:0 10px 25px rgba(91,124,255,.22);
+font-size:22px
+}
+
+.brand h1{
+margin:0;
+font-size:18px;
+letter-spacing:-.3px
+}
+
+.brand p{
+margin:2px 0 0;
+color:var(--muted);
+font-size:11px
+}
+
+.menu{
+width:44px;
+height:44px;
+border:1px solid var(--line);
+border-radius:15px;
+background:var(--glass);
+backdrop-filter:blur(15px);
+display:grid;
+place-items:center;
+font-size:21px;
+color:#53617c;
+box-shadow:var(--shadow);
+position:relative;
+z-index:300!important;
+pointer-events:auto!important;
+touch-action:manipulation
+}
+
+.hero{
+padding:40px 5px 27px;
+position:relative;
+z-index:1;
+pointer-events:auto
+}
+
+.hero h2{
+margin:0 0 12px;
+font-size:clamp(31px,7vw,52px);
+line-height:1.02;
+letter-spacing:-1.8px
+}
+
+.grad{
+background:linear-gradient(90deg,#5b7cff,#a468ed,#ef79bf);
+-webkit-background-clip:text;
+background-clip:text;
+color:transparent
+}
+
+.hero p{
+max-width:720px;
+margin:0;
+color:#65738d;
+line-height:1.7;
+font-size:15px
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:15px;
+margin-bottom:18px;
+position:relative;
+z-index:2;
+pointer-events:auto!important
+}
+
+.feature,
+.chat,
+.side{
+border:1px solid rgba(120,140,180,.15);
+background:var(--glass);
+backdrop-filter:blur(20px);
+box-shadow:var(--shadow);
+pointer-events:auto!important
+}
+
+.feature{
+position:relative;
+min-height:145px;
+padding:19px;
+border-radius:24px;
+overflow:hidden;
+transition:.22s transform,.22s box-shadow;
+cursor:pointer;
+z-index:2;
+touch-action:manipulation
+}
+
+.feature:hover{
+transform:translateY(-4px);
+box-shadow:0 22px 55px rgba(74,91,140,.17)
+}
+
+.feature:nth-child(1){
+background:linear-gradient(135deg,rgba(224,239,255,.9),rgba(255,255,255,.72))
+}
+
+.feature:nth-child(2){
+background:linear-gradient(135deg,rgba(229,225,255,.9),rgba(255,255,255,.72))
+}
+
+.feature:nth-child(3){
+background:linear-gradient(135deg,rgba(255,229,247,.9),rgba(255,255,255,.72))
+}
+
+.feature:nth-child(4){
+background:linear-gradient(135deg,rgba(222,250,246,.9),rgba(255,255,255,.72))
+}
+
+.feature:nth-child(5){
+background:linear-gradient(135deg,rgba(222,241,255,.9),rgba(255,255,255,.72))
+}
+
+.feature:nth-child(6){
+background:linear-gradient(135deg,rgba(234,255,229,.9),rgba(255,255,255,.72))
+}
+
+.icon{
+width:43px;
+height:43px;
+border-radius:15px;
+display:grid;
+place-items:center;
+background:rgba(255,255,255,.7);
+font-size:20px;
+margin-bottom:13px;
+pointer-events:none
+}
+
+.feature h3{
+margin:0 0 5px;
+font-size:15px
+}
+
+.feature p{
+margin:0;
+color:var(--muted);
+font-size:12px
+}
+
+.arrow{
+position:absolute;
+right:18px;
+bottom:17px;
+color:#687898;
+pointer-events:none
+}
+
+.layout{
+display:grid;
+grid-template-columns:250px 1fr;
+gap:16px;
+position:relative;
+z-index:3;
+pointer-events:auto!important
+}
+
+.side{
+border-radius:24px;
+padding:14px;
+display:none
+}
+
+.side.open{
+display:block;
+position:fixed;
+z-index:500!important;
+left:12px;
+right:12px;
+top:76px;
+max-height:calc(100vh - 95px);
+overflow:auto
+}
+
+.side button{
+width:100%;
+border:0;
+border-radius:14px;
+background:rgba(255,255,255,.65);
+padding:11px;
+margin-bottom:8px;
+text-align:left;
+color:#465571;
+position:relative;
+z-index:501;
+pointer-events:auto!important;
+touch-action:manipulation
+}
+
+.side .new{
+background:linear-gradient(135deg,#6d87ff,#a16bea);
+color:#fff
+}
+
+.side input{
+width:100%;
+border:1px solid var(--line);
+background:#fff8;
+padding:11px;
+border-radius:13px;
+margin:3px 0 12px;
+position:relative;
+z-index:501;
+pointer-events:auto!important
+}
+
+.toggle{
+display:flex;
+align-items:center;
+justify-content:space-between
+}
+
+.toggle input{
+width:auto;
+margin:0
+}
+
+.chat{
+border-radius:28px;
+min-width:0;
+overflow:hidden;
+position:relative;
+z-index:3;
+pointer-events:auto!important
+}
+
+.chathead{
+padding:17px 18px;
+border-bottom:1px solid var(--line);
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+position:relative;
+z-index:4
+}
+
+.chathead strong{
+font-size:14px
+}
+
+.chathead small{
+display:block;
+color:var(--muted);
+font-size:10px;
+margin-top:2px
+}
+
+#status{
+font-size:11px;
+color:#5c7b70;
+white-space:nowrap
+}
+
+#messages{
+height:420px;
+overflow-y:auto;
+padding:20px;
+position:relative;
+z-index:1;
+pointer-events:auto!important
+}
+
+.empty{
+text-align:center;
+color:var(--muted);
+padding:80px 20px 40px
+}
+
+.empty-chat{
+text-align:center;
+color:var(--muted);
+padding:80px 20px 40px
+}
+
+.empty-chat h2{
+color:var(--text);
+margin:12px 0 8px
+}
+
+.empty-chat p{
+line-height:1.6
+}
+
+.msg{
+display:flex;
+margin:0 0 15px
+}
+
+.msg.user{
+justify-content:flex-end
+}
+
+.bubble{
+max-width:min(82%,680px);
+padding:12px 14px;
+border-radius:18px;
+background:#fff;
+box-shadow:0 7px 24px rgba(80,100,150,.08);
+white-space:pre-wrap;
+overflow-wrap:anywhere;
+line-height:1.55;
+font-size:14px
+}
+
+.msg.user .bubble{
+background:linear-gradient(135deg,#6b86ff,#8c6bea);
+color:#fff;
+border-bottom-right-radius:6px
+}
+
+.msg.ai .bubble{
+border-bottom-left-radius:6px
+}
+
+.actions{
+display:flex;
+gap:6px;
+margin-top:7px
+}
+
+.actions button{
+border:0;
+background:rgba(120,140,180,.1);
+border-radius:9px;
+padding:5px 8px;
+font-size:11px;
+color:#687895;
+pointer-events:auto!important
+}
+
+.message{
+margin-bottom:15px
+}
+
+.message-bubble{
+padding:12px 14px;
+border-radius:18px;
+background:#fff;
+box-shadow:0 7px 24px rgba(80,100,150,.08);
+line-height:1.55;
+font-size:14px;
+overflow-wrap:anywhere
+}
+
+.user-message{
+text-align:right
+}
+
+.user-message .message-bubble{
+display:inline-block;
+max-width:88%;
+background:linear-gradient(135deg,#6b86ff,#8c6bea);
+color:#fff;
+border-bottom-right-radius:6px;
+text-align:left
+}
+
+.ai-message .message-bubble{
+display:inline-block;
+max-width:88%;
+border-bottom-left-radius:6px
+}
+
+.message-actions{
+display:flex;
+gap:6px;
+margin-top:7px
+}
+
+.message-actions button{
+border:0;
+background:rgba(120,140,180,.1);
+border-radius:9px;
+padding:5px 8px;
+font-size:11px;
+color:#687895;
+pointer-events:auto!important
+}
+
+#filePreview{
+padding:0 16px;
+position:relative;
+z-index:10;
+pointer-events:auto!important
+}
+
+.file-chip{
+display:inline-flex;
+align-items:center;
+gap:7px;
+padding:7px 9px;
+margin:3px;
+background:#f1f5ff;
+border:1px solid #dbe3ff;
+border-radius:12px;
+font-size:11px
+}
+
+.file-chip button{
+border:0;
+background:transparent;
+font-size:16px;
+color:#687895;
+padding:0 3px
+}
+
+.composer{
+margin:12px;
+border:1px solid var(--line);
+border-radius:23px;
+background:rgba(255,255,255,.88);
+padding:9px;
+box-shadow:0 10px 30px rgba(74,91,140,.08);
+position:relative;
+z-index:100!important;
+pointer-events:auto!important;
+touch-action:manipulation
+}
+
+.tools{
+display:flex;
+align-items:center;
+gap:6px;
+margin-bottom:7px;
+position:relative;
+z-index:101!important;
+pointer-events:auto!important
+}
+
+.tool,
+.send{
+border:0;
+width:38px;
+height:38px;
+border-radius:13px;
+display:grid;
+place-items:center;
+background:#f3f6fc;
+color:#596783;
+position:relative;
+z-index:102!important;
+pointer-events:auto!important;
+touch-action:manipulation;
+-webkit-user-select:none;
+user-select:none
+}
+
+.tool:hover{
+background:#eaf0ff
+}
+
+.send{
+margin-left:auto;
+background:linear-gradient(135deg,#5e7fff,#a066ea);
+color:#fff;
+box-shadow:0 8px 18px rgba(94,127,255,.25)
+}
+
+.send:disabled{
+opacity:.7;
+cursor:wait
+}
+
+.composer textarea{
+width:100%;
+resize:none;
+border:0;
+outline:0;
+background:transparent;
+padding:8px 6px;
+color:var(--text);
+min-height:48px;
+max-height:130px;
+position:relative;
+z-index:101!important;
+pointer-events:auto!important
+}
+
+.bottom{
+display:flex;
+align-items:center;
+gap:7px
+}
+
+.lang{
+border:1px solid var(--line);
+background:#fff;
+border-radius:12px;
+padding:8px 9px;
+color:#56647d;
+max-width:150px;
+position:relative;
+z-index:103!important;
+pointer-events:auto!important
+}
+
+.hidden{
+display:none!important
+}
+
+.footer{
+text-align:center;
+color:#8490a5;
+font-size:11px;
+padding:22px 0 3px;
+position:relative;
+z-index:1
+}
+
+.toast{
+position:fixed;
+left:50%;
+bottom:22px;
+transform:translate(-50%,20px);
+opacity:0;
+pointer-events:none!important;
+background:#202a42;
+color:#fff;
+padding:10px 15px;
+border-radius:13px;
+font-size:12px;
+transition:.25s;
+z-index:1000
+}
+
+.toast.show{
+opacity:1;
+transform:translate(-50%,0);
+pointer-events:none!important
+}
+
+/* IMPORTANT CLICK / TOUCH PROTECTION */
+html,
+body,
+.app,
+.top,
+.hero,
+.grid,
+.layout,
+.chat,
+.chathead,
+#messages,
+.composer,
+.tools,
+.footer{
+pointer-events:auto!important
+}
+
+button,
+input,
+textarea,
+select{
+pointer-events:auto!important
+}
+
+button:disabled{
+opacity:.7
+}
+
+@media(max-width:800px){
+.grid{
+grid-template-columns:repeat(2,1fr)
+}
+
+.layout{
+grid-template-columns:1fr
+}
+
+.hero{
+padding-top:31px
+}
+}
+
+@media(max-width:520px){
+.app{
+padding:12px 11px 24px
+}
+
+.brand p{
+display:none
+}
+
+.logo{
+width:42px;
+height:42px
+}
+
+.menu{
+width:42px;
+height:42px
+}
+
+.hero h2{
+font-size:34px
+}
+
+.hero p{
+font-size:13px
+}
+
+.grid{
+gap:10px
+}
+
+.feature{
+min-height:138px;
+padding:15px;
+border-radius:20px
+}
+
+.feature h3{
+font-size:14px
+}
+
+.feature p{
+font-size:11px
+}
+
+.icon{
+width:39px;
+height:39px;
+font-size:18px
+}
+
+.chat{
+border-radius:22px
+}
+
+#messages{
+height:390px;
+padding:14px
+}
+
+.bubble,
+.message-bubble{
+max-width:88%;
+font-size:13px
+}
+
+.composer{
+margin:8px;
+border-radius:19px
+}
+
+.tool,
+.send{
+width:36px;
+height:36px
+}
+
+.lang{
+max-width:105px;
+font-size:12px;
+padding:7px
+}
+
+.hero{
+padding-bottom:21px
+}
+}
+
+@media(max-width:370px){
+.grid{
+grid-template-columns:1fr
+}
+
+.hero h2{
+font-size:31px
+}
+
+.tools{
+gap:4px
+}
+
+.tool,
+.send{
+width:34px;
+height:34px
+}
+
+.lang{
+max-width:88px
+}
+}
 </style>
 </head>
+
 <body>
+
 <div class="app">
+
 <header class="top">
-<div class="brand"><div class="logo">✦</div><div><h1>Global AI Mahlet</h1><p>Your AI Partner for a Smarter Future</p></div></div>
-<button class="menu" id="menuBtn" aria-label="Menu">☰</button>
+
+<div class="brand">
+<div class="logo">✦</div>
+
+<div>
+<h1>Global AI Mahlet</h1>
+<p>Your AI Partner for a Smarter Future</p>
+</div>
+</div>
+
+<button class="menu"
+id="menuBtn"
+type="button"
+aria-label="Menu">☰</button>
+
 </header>
 
 <section class="hero">
+
 <h2>Hello, <span class="grad">Mahlet</span> ✨</h2>
-<p>I'm Global AI Mahlet — your smart assistant. Ask me anything, anytime. I'm here to help you learn, create, solve, and grow! 💙</p>
+
+<p>
+I'm Global AI Mahlet — your smart assistant.
+Ask me anything, anytime. I'm here to help you learn,
+create, solve, and grow! 💙
+</p>
+
 </section>
 
 <section class="grid">
-<article class="feature"><div class="icon">🎓</div><h3>Study Help</h3><p>Learn faster &amp; better</p><span class="arrow">→</span></article>
-<article class="feature"><div class="icon">💻</div><h3>Coding &amp; Tech</h3><p>Build your skills</p><span class="arrow">→</span></article>
-<article class="feature"><div class="icon">💡</div><h3>Ideas &amp; Creativity</h3><p>Turn ideas into reality</p><span class="arrow">→</span></article>
-<article class="feature"><div class="icon">📝</div><h3>Write &amp; Improve</h3><p>Better writing, clearer</p><span class="arrow">→</span></article>
-<article class="feature"><div class="icon">🌍</div><h3>Global Information</h3><p>Explore the world</p><span class="arrow">→</span></article>
-<article class="feature"><div class="icon">🎯</div><h3>Your Goals</h3><p>Plan. Learn. Achieve.</p><span class="arrow">→</span></article>
+
+<article class="feature">
+<div class="icon">🎓</div>
+<h3>Study Help</h3>
+<p>Learn faster &amp; better</p>
+<span class="arrow">→</span>
+</article>
+
+<article class="feature">
+<div class="icon">💻</div>
+<h3>Coding &amp; Tech</h3>
+<p>Build your skills</p>
+<span class="arrow">→</span>
+</article>
+
+<article class="feature">
+<div class="icon">💡</div>
+<h3>Ideas &amp; Creativity</h3>
+<p>Turn ideas into reality</p>
+<span class="arrow">→</span>
+</article>
+
+<article class="feature">
+<div class="icon">📝</div>
+<h3>Write &amp; Improve</h3>
+<p>Better writing, clearer</p>
+<span class="arrow">→</span>
+</article>
+
+<article class="feature">
+<div class="icon">🌍</div>
+<h3>Global Information</h3>
+<p>Explore the world</p>
+<span class="arrow">→</span>
+</article>
+
+<article class="feature">
+<div class="icon">🎯</div>
+<h3>Your Goals</h3>
+<p>Plan. Learn. Achieve.</p>
+<span class="arrow">→</span>
+</article>
+
 </section>
 
 <div class="layout">
+
 <aside class="side" id="sidebar">
-<button class="new" id="newChat">＋ New Chat</button>
-<button id="voiceMode">🎙️ Voice Mode</button>
-<input id="recentSearch" placeholder="Search recent chats...">
-<div class="toggle"><span>Temporary Chat</span><input id="temporaryChat" type="checkbox"></div>
+
+<button class="new" id="newChat" type="button">
+＋ New Chat
+</button>
+
+<button id="voiceMode" type="button">
+🎙️ Voice Mode
+</button>
+
+<input
+id="recentSearch"
+type="search"
+placeholder="Search recent chats..."
+autocomplete="off"
+>
+
+<div class="toggle">
+<span>Temporary Chat</span>
+<input id="temporaryChat" type="checkbox">
+</div>
+
 <div id="recentChats"></div>
+
 </aside>
 
 <main class="chat">
+
 <div class="chathead">
-<div><strong>Global AI Mahlet</strong><small>Ready to help you ✨</small></div>
-<span id="status">● Online</span>
+
+<div>
+<strong>Global AI Mahlet</strong>
+<small>Ready to help you ✨</small>
 </div>
 
-<div id="messages"><div class="empty" id="emptyState">Start a conversation with Global AI Mahlet 💙<br><small>Ask a question, learn something, or share an idea.</small></div></div>
+<span id="status">● Online</span>
+
+</div>
+
+<div id="messages">
+
+<div class="empty" id="emptyState">
+Start a conversation with Global AI Mahlet 💙
+<br>
+<small>
+Ask a question, learn something, or share an idea.
+</small>
+</div>
+
+</div>
 
 <div id="filePreview"></div>
 
 <div class="composer">
-<textarea id="messageInput" rows="1" placeholder="Message Global AI Mahlet..."></textarea>
+
+<textarea
+id="messageInput"
+rows="1"
+placeholder="Message Global AI Mahlet..."
+></textarea>
+
 <div class="tools">
-<button class="tool" type="button" data-camera aria-label="Camera">📷</button>
-<button class="tool" type="button" data-attach aria-label="Attach file">📎</button>
-<button class="tool" type="button" id="imageButton" aria-label="Image">🖼️</button>
-<button class="tool" type="button" id="micButton" aria-label="Microphone">🎙️</button>
-<select class="lang" data-language aria-label="Language"></select>
-<button class="send" type="button" id="sendButton" aria-label="Send">➤</button>
+
+<button
+class="tool"
+type="button"
+data-camera
+aria-label="Camera"
+>📷</button>
+
+<button
+class="tool"
+type="button"
+data-attach
+aria-label="Attach file"
+>📎</button>
+
+<button
+class="tool"
+type="button"
+id="imageButton"
+aria-label="Image"
+>🖼️</button>
+
+<button
+class="tool"
+type="button"
+id="micButton"
+aria-label="Microphone"
+>🎙️</button>
+
+<select
+class="lang"
+data-language
+aria-label="Language"
+></select>
+
+<button
+class="send"
+type="button"
+id="sendButton"
+aria-label="Send"
+>➤</button>
+
 </div>
 </div>
+
 </main>
 </div>
 
-<footer class="footer">Made for a better tomorrow 💙</footer>
+<footer class="footer">
+Made for a better tomorrow 💙
+</footer>
+
 </div>
 
-<input class="hidden" id="fileInput" type="file" data-file-input multiple>
-<input class="hidden" id="cameraInput" type="file" accept="image/*" capture="environment">
-<input class="hidden" id="imageInput" type="file" accept="image/*" multiple>
-<div class="toast" id="toast"></div>
+<input
+class="hidden"
+id="fileInput"
+type="file"
+data-file-input
+multiple
+>
+
+<input
+class="hidden"
+id="cameraInput"
+type="file"
+accept="image/*"
+capture="environment"
+>
+
+<input
+class="hidden"
+id="imageInput"
+type="file"
+accept="image/*"
+multiple
+>
+
+<div
+class="toast"
+id="toast"
+style="pointer-events:none!important"
+></div>
 
 <script>
-(()=>{const s=document.getElementById("sidebar"),m=document.getElementById("menuBtn"),n=document.getElementById("newChat"),v=document.getElementById("voiceMode"),i=document.getElementById("imageInput"),b=document.getElementById("imageButton"),t=document.getElementById("toast");
-m?.addEventListener("click",()=>s.classList.toggle("open"));
-b?.addEventListener("click",()=>i.click());
-n?.addEventListener("click",()=>{window.GlobalAIMahlet?.newChat?.();s.classList.remove("open")});
-v?.addEventListener("click",()=>window.GlobalAIMahlet?.toggleVoiceMode?.());
-window.showToast=x=>{t.textContent=x;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+(()=>{
+"use strict";
+
+const sidebar=document.getElementById("sidebar");
+const menu=document.getElementById("menuBtn");
+const newChat=document.getElementById("newChat");
+const voiceMode=document.getElementById("voiceMode");
+const imageInput=document.getElementById("imageInput");
+const imageButton=document.getElementById("imageButton");
+const toast=document.getElementById("toast");
+
+if(menu){
+menu.addEventListener("click",e=>{
+e.preventDefault();
+e.stopPropagation();
+
+if(sidebar){
+sidebar.classList.toggle("open");
+}
+});
+}
+
+if(imageButton){
+imageButton.addEventListener("click",e=>{
+e.preventDefault();
+e.stopPropagation();
+
+if(imageInput){
+imageInput.click();
+}
+});
+}
+
+if(newChat){
+newChat.addEventListener("click",e=>{
+e.preventDefault();
+e.stopPropagation();
+
+if(window.GlobalAIMahlet?.newChat){
+window.GlobalAIMahlet.newChat();
+}
+
+if(sidebar){
+sidebar.classList.remove("open");
+}
+});
+}
+
+if(voiceMode){
+voiceMode.addEventListener("click",e=>{
+e.preventDefault();
+e.stopPropagation();
+
+if(window.GlobalAIMahlet?.toggleVoiceMode){
+window.GlobalAIMahlet.toggleVoiceMode();
+}
+});
+}
+
+window.showToast=function(message){
+
+if(!toast)return;
+
+toast.textContent=message;
+
+toast.classList.add("show");
+
+setTimeout(()=>{
+toast.classList.remove("show");
+},2200);
+
+};
+
 })();
 </script>
+
 <script src="./chat.js"></script>
+
 </body>
   </html>
