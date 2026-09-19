@@ -23,13 +23,6 @@ export default {
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.6);
         }
-        /* Ensure Lucide icons render properly */
-        i[data-lucide] {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            stroke-width: 2;
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative overflow-x-hidden pb-6">
@@ -43,14 +36,14 @@ export default {
     <input type="file" id="galleryInput" accept="image/*" class="hidden">
 
     <!-- Main Container -->
-    <div class="max-w-md mx-auto w-full px-4 pt-6 flex-1 flex flex-col justify-between">
+    <div class="max-w-4xl mx-auto w-full px-4 pt-6 flex-1 flex flex-col justify-between">
         
         <div>
             <!-- Header -->
             <header class="flex items-center justify-between mb-8">
                 <div class="flex items-center space-x-3">
-                    <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-md shadow-indigo-200 bg-white flex items-center justify-center">
-                        <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg">M</div>
+                    <div class="w-12 h-12 rounded-full overflow-hidden shadow-md shadow-indigo-200 bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center text-white">
+                        <i data-lucide="bot" style="width:24px;height:24px;"></i>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent">Global AI Mahlet</h1>
@@ -58,12 +51,12 @@ export default {
                     </div>
                 </div>
                 <button id="menuBtn" class="w-11 h-11 rounded-full glass-card flex items-center justify-center text-slate-700 shadow-sm border border-slate-200/65 active:scale-95 transition cursor-pointer">
-                    <i data-lucide="menu"></i>
+                    <i data-lucide="menu" style="width:20px;height:20px;"></i>
                 </button>
             </header>
 
             <!-- Greeting Section -->
-            <section class="text-center mb-8 px-2">
+            <section class="text-center mb-8 px-2 max-w-xl mx-auto">
                 <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
                     Hello, <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Mahlet</span> ✨
                 </h2>
@@ -72,56 +65,62 @@ export default {
                 </p>
             </section>
 
-            <!-- Feature Cards Grid -->
-            <div class="grid grid-cols-2 gap-3 mb-6">
+            <!-- Feature Cards Grid (3 columns matching your exact image layout) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <!-- 1. Study Help -->
                 <div data-feature="Study Help" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-blue-100/60 bg-gradient-to-br from-blue-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3"><i data-lucide="graduation-cap"></i></div>
+                        <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3"><i data-lucide="graduation-cap" style="width:20px;height:20px;"></i></div>
                         <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Study Help</h3>
                         <p class="text-[11px] text-slate-500 leading-tight">Learn faster & better</p>
                     </div>
                     <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
+                <!-- 2. Coding & Tech -->
                 <div data-feature="Coding & Tech" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-purple-100/60 bg-gradient-to-br from-purple-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3"><i data-lucide="code"></i></div>
+                        <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3"><i data-lucide="code" style="width:20px;height:20px;"></i></div>
                         <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Coding & Tech</h3>
                         <p class="text-[11px] text-slate-500 leading-tight">Build your skills</p>
                     </div>
                     <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
+                <!-- 3. Ideas & Creativity -->
                 <div data-feature="Ideas & Creativity" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-emerald-100/60 bg-gradient-to-br from-emerald-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3"><i data-lucide="lightbulb"></i></div>
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3"><i data-lucide="lightbulb" style="width:20px;height:20px;"></i></div>
                         <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Ideas & Creativity</h3>
                         <p class="text-[11px] text-slate-500 leading-tight">Turn ideas into reality</p>
                     </div>
                     <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
+                <!-- 4. Write & Improve -->
                 <div data-feature="Write & Improve" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-amber-100/60 bg-gradient-to-br from-amber-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3"><i data-lucide="file-text"></i></div>
+                        <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3"><i data-lucide="file-text" style="width:20px;height:20px;"></i></div>
                         <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Write & Improve</h3>
                         <p class="text-[11px] text-slate-500 leading-tight">Better writing, clearer</p>
                     </div>
                     <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
+                <!-- 5. Global Information -->
                 <div data-feature="Global Information" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-rose-100/60 bg-gradient-to-br from-rose-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3"><i data-lucide="globe"></i></div>
+                        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3"><i data-lucide="globe" style="width:20px;height:20px;"></i></div>
                         <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Global Information</h3>
                         <p class="text-[11px] text-slate-500 leading-tight">Explore the world</p>
                     </div>
                     <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
+                <!-- 6. Your Goals -->
                 <div data-feature="Your Goals" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-sky-100/60 bg-gradient-to-br from-sky-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3"><i data-lucide="target"></i></div>
+                        <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3"><i data-lucide="target" style="width:20px;height:20px;"></i></div>
                         <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Your Goals</h3>
                         <p class="text-[11px] text-slate-500 leading-tight">Plan. Learn. Achieve.</p>
                     </div>
@@ -130,41 +129,41 @@ export default {
             </div>
         </div>
 
-        <!-- Bottom Input & Navigation Bar -->
-        <div class="w-full">
+        <!-- Bottom Input & Navigation Bar (Exact match to screenshot) -->
+        <div class="w-full max-w-2xl mx-auto">
             <div class="glass-card p-4 rounded-3xl shadow-xl shadow-indigo-100/50 border border-white">
                 
                 <!-- Input Box Row -->
-                <div class="flex items-center justify-between mb-3 px-1">
-                    <div class="flex items-center space-x-2 flex-1">
-                        <span class="text-indigo-500 flex items-center">✨</span>
+                <div class="flex items-center justify-between mb-4 px-2">
+                    <div class="flex items-center space-x-3 flex-1">
+                        <span class="text-indigo-500 flex items-center"><i data-lucide="sparkles" style="width:18px;height:18px;"></i></span>
                         <input type="text" id="userInput" placeholder="Message Global AI Mahlet..." class="w-full bg-transparent text-sm text-slate-800 placeholder-slate-400 focus:outline-none">
                     </div>
-                    <button id="sendBtn" class="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 active:scale-95 transition cursor-pointer">
+                    <button id="sendBtn" class="w-11 h-11 rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 active:scale-95 transition cursor-pointer">
                         <i data-lucide="send" style="width:18px;height:18px;"></i>
                     </button>
                 </div>
 
-                <!-- Action Tools Row -->
-                <div class="flex items-center justify-between pt-2 border-t border-slate-100 relative">
-                    <div class="flex items-center space-x-1 sm:space-x-2">
-                        <button id="cameraBtn" class="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer" title="Take Photo">
+                <!-- Action Tools Row (Exact circular light-blue buttons) -->
+                <div class="flex items-center justify-between pt-3 border-t border-slate-100/80 relative">
+                    <div class="flex items-center space-x-2">
+                        <button id="cameraBtn" class="w-10 h-10 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Take Photo">
                             <i data-lucide="camera" style="width:18px;height:18px;"></i>
                         </button>
-                        <button id="fileBtn" class="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer" title="Attach File">
+                        <button id="fileBtn" class="w-10 h-10 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Attach File">
                             <i data-lucide="paperclip" style="width:18px;height:18px;"></i>
                         </button>
-                        <button id="galleryBtn" class="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer" title="Upload Image">
+                        <button id="galleryBtn" class="w-10 h-10 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Upload Image">
                             <i data-lucide="image" style="width:18px;height:18px;"></i>
                         </button>
-                        <button id="micBtn" class="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer" title="Voice Message">
+                        <button id="micBtn" class="w-10 h-10 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Voice Message">
                             <i data-lucide="mic" style="width:18px;height:18px;"></i>
                         </button>
                     </div>
 
                     <!-- Language Selector -->
                     <div class="relative">
-                        <button id="langBtn" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-slate-100/80 hover:bg-slate-200 text-xs font-medium text-slate-700 transition cursor-pointer">
+                        <button id="langBtn" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-full bg-slate-100/80 hover:bg-slate-200 text-xs font-medium text-slate-700 transition cursor-pointer">
                             <i data-lucide="globe" style="width:14px;height:14px;"></i>
                             <span id="currentLangLabel">EN</span>
                             <i data-lucide="chevron-down" style="width:12px;height:12px;" class="text-slate-500"></i>
