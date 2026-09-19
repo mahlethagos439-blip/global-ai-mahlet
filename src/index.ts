@@ -7,7 +7,7 @@ interface Ai {
   run(
     model: string,
     inputs: Record<string, unknown>
-  ): Promise<unknown>;
+  ): Promise<any>;
 }
 
 export default {
@@ -18,19 +18,13 @@ export default {
 
     const url = new URL(request.url);
 
-    // Allow the website itself to load normally
-    if (url.pathname !== "/api/chat") {
-      return env.ASSETS.fetch(request);
-    }
-
-    // CORS
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type"
     };
 
-    // Browser preflight
+    // Handle CORS preflight
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -38,7 +32,12 @@ export default {
       });
     }
 
-    // Only POST is allowed for AI chat
+    // Let Cloudflare serve the website
+    if (url.pathname !== "/api/chat") {
+      return env.ASSETS.fetch(request);
+    }
+
+    // Only POST is allowed for chat
     if (request.method !== "POST") {
       return new Response(
         JSON.stringify({
@@ -55,23 +54,27 @@ export default {
     }
 
     try {
+
       const body = await request.json() as {
         message?: string;
         language?: string;
         messages?: Array<{
-          role: string;
+          role?: string;
           content?: string;
           text?: string;
         }>;
       };
 
-      const message = String(body.message || "").trim();
-      const language = String(body.language || "en");
+      const message =
+        String(body.message || "").trim();
+
+      const language =
+        String(body.language || "en");
 
       if (!message) {
         return new Response(
           JSON.stringify({
-            text: "Please enter a message."
+            error: "Message is empty"
           }),
           {
             status: 400,
@@ -83,22 +86,33 @@ export default {
         );
       }
 
-      const previousMessages = Array.isArray(body.messages)
-        ? body.messages
-        : [];
+      const previousMessages =
+        Array.isArray(body.messages)
+          ? body.messages
+          : [];
 
-      const messages = previousMessages
-        .filter((m) => m && (m.content || m.text))
-        .slice(-20)
-        .map((m) => ({
-          role:
-            m.role === "assistant"
-              ? "assistant"
-              : "user",
-          content: String(m.content || m.text || "")
-        }));
+      const messages =
+        previousMessages
+          .filter(
+            m =>
+              m &&
+              (m.content || m.text)
+          )
+          .slice(-20)
+          .map(m => ({
+            role:
+              m.role === "assistant"
+                ? "assistant"
+                : "user",
+            content:
+              String(
+                m.content ||
+                m.text ||
+                ""
+              )
+          }));
 
-      // Make sure the newest user message is included.
+      // Make sure the current user message exists
       if (
         !messages.length ||
         messages[messages.length - 1].content !== message
@@ -112,48 +126,54 @@ export default {
       const systemPrompt = `
 You are Global AI Mahlet, a helpful multilingual AI assistant.
 
-Your job is to help users learn, create, solve problems, write,
-code, understand information, and plan their goals.
+Help users learn, create, solve problems, write, code,
+understand information, and plan their goals.
 
-Respond naturally and clearly.
+The user's selected language is:
+${language}
 
-The user's selected language code is: ${language}
+Understand the user's message and respond naturally.
 
-When appropriate, answer in the user's selected language.
-If the user writes in another language, understand the user and
-respond naturally.
+When appropriate, answer in the selected language.
 
-Be accurate. If you are uncertain about something, say so clearly.
-Do not claim to have performed actions you cannot actually perform.
+Be accurate and useful.
 
-Keep answers useful and understandable.
+If you are uncertain, say so clearly.
+
+Do not claim to have performed actions that you cannot actually perform.
 `;
 
-      const result = await env.AI.run(
-        "@cf/meta/llama-3.1-8b-instruct",
-        {
-          messages: [
-            {
-              role: "system",
-              content: systemPrompt
-            },
-            ...messages
-          ],
-          max_tokens: 1024,
-          temperature: 0.6
-        }
-      ) as {
-        response?: string;
-      };
+      // Cloudflare Workers AI
+      const result =
+        await env.AI.run(
+          "@cf/meta/llama-3.1-8b-instruct",
+          {
+            messages: [
+              {
+                role: "system",
+                content: systemPrompt
+              },
+              ...messages
+            ],
+            max_tokens: 1024,
+            temperature: 0.6
+          }
+        );
 
       const answer =
         result?.response ||
-        "I received your message, but I couldn't generate a response.";
+        result?.result?.response;
+
+      if (!answer) {
+        throw new Error(
+          "Cloudflare AI returned no response"
+        );
+      }
 
       return new Response(
         JSON.stringify({
-          text: answer,
-          language
+          text: String(answer),
+          language: language
         }),
         {
           status: 200,
@@ -173,8 +193,12 @@ Keep answers useful and understandable.
 
       return new Response(
         JSON.stringify({
-          text: "I'm sorry, but I couldn't connect to the AI right now. Please try again.",
-          error: "AI_REQUEST_FAILED"
+          text:
+            "Global AI Mahlet could not connect to the AI model right now.",
+          error:
+            error instanceof Error
+              ? error.message
+              : String(error)
         }),
         {
           status: 500,
