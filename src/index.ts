@@ -23,6 +23,13 @@ export default {
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.6);
         }
+        /* Ensure Lucide icons render properly */
+        i[data-lucide] {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between relative overflow-x-hidden pb-6">
@@ -43,7 +50,7 @@ export default {
             <header class="flex items-center justify-between mb-8">
                 <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-md shadow-indigo-200 bg-white flex items-center justify-center">
-                        <img src="logo.png" alt="Global AI Mahlet Logo" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'%236366f1\\\'><circle cx=\\'12\\' cy=\\'12\\' r=\\'10\\'/></svg>'">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg">M</div>
                     </div>
                     <div>
                         <h1 class="text-xl font-bold bg-gradient-to-r from-blue-700 to-purple-600 bg-clip-text text-transparent">Global AI Mahlet</h1>
@@ -51,7 +58,7 @@ export default {
                     </div>
                 </div>
                 <button id="menuBtn" class="w-11 h-11 rounded-full glass-card flex items-center justify-center text-slate-700 shadow-sm border border-slate-200/65 active:scale-95 transition cursor-pointer">
-                    <i data-lucide="menu" class="w-5 h-5 pointer-events-none"></i>
+                    <i data-lucide="menu"></i>
                 </button>
             </header>
 
@@ -69,56 +76,56 @@ export default {
             <div class="grid grid-cols-2 gap-3 mb-6">
                 <div data-feature="Study Help" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-blue-100/60 bg-gradient-to-br from-blue-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3 pointer-events-none"><i data-lucide="graduation-cap" class="w-5 h-5"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5 pointer-events-none">Study Help</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight pointer-events-none">Learn faster & better</p>
+                        <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-3"><i data-lucide="graduation-cap"></i></div>
+                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Study Help</h3>
+                        <p class="text-[11px] text-slate-500 leading-tight">Learn faster & better</p>
                     </div>
-                    <div class="mt-4 flex justify-end pointer-events-none"><div class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></div></div>
+                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
                 <div data-feature="Coding & Tech" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-purple-100/60 bg-gradient-to-br from-purple-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3 pointer-events-none"><i data-lucide="code" class="w-5 h-5"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5 pointer-events-none">Coding & Tech</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight pointer-events-none">Build your skills</p>
+                        <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3"><i data-lucide="code"></i></div>
+                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Coding & Tech</h3>
+                        <p class="text-[11px] text-slate-500 leading-tight">Build your skills</p>
                     </div>
-                    <div class="mt-4 flex justify-end pointer-events-none"><div class="w-7 h-7 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></div></div>
+                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
                 <div data-feature="Ideas & Creativity" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-emerald-100/60 bg-gradient-to-br from-emerald-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3 pointer-events-none"><i data-lucide="lightbulb" class="w-5 h-5"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5 pointer-events-none">Ideas & Creativity</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight pointer-events-none">Turn ideas into reality</p>
+                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3"><i data-lucide="lightbulb"></i></div>
+                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Ideas & Creativity</h3>
+                        <p class="text-[11px] text-slate-500 leading-tight">Turn ideas into reality</p>
                     </div>
-                    <div class="mt-4 flex justify-end pointer-events-none"><div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></div></div>
+                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
                 <div data-feature="Write & Improve" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-amber-100/60 bg-gradient-to-br from-amber-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3 pointer-events-none"><i data-lucide="file-text" class="w-5 h-5"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5 pointer-events-none">Write & Improve</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight pointer-events-none">Better writing, clearer</p>
+                        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3"><i data-lucide="file-text"></i></div>
+                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Write & Improve</h3>
+                        <p class="text-[11px] text-slate-500 leading-tight">Better writing, clearer</p>
                     </div>
-                    <div class="mt-4 flex justify-end pointer-events-none"><div class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></div></div>
+                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
                 <div data-feature="Global Information" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-rose-100/60 bg-gradient-to-br from-rose-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3 pointer-events-none"><i data-lucide="globe" class="w-5 h-5"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5 pointer-events-none">Global Information</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight pointer-events-none">Explore the world</p>
+                        <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3"><i data-lucide="globe"></i></div>
+                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Global Information</h3>
+                        <p class="text-[11px] text-slate-500 leading-tight">Explore the world</p>
                     </div>
-                    <div class="mt-4 flex justify-end pointer-events-none"><div class="w-7 h-7 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></div></div>
+                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
 
                 <div data-feature="Your Goals" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-sky-100/60 bg-gradient-to-br from-sky-50/50 to-white">
                     <div>
-                        <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3 pointer-events-none"><i data-lucide="target" class="w-5 h-5"></i></div>
-                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5 pointer-events-none">Your Goals</h3>
-                        <p class="text-[11px] text-slate-500 leading-tight pointer-events-none">Plan. Learn. Achieve.</p>
+                        <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3"><i data-lucide="target"></i></div>
+                        <h3 class="text-sm font-semibold text-slate-800 mb-0.5">Your Goals</h3>
+                        <p class="text-[11px] text-slate-500 leading-tight">Plan. Learn. Achieve.</p>
                     </div>
-                    <div class="mt-4 flex justify-end pointer-events-none"><div class="w-7 h-7 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center"><i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></div></div>
+                    <div class="mt-4 flex justify-end"><div class="w-7 h-7 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center"><i data-lucide="arrow-right" style="width:14px;height:14px;"></i></div></div>
                 </div>
             </div>
         </div>
@@ -134,7 +141,7 @@ export default {
                         <input type="text" id="userInput" placeholder="Message Global AI Mahlet..." class="w-full bg-transparent text-sm text-slate-800 placeholder-slate-400 focus:outline-none">
                     </div>
                     <button id="sendBtn" class="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 active:scale-95 transition cursor-pointer">
-                        <i data-lucide="send" class="w-4 h-4 pointer-events-none"></i>
+                        <i data-lucide="send" style="width:18px;height:18px;"></i>
                     </button>
                 </div>
 
@@ -142,28 +149,28 @@ export default {
                 <div class="flex items-center justify-between pt-2 border-t border-slate-100 relative">
                     <div class="flex items-center space-x-1 sm:space-x-2">
                         <button id="cameraBtn" class="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer" title="Take Photo">
-                            <i data-lucide="camera" class="w-4 h-4 pointer-events-none"></i>
+                            <i data-lucide="camera" style="width:18px;height:18px;"></i>
                         </button>
                         <button id="fileBtn" class="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer" title="Attach File">
-                            <i data-lucide="paperclip" class="w-4 h-4 pointer-events-none"></i>
+                            <i data-lucide="paperclip" style="width:18px;height:18px;"></i>
                         </button>
                         <button id="galleryBtn" class="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer" title="Upload Image">
-                            <i data-lucide="image" class="w-4 h-4 pointer-events-none"></i>
+                            <i data-lucide="image" style="width:18px;height:18px;"></i>
                         </button>
                         <button id="micBtn" class="w-9 h-9 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer" title="Voice Message">
-                            <i data-lucide="mic" class="w-4 h-4 pointer-events-none"></i>
+                            <i data-lucide="mic" style="width:18px;height:18px;"></i>
                         </button>
                     </div>
 
                     <!-- Language Selector -->
                     <div class="relative">
                         <button id="langBtn" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-slate-100/80 hover:bg-slate-200 text-xs font-medium text-slate-700 transition cursor-pointer">
-                            <i data-lucide="globe" class="w-3.5 h-3.5 pointer-events-none"></i>
-                            <span id="currentLangLabel" class="pointer-events-none">EN</span>
-                            <i data-lucide="chevron-down" class="w-3 h-3 text-slate-500 pointer-events-none"></i>
+                            <i data-lucide="globe" style="width:14px;height:14px;"></i>
+                            <span id="currentLangLabel">EN</span>
+                            <i data-lucide="chevron-down" style="width:12px;height:12px;" class="text-slate-500"></i>
                         </button>
 
-                        <!-- Dropdown List with 100 Languages including Tigrigna & Amharic -->
+                        <!-- Dropdown List with Languages -->
                         <div id="langDropdown" class="hidden absolute bottom-12 right-0 w-52 max-h-60 overflow-y-auto bg-white rounded-2xl shadow-xl border border-slate-100 p-1 z-50 text-xs">
                             <div data-lang="en" data-label="EN" class="lang-option px-3 py-2 hover:bg-indigo-50 rounded-xl cursor-pointer font-medium text-slate-700">English (EN)</div>
                             <div data-lang="ti" data-label="ትግርኛ" class="lang-option px-3 py-2 hover:bg-indigo-50 rounded-xl cursor-pointer font-medium text-slate-700">Tigrigna (ትግርኛ)</div>
@@ -194,10 +201,13 @@ export default {
 
     </div>
 
-    <!-- Embedded Interactive Script so buttons work immediately -->
+    <!-- Script to render icons and handle all button clicks -->
     <script>
-        if (typeof lucide !== 'undefined') { lucide.createIcons(); }
-        document.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
             const cameraBtn = document.getElementById('cameraBtn');
             const cameraInput = document.getElementById('cameraInput');
             if (cameraBtn && cameraInput) cameraBtn.addEventListener('click', () => cameraInput.click());
