@@ -1,239 +1,1028 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global AI Mahlet</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(180deg, #f0f4ff 0%, #fefdff 40%, #f2f7ff 100%);
-            color: #1e293b;
-            margin: 0;
-            overflow-x: hidden;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-        }
-        /* Exact background subtle wave curves */
-        .bg-wave-top {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 380px;
-            background: radial-gradient(circle at 90% 10%, rgba(216, 226, 255, 0.5) 0%, rgba(235, 223, 255, 0.3) 40%, transparent 70%);
-            z-index: -10;
-            border-bottom-left-radius: 60px;
-            border-bottom-right-radius: 60px;
-        }
-        .bg-wave-bottom {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 120px;
-            background: radial-gradient(circle at 10% 100%, rgba(210, 224, 255, 0.5) 0%, rgba(230, 215, 255, 0.3) 60%, transparent 100%);
-            z-index: -10;
-            pointer-events: none;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+
+  <title>Global AI Mahlet</title>
+  <meta
+    name="description"
+    content="Global AI Mahlet — Your AI Partner for a Smarter Future"
+  />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+      color: #14234b;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(93, 196, 255, 0.16), transparent 28%),
+        radial-gradient(circle at 90% 25%, rgba(167, 112, 255, 0.17), transparent 30%),
+        radial-gradient(circle at 50% 85%, rgba(255, 137, 204, 0.12), transparent 28%),
+        #fbfcff;
+    }
+
+    button,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    /* =========================
+       BACKGROUND WAVES
+    ========================== */
+
+    .page {
+      position: relative;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .wave {
+      position: absolute;
+      left: -10%;
+      width: 120%;
+      height: 300px;
+      pointer-events: none;
+      z-index: 0;
+      border-radius: 50%;
+      filter: blur(1px);
+    }
+
+    .wave-one {
+      top: 150px;
+      background: linear-gradient(
+        110deg,
+        rgba(101, 206, 255, 0.20),
+        rgba(255, 255, 255, 0),
+        rgba(151, 112, 255, 0.18)
+      );
+      transform: rotate(-3deg);
+    }
+
+    .wave-two {
+      top: 250px;
+      background: linear-gradient(
+        110deg,
+        rgba(255, 255, 255, 0),
+        rgba(178, 146, 255, 0.15),
+        rgba(255, 169, 219, 0.15)
+      );
+      transform: rotate(4deg);
+    }
+
+    /* =========================
+       HEADER
+    ========================== */
+
+    .header {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      padding: 20px 5%;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(100, 120, 200, 0.08);
+    }
+
+    .header-inner {
+      max-width: 1180px;
+      margin: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 62px;
+      height: 62px;
+      flex-shrink: 0;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 31px;
+      color: white;
+      background: linear-gradient(
+        135deg,
+        #00aaff,
+        #5b63ff 48%,
+        #9a3fff
+      );
+      box-shadow:
+        0 12px 30px rgba(77, 94, 255, 0.25),
+        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-title {
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 800;
+      line-height: 1.1;
+      background: linear-gradient(
+        90deg,
+        #009ce8,
+        #5865f2,
+        #8d35e9
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .brand-subtitle {
+      margin-top: 5px;
+      color: #5c6c98;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .menu-button {
+      width: 58px;
+      height: 58px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      color: #172957;
+      background: rgba(235, 241, 255, 0.9);
+      border: 1px solid rgba(107, 130, 255, 0.16);
+      box-shadow: 0 8px 25px rgba(78, 98, 180, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 27px;
+      transition: 0.25s ease;
+    }
+
+    .menu-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(78, 98, 180, 0.20);
+    }
+
+    /* =========================
+       MAIN
+    ========================== */
+
+    .main {
+      position: relative;
+      z-index: 2;
+      max-width: 1180px;
+      margin: auto;
+      padding: 75px 5% 35px;
+    }
+
+    .hero {
+      text-align: center;
+      max-width: 850px;
+      margin: 0 auto 55px;
+    }
+
+    .hero h1 {
+      font-size: clamp(42px, 7vw, 72px);
+      line-height: 1.05;
+      font-weight: 850;
+      letter-spacing: -2px;
+      color: #132451;
+    }
+
+    .hero-name {
+      background: linear-gradient(
+        90deg,
+        #2d77ff,
+        #6657ef,
+        #9d32ed
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .sparkle {
+      display: inline-block;
+      margin-left: 7px;
+      animation: sparkle 2.2s ease-in-out infinite;
+    }
+
+    @keyframes sparkle {
+      0%, 100% {
+        transform: scale(1) rotate(0deg);
+      }
+      50% {
+        transform: scale(1.18) rotate(8deg);
+      }
+    }
+
+    .hero-text {
+      margin: 25px auto 0;
+      max-width: 720px;
+      color: #617099;
+      font-size: clamp(18px, 3vw, 25px);
+      line-height: 1.55;
+    }
+
+    .hero-heart {
+      color: #655bf3;
+    }
+
+    /* =========================
+       FEATURE CARDS
+    ========================== */
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-bottom: 55px;
+    }
+
+    .feature-card {
+      position: relative;
+      min-height: 175px;
+      padding: 25px;
+      border-radius: 28px;
+      border: 1px solid rgba(100, 130, 220, 0.12);
+      overflow: hidden;
+      transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 45px rgba(74, 93, 180, 0.13);
+    }
+
+    .feature-card:nth-child(1) {
+      background: linear-gradient(
+        135deg,
+        #e8f8ff,
+        #f4fbff
+      );
+    }
+
+    .feature-card:nth-child(2) {
+      background: linear-gradient(
+        135deg,
+        #f1ebff,
+        #faf7ff
+      );
+    }
+
+    .feature-card:nth-child(3) {
+      background: linear-gradient(
+        135deg,
+        #e9fff6,
+        #f8fffc
+      );
+    }
+
+    .feature-card:nth-child(4) {
+      background: linear-gradient(
+        135deg,
+        #fff4e7,
+        #fffaf5
+      );
+    }
+
+    .feature-card:nth-child(5) {
+      background: linear-gradient(
+        135deg,
+        #ffeef8,
+        #fff7fc
+      );
+    }
+
+    .feature-card:nth-child(6) {
+      background: linear-gradient(
+        135deg,
+        #eaf1ff,
+        #f7f9ff
+      );
+    }
+
+    .feature-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 27px;
+      margin-bottom: 17px;
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: inset 0 0 0 1px rgba(100, 120, 200, 0.08);
+    }
+
+    .feature-card h3 {
+      font-size: 21px;
+      margin-bottom: 7px;
+      color: #172b60;
+    }
+
+    .feature-card p {
+      font-size: 15px;
+      color: #596a9a;
+      line-height: 1.4;
+    }
+
+    .arrow {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.82);
+      font-size: 21px;
+      box-shadow: 0 7px 20px rgba(70, 90, 170, 0.10);
+    }
+
+    /* =========================
+       CHAT BOX
+    ========================== */
+
+    .chat-section {
+      margin-top: 10px;
+    }
+
+    .chat-box {
+      position: relative;
+      width: 100%;
+      border-radius: 35px;
+      padding: 22px;
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 2px solid rgba(112, 151, 255, 0.20);
+      box-shadow:
+        0 25px 70px rgba(66, 91, 180, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .message-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .message-icon {
+      font-size: 27px;
+      flex-shrink: 0;
+    }
+
+    #messageInput {
+      width: 100%;
+      min-height: 54px;
+      max-height: 150px;
+      resize: none;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #182852;
+      font-size: 18px;
+      padding: 13px 0;
+    }
+
+    #messageInput::placeholder {
+      color: #8995b5;
+    }
+
+    .send-button {
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      color: white;
+      font-size: 27px;
+      background: linear-gradient(
+        135deg,
+        #5c83ff,
+        #724cf0,
+        #8738e9
+      );
+      box-shadow:
+        0 10px 25px rgba(94, 83, 239, 0.28);
+      transition: 0.2s ease;
+    }
+
+    .send-button:hover {
+      transform: scale(1.05);
+    }
+
+    .chat-tools {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .tool-button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #eef3ff;
+      color: #24447f;
+      font-size: 22px;
+      transition: 0.2s ease;
+    }
+
+    .tool-button:hover {
+      transform: translateY(-2px);
+      background: #e4ebff;
+    }
+
+    .language {
+      margin-left: auto;
+      min-width: 110px;
+      height: 48px;
+      padding: 0 17px;
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #eef3ff;
+      color: #263f77;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* =========================
+       AI RESPONSE AREA
+    ========================== */
+
+    .messages {
+      display: none;
+      margin-bottom: 25px;
+      max-height: 430px;
+      overflow-y: auto;
+      padding: 5px;
+    }
+
+    .messages.visible {
+      display: block;
+    }
+
+    .message {
+      max-width: 85%;
+      padding: 15px 18px;
+      margin-bottom: 12px;
+      border-radius: 20px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .message.user {
+      margin-left: auto;
+      color: white;
+      background: linear-gradient(
+        135deg,
+        #6384ff,
+        #754de8
+      );
+      border-bottom-right-radius: 5px;
+    }
+
+    .message.ai {
+      margin-right: auto;
+      color: #23345f;
+      background: #f0f4ff;
+      border-bottom-left-radius: 5px;
+    }
+
+    /* =========================
+       FOOTER
+    ========================== */
+
+    .footer {
+      text-align: center;
+      padding: 35px 20px 45px;
+      color: #6576aa;
+      font-size: 16px;
+    }
+
+    .footer-heart {
+      color: #635af1;
+    }
+
+    /* =========================
+       LOADING
+    ========================== */
+
+    .typing {
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .typing span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #7183c4;
+      animation: typing 1.2s infinite ease-in-out;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.45;
+      }
+
+      30% {
+        transform: translateY(-5px);
+        opacity: 1;
+      }
+    }
+
+    /* =========================
+       TABLET
+    ========================== */
+
+    @media (max-width: 850px) {
+      .features {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .main {
+        padding-top: 55px;
+      }
+    }
+
+    /* =========================
+       MOBILE
+    ========================== */
+
+    @media (max-width: 600px) {
+      .header {
+        padding: 13px 16px;
+      }
+
+      .header-inner {
+        gap: 10px;
+      }
+
+      .brand-logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 15px;
+        font-size: 24px;
+      }
+
+      .brand-title {
+        font-size: 20px;
+      }
+
+      .brand-subtitle {
+        font-size: 11px;
+      }
+
+      .menu-button {
+        width: 48px;
+        height: 48px;
+        font-size: 23px;
+      }
+
+      .main {
+        width: 100%;
+        padding: 48px 15px 25px;
+      }
+
+      .hero {
+        margin-bottom: 38px;
+      }
+
+      .hero h1 {
+        font-size: 41px;
+        letter-spacing: -1.5px;
+      }
+
+      .hero-text {
+        font-size: 17px;
+        line-height: 1.55;
+        padding: 0 5px;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .feature-card {
+        min-height: 150px;
+        padding: 21px;
+        border-radius: 24px;
+      }
+
+      .feature-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 24px;
+      }
+
+      .feature-card h3 {
+        font-size: 19px;
+      }
+
+      .feature-card p {
+        font-size: 14px;
+      }
+
+      .chat-box {
+        padding: 15px;
+        border-radius: 27px;
+      }
+
+      .message-row {
+        gap: 8px;
+      }
+
+      #messageInput {
+        font-size: 16px;
+        min-height: 50px;
+      }
+
+      .send-button {
+        width: 52px;
+        height: 52px;
+        font-size: 23px;
+      }
+
+      .chat-tools {
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .tool-button {
+        width: 43px;
+        height: 43px;
+        font-size: 19px;
+      }
+
+      .language {
+        margin-left: auto;
+        height: 43px;
+        min-width: 90px;
+        padding: 0 12px;
+        font-size: 14px;
+      }
+
+      .wave {
+        height: 220px;
+      }
+    }
+
+    /* =========================
+       VERY SMALL PHONES
+    ========================== */
+
+    @media (max-width: 370px) {
+      .brand-subtitle {
+        display: none;
+      }
+
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .chat-tools {
+        gap: 6px;
+      }
+
+      .tool-button {
+        width: 40px;
+        height: 40px;
+      }
+
+      .language {
+        min-width: 78px;
+        padding: 0 8px;
+      }
+    }
+  </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between pb-8 relative">
 
-    <!-- Decorative background elements -->
-    <div class="bg-wave-top"></div>
-    <div class="bg-wave-bottom"></div>
+<body>
 
-    <!-- Hidden file upload inputs -->
-    <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
-    <input type="file" id="fileInput" class="hidden">
-    <input type="file" id="galleryInput" accept="image/*" class="hidden">
+  <div class="page">
 
-    <!-- Main Content Wrapper -->
-    <div class="max-w-4xl mx-auto w-full px-4 pt-5 flex-1 flex flex-col justify-between">
-        
-        <div>
-            <!-- Header Section -->
-            <header class="flex items-center justify-between mb-8">
-                <div class="flex items-center space-x-3">
-                    <!-- Exact Logo Icon from Photo -->
-                    <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 shrink-0">
-                        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 10l1.5-1.5M20.5 8.5L19 7M19 8.5h3"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent leading-tight">Global AI Mahlet</h1>
-                        <p class="text-xs text-slate-500 font-medium">Your AI Partner for a Smarter Future</p>
-                    </div>
-                </div>
-                <button id="menuBtn" class="w-11 h-11 rounded-full glass-card flex items-center justify-center text-slate-700 shadow-sm border border-slate-200/80 active:scale-95 transition cursor-pointer">
-                    <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </header>
+    <div class="wave wave-one"></div>
+    <div class="wave wave-two"></div>
 
-            <!-- Greeting Text Section -->
-            <section class="text-center mb-8 px-2 max-w-xl mx-auto">
-                <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mb-2">
-                    <span id="greetingHello">Hello</span>, <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Mahlet</span> ✨
-                </h2>
-                <p id="greetingDesc" class="text-xs sm:text-sm text-slate-500 leading-relaxed font-normal">
-                    I'm Global AI Mahlet — your smart assistant. Ask me anything, anytime. I'm here to help you learn, create, solve, and grow! <span class="text-indigo-500 font-bold">💜</span>
-                </p>
-            </section>
+    <!-- ================= HEADER ================= -->
 
-            <!-- 6 Feature Cards Grid (Matching exact colors and layouts) -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-8">
-                
-                <!-- 1. Study Help (Blue) -->
-                <div data-feature="Study Help" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-blue-100 bg-gradient-to-br from-blue-50/60 to-white h-32">
-                    <div class="flex items-start justify-between">
-                        <div class="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/></svg>
-                        </div>
-                        <div class="w-7 h-7 rounded-full bg-blue-100/70 text-blue-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Study Help</h3>
-                        <p class="text-[11px] text-slate-500 font-normal">Learn faster & better</p>
-                    </div>
-                </div>
+    <header class="header">
+      <div class="header-inner">
 
-                <!-- 2. Coding & Tech (Purple) -->
-                <div data-feature="Coding & Tech" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-purple-100 bg-gradient-to-br from-purple-50/60 to-white h-32">
-                    <div class="flex items-start justify-between">
-                        <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-                        </div>
-                        <div class="w-7 h-7 rounded-full bg-purple-100/70 text-purple-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Coding & Tech</h3>
-                        <p class="text-[11px] text-slate-500 font-normal">Build your skills</p>
-                    </div>
-                </div>
+        <div class="brand">
 
-                <!-- 3. Ideas & Creativity (Green) -->
-                <div data-feature="Ideas & Creativity" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-emerald-100 bg-gradient-to-br from-emerald-50/60 to-white h-32">
-                    <div class="flex items-start justify-between">
-                        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
-                        </div>
-                        <div class="w-7 h-7 rounded-full bg-emerald-100/70 text-emerald-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Ideas & Creativity</h3>
-                        <p class="text-[11px] text-slate-500 font-normal">Turn ideas into reality</p>
-                    </div>
-                </div>
+          <div class="brand-logo">
+            ✦
+          </div>
 
-                <!-- 4. Write & Improve (Yellow/Amber) -->
-                <div data-feature="Write & Improve" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-amber-100 bg-gradient-to-br from-amber-50/60 to-white h-32">
-                    <div class="flex items-start justify-between">
-                        <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </div>
-                        <div class="w-7 h-7 rounded-full bg-amber-100/70 text-amber-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Write & Improve</h3>
-                        <p class="text-[11px] text-slate-500 font-normal">Better writing, clearer</p>
-                    </div>
-                </div>
-
-                <!-- 5. Global Information (Pink/Rose) -->
-                <div data-feature="Global Information" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-rose-100 bg-gradient-to-br from-rose-50/60 to-white h-32">
-                    <div class="flex items-start justify-between">
-                        <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shadow-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
-                        </div>
-                        <div class="w-7 h-7 rounded-full bg-rose-100/70 text-rose-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Global Information</h3>
-                        <p class="text-[11px] text-slate-500 font-normal">Explore the world</p>
-                    </div>
-                </div>
-
-                <!-- 6. Your Goals (Sky Blue) -->
-                <div data-feature="Your Goals" class="feature-card glass-card p-4 rounded-3xl shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between border border-sky-100 bg-gradient-to-br from-sky-50/60 to-white h-32">
-                    <div class="flex items-start justify-between">
-                        <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center shadow-sm">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                        </div>
-                        <div class="w-7 h-7 rounded-full bg-sky-100/70 text-sky-600 flex items-center justify-center">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-800 mb-0.5">Your Goals</h3>
-                        <p class="text-[11px] text-slate-500 font-normal">Plan. Learn. Achieve.</p>
-                    </div>
-                </div>
-
+          <div class="brand-text">
+            <div class="brand-title">
+              Global AI Mahlet
             </div>
+
+            <div class="brand-subtitle">
+              Your AI Partner for a Smarter Future
+            </div>
+          </div>
+
         </div>
 
-        <!-- Bottom Message & Tools Bar -->
-        <div class="w-full max-w-2xl mx-auto">
-            <div class="glass-card p-4 rounded-[28px] shadow-2xl shadow-indigo-200/50 border border-white">
-                
-                <!-- Input Message Row -->
-                <div class="flex items-center justify-between mb-3 px-1">
-                    <div class="flex items-center space-x-3 flex-1">
-                        <span class="text-indigo-400 flex items-center">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
-                        </span>
-                        <input type="text" id="userInput" placeholder="Message Global AI Mahlet..." class="w-full bg-transparent text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none">
-                    </div>
-                    <button id="sendBtn" class="w-11 h-11 rounded-full bg-gradient-to-r from-indigo-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-indigo-300 active:scale-95 transition cursor-pointer shrink-0">
-                        <svg class="w-4 h-4 transform rotate-45" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
-                    </button>
-                </div>
+        <button
+          class="menu-button"
+          type="button"
+          aria-label="Open menu"
+          onclick="toggleMenu()"
+        >
+          ☰
+        </button>
 
-                <!-- Action Tools & Language Selector Row -->
-                <div class="flex items-center justify-between pt-3 border-t border-slate-100/90 relative">
-                    <div class="flex items-center space-x-2">
-                        <button id="cameraBtn" class="w-9 h-9 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Camera">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        </button>
-                        <button id="fileBtn" class="w-9 h-9 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Attach">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
-                        </button>
-                        <button id="galleryBtn" class="w-9 h-9 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Gallery">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        </button>
-                        <button id="micBtn" class="w-9 h-9 rounded-full bg-blue-50/80 hover:bg-blue-100 flex items-center justify-center text-blue-600 transition cursor-pointer shadow-sm" title="Microphone">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
-                        </button>
-                    </div>
+      </div>
+    </header>
 
-                    <!-- Language Button & 80+ Dropdown Menu -->
-                    <div class="relative">
-                        <button id="langBtn" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-full bg-slate-100/90 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition cursor-pointer shadow-sm">
-                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
-                            <span id="currentLangLabel">EN</span>
-                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
+    <!-- ================= MAIN ================= -->
 
-                        <div id="langDropdown" class="hidden absolute bottom-12 right-0 w-60 max-h-64 overflow-y-auto bg-white rounded-2xl shadow-2xl border border-slate-100 p-1.5 z-50 text-xs">
-                            <div class="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wide">Select Language (80+)</div>
-                            
+    <main class="main">
+
+      <!-- HERO -->
+
+      <section class="hero">
+
+        <h1>
+          Hello,
+          <span class="hero-name">Mahlet</span>
+          <span class="sparkle">✨</span>
+        </h1>
+
+        <p class="hero-text">
+          I'm Global AI Mahlet — your smart assistant.
+          <br />
+          Ask me anything, anytime. I'm here to help you
+          learn, create, solve, and grow!
+          <span class="hero-heart">💙</span>
+        </p>
+
+      </section>
+
+      <!-- ================= FEATURES ================= -->
+
+      <section class="features">
+
+        <button class="feature-card" onclick="useFeature('Study Help')">
+          <div class="feature-icon">🎓</div>
+
+          <h3>Study Help</h3>
+
+          <p>
+            Learn faster & better
+          </p>
+
+          <div class="arrow">→</div>
+        </button>
+
+
+        <button class="feature-card" onclick="useFeature('Coding & Tech')">
+          <div class="feature-icon">💻</div>
+
+          <h3>Coding & Tech</h3>
+
+          <p>
+            Build your skills
+          </p>
+
+          <div class="arrow">→</div>
+        </button>
+
+
+        <button class="feature-card" onclick="useFeature('Ideas & Creativity')">
+          <div class="feature-icon">💡</div>
+
+          <h3>Ideas & Creativity</h3>
+
+          <p>
+            Turn ideas into reality
+          </p>
+
+          <div class="arrow">→</div>
+        </button>
+
+
+        <button class="feature-card" onclick="useFeature('Write & Improve')">
+          <div class="feature-icon">📄</div>
+
+          <h3>Write & Improve</h3>
+
+          <p>
+            Better writing, clearer
+          </p>
+
+          <div class="arrow">→</div>
+        </button>
+
+
+        <button class="feature-card" onclick="useFeature('Global Information')">
+          <div class="feature-icon">🌐</div>
+
+          <h3>Global Information</h3>
+
+          <p>
+            Explore the world
+          </p>
+
+          <div class="arrow">→</div>
+        </button>
+
+
+        <button class="feature-card" onclick="useFeature('Your Goals')">
+          <div class="feature-icon">🎯</div>
+
+          <h3>Your Goals</h3>
+
+          <p>
+            Plan. Learn. Achieve.
+          </p>
+
+          <div class="arrow">→</div>
+        </button>
+
+      </section>
+
+
+      <!-- ================= CHAT ================= -->
+
+      <section class="chat-section">
+
+        <div id="messages" class="messages"></div>
+
+        <div class="chat-box">
+
+          <div class="message-row">
+
+            <div class="message-icon">
+              ✨
+            </div>
+
+            <textarea
+              id="messageInput"
+              rows="1"
+              placeholder="Message Global AI Mahlet..."
+              aria-label="Message Global AI Mahlet"
+              onkeydown="handleKey(event)"
+            ></textarea>
+
+            <button
+              class="send-button"
+              type="button"
+              onclick="sendMessage()"
+              aria-label="Send message"
+            >
+              ➤
+            </button>
+
+          </div>
+
+
+          <div class="chat-tools">
+
+            <button
+              class="tool-button"
+              type="button"
+              onclick="openCamera()"
+              aria-label="Camera"
+            >
+              📷
+            </button>
+
+            <button
+              class="tool-button"
+              type="button"
+              onclick="openAttachment()"
+              aria-label="Attachment"
+            >
+              📎
+            </button>
+
+            <button
+              class="tool-button"
+              type="button"
+              onclick="openImage()"
+              aria-label="Image"
+            >
+              🖼️
+            </button>
+
+            <button
+              class="tool-button"
+              type="button"
+              onclick="startVoice()"
+              aria-label="Voice"
+            >
+              🎙️
+            </button>
+
+            <button
+              class="language"
+              type="button"
+              onclick="changeLanguage()"
+            >
+              🌐
+              <span id="languageText">EN</span>
+              <span>⌄</span>
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="footer">
+      <span>—</span>
+      <span class="footer-heart"> 💙 </span>
+      Made for a better tomorrow
+    </footer>
+
+  </div>
+
+
+  <!-- ================= JAVASCRIPT ================= -->
+
+  <script>
+
+    const input = document.getElementById("messageInput");
+    const messages = document.getElementById("messages");
+
+    /* ---------------------------------
+       ENTER KEY
+    --------------------------------- */
+
+    function handleKey(event) {
+
+      if (event.key === "Enter" && !event.shiftKey) {
+
+        event.preventDefault();
+
+        sendMessage();
+      }
+    }
+
+
+    /* ---------------------------------
+       ADD MESSAGE TO SCREEN
+    -----------
