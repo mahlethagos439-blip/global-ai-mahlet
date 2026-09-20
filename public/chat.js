@@ -2,10 +2,10 @@
 (() => {
   "use strict";
 
-  const KEY = "global_ai_mahlet_chats_v1";
+  const CHAT_KEY = "global_ai_mahlet_chats_v1";
   const LANG_KEY = "global_ai_mahlet_language_v1";
 
-  /* EXACTLY 100 LANGUAGES */
+  /* 100 languages */
   const LANGUAGES = [
     ["English", "en"],
     ["Amharic", "am"],
@@ -87,10 +87,8 @@
     ["Galician", "gl"],
     ["Macedonian", "mk"],
     ["Maltese", "mt"],
-    ["Persian", "fa"],
     ["Pashto", "ps"],
     ["Kurdish", "ku"],
-    ["Nepali", "ne"],
     ["Samoan", "sm"],
     ["Tongan", "to"],
     ["Maori", "mi"],
@@ -99,18 +97,28 @@
     ["Esperanto", "eo"],
     ["Luxembourgish", "lb"],
     ["Belarusian", "be"],
-    ["Mongolian", "mn"],
-    ["Khmer", "km"],
     ["Tajik", "tg"],
     ["Turkmen", "tk"],
     ["Kyrgyz", "ky"],
-    ["Sundanese", "su"]
+    ["Sundanese", "su"],
+    ["Filipino", "fil"],
+    ["Fijian", "fj"],
+    ["Malagasy", "mg"],
+    ["Yiddish", "yi"],
+    ["Aramaic", "arc"],
+    ["Lingala", "ln"],
+    ["Kinyarwanda", "rw"],
+    ["Chichewa", "ny"],
+    ["Sesotho", "st"],
+    ["Tswana", "tn"],
+    ["Shona", "sn"],
+    ["Amharic", "am"]
   ];
 
-  const $ = (selector) =>
+  const $ = selector =>
     document.querySelector(selector);
 
-  const $$ = (selector) =>
+  const $$ = selector =>
     [...document.querySelectorAll(selector)];
 
   const state = {
@@ -118,31 +126,37 @@
     activeId: null,
     temporary: false,
     tempChat: null,
-    voiceMode: false,
-    listening: false,
     language:
       localStorage.getItem(LANG_KEY) || "en",
     selectedFiles: [],
-    recognition: null
+    recognition: null,
+    listening: false
   };
 
-  /* -----------------------------
+  /* =========================
      STORAGE
-  ----------------------------- */
+  ========================= */
 
   function loadChats() {
     try {
       const saved =
-        localStorage.getItem(KEY);
+        localStorage.getItem(CHAT_KEY);
 
-      if (!saved) return [];
+      if (!saved) {
+        return [];
+      }
 
       const data = JSON.parse(saved);
 
       return Array.isArray(data)
         ? data
         : [];
-    } catch {
+    } catch (error) {
+      console.warn(
+        "Could not load chats:",
+        error
+      );
+
       return [];
     }
   }
@@ -150,7 +164,7 @@
   function saveChats() {
     try {
       localStorage.setItem(
-        KEY,
+        CHAT_KEY,
         JSON.stringify(state.chats)
       );
     } catch (error) {
@@ -167,6 +181,53 @@
       Math.random()
         .toString(36)
         .slice(2)
+    );
+  }
+
+  /* =========================
+     DOM HELPERS
+  ========================= */
+
+  function getInput() {
+    return (
+      $("#messageInput") ||
+      $("#message") ||
+      $("textarea") ||
+      $("input[type='text']")
+    );
+  }
+
+  function getMessagesBox() {
+    return (
+      $("#messages") ||
+      $("#chatMessages") ||
+      $(".messages") ||
+      $(".chat-messages")
+    );
+  }
+
+  function getFileInput() {
+    return (
+      $("#fileInput") ||
+      $("#imageInput") ||
+      $("input[type='file']")
+    );
+  }
+
+  /* =========================
+     CHAT MANAGEMENT
+  ========================= */
+
+  function getActiveChat() {
+    if (state.temporary) {
+      return state.tempChat;
+    }
+
+    return (
+      state.chats.find(
+        chat =>
+          chat.id === state.activeId
+      ) || null
     );
   }
 
@@ -190,39 +251,9 @@
     render();
   }
 
-  function getActiveChat() {
-    if (state.temporary) {
-      return state.tempChat;
-    }
-
-    return (
-      state.chats.find(
-        chat =>
-          chat.id === state.activeId
-      ) || null
-    );
-  }
-
-  /* -----------------------------
-     DOM HELPERS
-  ----------------------------- */
-
-  function input() {
-    return (
-      $("#messageInput") ||
-      $("textarea") ||
-      $("input[type='text']")
-    );
-  }
-
-  function messagesBox() {
-    return (
-      $("#messages") ||
-      $("#chatMessages") ||
-      $(".messages") ||
-      $(".chat-messages")
-    );
-  }
+  /* =========================
+     RENDER
+  ========================= */
 
   function render() {
     renderMessages();
@@ -230,104 +261,101 @@
   }
 
   function renderMessages() {
-    const box = messagesBox();
+    const box = getMessagesBox();
 
-    if (!box) return;
+    if (!box) {
+      return;
+    }
 
-    const chat =
-      getActiveChat();
+    const chat = getActiveChat();
 
-    if (!chat) return;
+    if (!chat) {
+      return;
+    }
 
     box.innerHTML = "";
 
-    chat.messages.forEach(
-      message => {
-        const wrapper =
+    chat.messages.forEach(message => {
+      const wrapper =
+        document.createElement("div");
+
+      wrapper.className =
+        message.role === "user"
+          ? "message user-message"
+          : "message ai-message";
+
+      const content =
+        document.createElement("div");
+
+      content.className =
+        "message-content";
+
+      content.textContent =
+        message.content || "";
+
+      wrapper.appendChild(content);
+
+      if (
+        message.role === "assistant"
+      ) {
+        const actions =
           document.createElement("div");
 
-        wrapper.className =
-          message.role === "user"
-            ? "message user-message"
-            : "message ai-message";
+        actions.className =
+          "message-actions";
 
-        const content =
-          document.createElement("div");
+        /* Speaker */
+        const speaker =
+          document.createElement("button");
 
-        content.className =
-          "message-content";
+        speaker.type = "button";
+        speaker.textContent = "🔊";
+        speaker.title = "Speaker";
+        speaker.setAttribute(
+          "aria-label",
+          "Speaker"
+        );
 
-        content.textContent =
-          message.content || "";
+        speaker.addEventListener(
+          "click",
+          () => {
+            speak(
+              message.content || ""
+            );
+          }
+        );
 
-        wrapper.appendChild(content);
+        /* Share */
+        const share =
+          document.createElement("button");
 
-        if (
-          message.role === "assistant"
-        ) {
-          const actions =
-            document.createElement("div");
+        share.type = "button";
+        share.textContent = "↗";
+        share.title = "Share";
+        share.setAttribute(
+          "aria-label",
+          "Share"
+        );
 
-          actions.className =
-            "message-actions";
+        share.addEventListener(
+          "click",
+          () => {
+            shareText(
+              message.content || ""
+            );
+          }
+        );
 
-          const speaker =
-            document.createElement("button");
+        actions.appendChild(speaker);
+        actions.appendChild(share);
 
-          speaker.type = "button";
-          speaker.textContent = "🔊";
-          speaker.title = "Speaker";
-          speaker.setAttribute(
-            "aria-label",
-            "Speaker"
-          );
-
-          speaker.addEventListener(
-            "click",
-            () =>
-              speak(
-                message.content || ""
-              )
-          );
-
-          const share =
-            document.createElement("button");
-
-          share.type = "button";
-          share.textContent = "↗";
-          share.title = "Share";
-          share.setAttribute(
-            "aria-label",
-            "Share"
-          );
-
-          share.addEventListener(
-            "click",
-            () =>
-              shareText(
-                message.content || ""
-              )
-          );
-
-          actions.appendChild(
-            speaker
-          );
-
-          actions.appendChild(
-            share
-          );
-
-          wrapper.appendChild(
-            actions
-          );
-        }
-
-        box.appendChild(wrapper);
+        wrapper.appendChild(actions);
       }
-    );
 
-    box.scrollTop =
-      box.scrollHeight;
+      box.appendChild(wrapper);
+    });
+
+    box.scrollTop = box.scrollHeight;
   }
 
   function renderRecentChats() {
@@ -335,7 +363,9 @@
       $("#recentChats") ||
       $(".recent-chats");
 
-    if (!box) return;
+    if (!box) {
+      return;
+    }
 
     box.innerHTML = "";
 
@@ -344,16 +374,17 @@
         document.createElement("button");
 
       button.type = "button";
+
       button.textContent =
-        chat.title ||
-        "New chat";
+        chat.title || "New chat";
+
+      button.dataset.chatId =
+        chat.id;
 
       button.addEventListener(
         "click",
         () => {
-          state.activeId =
-            chat.id;
-
+          state.activeId = chat.id;
           render();
         }
       );
@@ -362,45 +393,54 @@
     });
   }
 
-  /* -----------------------------
-     SEND MESSAGE
-  ----------------------------- */
+  /* =========================
+     SEND
+  ========================= */
 
   async function send() {
-    const field = input();
+    const field = getInput();
 
-    if (!field) return;
+    if (!field) {
+      return;
+    }
 
     const message =
-      String(
-        field.value || ""
-      ).trim();
+      String(field.value || "").trim();
 
     if (
       !message &&
-      !state.selectedFiles.length
+      state.selectedFiles.length === 0
     ) {
       return;
     }
 
-    let chat =
-      getActiveChat();
+    let chat = getActiveChat();
 
     if (!chat) {
       newChat();
-      chat =
-        getActiveChat();
+      chat = getActiveChat();
+    }
+
+    if (!chat) {
+      return;
     }
 
     const files =
-      await prepare();
+      await prepareFiles();
+
+    /*
+      IMPORTANT:
+
+      The user's text and image are stored
+      together in the same request.
+    */
 
     chat.messages.push({
       role: "user",
       content:
         message ||
         "Please analyze this image.",
-      files
+      files: files
     });
 
     if (
@@ -426,11 +466,10 @@
     try {
       const result =
         await requestAI({
-          message,
-          language:
-            state.language,
-          chat,
-          files
+          message: message,
+          language: state.language,
+          chat: chat,
+          files: files
         });
 
       const answer =
@@ -440,15 +479,17 @@
 
       chat.messages.push({
         role: "assistant",
-        content:
-          String(answer)
+        content: String(answer)
       });
 
       saveChats();
       renderMessages();
 
     } catch (error) {
-      console.error(error);
+      console.error(
+        "Global AI request error:",
+        error
+      );
 
       chat.messages.push({
         role: "assistant",
@@ -461,30 +502,37 @@
     }
   }
 
-  /* -----------------------------
-     CLOUDFLARE AI REQUEST
-  ----------------------------- */
+  /* =========================
+     AI REQUEST
+  ========================= */
 
   async function requestAI(params) {
-
     const endpoint =
       document.body.dataset.aiEndpoint ||
       window.GLOBAL_AI_ENDPOINT ||
       "/api/chat";
 
+    /*
+      Find the first selected image.
+    */
     const firstImage =
       (params.files || []).find(
         file =>
           file &&
           typeof file.type === "string" &&
-          file.type.startsWith(
-            "image/"
-          ) &&
+          file.type.startsWith("image/") &&
           typeof file.preview === "string"
       );
 
     const image =
       firstImage?.preview || "";
+
+    /*
+      This is the important part:
+
+      message = user's written question
+      image   = user's selected image
+    */
 
     const payload = {
       message:
@@ -499,17 +547,6 @@
       files:
         params.files || []
     };
-
-    /*
-      IMPORTANT:
-
-      If the user selected an image AND
-      wrote a message, both are sent together.
-
-      The image is sent as "image"
-      because your working Worker expects
-      body.image.
-    */
 
     if (image) {
       payload.image = image;
@@ -527,9 +564,7 @@
           },
 
           body:
-            JSON.stringify(
-              payload
-            )
+            JSON.stringify(payload)
         }
       );
 
@@ -554,42 +589,39 @@
     }
 
     return {
-      text:
-        await response.text()
+      text: await response.text()
     };
   }
 
-  /* -----------------------------
-     IMAGE TO DATA URL
-  ----------------------------- */
+  /* =========================
+     IMAGE DATA
+  ========================= */
 
-  function dataURL(file) {
+  function fileToDataURL(file) {
     return new Promise(
       (resolve, reject) => {
-
         const reader =
           new FileReader();
 
-        reader.onload = () =>
-          resolve(
-            reader.result
-          );
+        reader.onload = () => {
+          resolve(reader.result);
+        };
 
-        reader.onerror = reject;
+        reader.onerror = error => {
+          reject(error);
+        };
 
         reader.readAsDataURL(file);
       }
     );
   }
 
-  async function prepare() {
+  async function prepareFiles() {
     const output = [];
 
     for (
-      const file of
-      state.selectedFiles
+      const file of state.selectedFiles
     ) {
-
       const item = {
         name: file.name,
         type: file.type,
@@ -598,12 +630,10 @@
 
       if (
         file.type &&
-        file.type.startsWith(
-          "image/"
-        )
+        file.type.startsWith("image/")
       ) {
         item.preview =
-          await dataURL(file);
+          await fileToDataURL(file);
       }
 
       output.push(item);
@@ -612,30 +642,23 @@
     return output;
   }
 
-  /* -----------------------------
-     FILES
-  ----------------------------- */
+  /* =========================
+     FILE UPLOAD
+  ========================= */
 
   function setupFiles() {
-
     const fileInput =
-      $(
-        "#fileInput"
-      ) ||
-      $(
-        "input[type='file']"
-      );
+      getFileInput();
 
-    if (!fileInput) return;
+    if (!fileInput) {
+      return;
+    }
 
     fileInput.addEventListener(
       "change",
       () => {
-
         state.selectedFiles =
-          [
-            ...fileInput.files
-          ];
+          [...fileInput.files];
 
         showFilePreview();
       }
@@ -643,22 +666,20 @@
   }
 
   function showFilePreview() {
-
     const area =
       $("#filePreview") ||
       $(".file-preview");
 
-    if (!area) return;
+    if (!area) {
+      return;
+    }
 
     area.innerHTML = "";
 
     state.selectedFiles.forEach(
       file => {
-
         const item =
-          document.createElement(
-            "div"
-          );
+          document.createElement("div");
 
         item.className =
           "selected-file";
@@ -672,7 +693,6 @@
   }
 
   function clearFilePreview() {
-
     const area =
       $("#filePreview") ||
       $(".file-preview");
@@ -683,29 +703,24 @@
   }
 
   function setupFileRemove() {
-
     document.addEventListener(
       "click",
       event => {
-
         const button =
           event.target.closest(
             "[data-remove-file], .remove-file"
           );
 
-        if (!button) return;
+        if (!button) {
+          return;
+        }
 
         state.selectedFiles = [];
 
         clearFilePreview();
 
         const fileInput =
-          $(
-            "#fileInput"
-          ) ||
-          $(
-            "input[type='file']"
-          );
+          getFileInput();
 
         if (fileInput) {
           fileInput.value = "";
@@ -714,21 +729,20 @@
     );
   }
 
-  /* -----------------------------
+  /* =========================
      LARGE MESSAGE BOX
-  ----------------------------- */
+  ========================= */
 
   function setupInput() {
+    const field = getInput();
 
-    const field = input();
-
-    if (!field) return;
+    if (!field) {
+      return;
+    }
 
     if (
-      field.tagName ===
-      "TEXTAREA"
+      field.tagName === "TEXTAREA"
     ) {
-
       field.style.minHeight =
         "110px";
 
@@ -745,14 +759,11 @@
     field.addEventListener(
       "keydown",
       event => {
-
         if (
           event.key === "Enter" &&
           !event.shiftKey
         ) {
-
           event.preventDefault();
-
           send();
         }
       }
@@ -761,7 +772,6 @@
     field.addEventListener(
       "input",
       () => {
-
         field.style.height =
           "auto";
 
@@ -774,40 +784,35 @@
     );
   }
 
-  /* -----------------------------
+  /* =========================
      LANGUAGE
-  ----------------------------- */
+  ========================= */
 
   function setupLanguage() {
-
     const selector =
-      $("#languageSelect") ||
-      $("select");
+      $("#languageSelect");
 
-    if (!selector) return;
+    if (!selector) {
+      return;
+    }
 
-    const existingValues =
-      [...selector.options]
-        .map(
-          option =>
-            option.value
-        );
+    /*
+      Only add options if the HTML
+      does not already contain them.
+    */
 
     if (
-      existingValues.length === 0
+      selector.options.length === 0
     ) {
-
       LANGUAGES.forEach(
         ([name, code]) => {
-
           const option =
             document.createElement(
               "option"
             );
 
           option.value = code;
-          option.textContent =
-            name;
+          option.textContent = name;
 
           selector.appendChild(
             option
@@ -822,7 +827,6 @@
     selector.addEventListener(
       "change",
       () => {
-
         state.language =
           selector.value;
 
@@ -834,21 +838,17 @@
     );
   }
 
-  /* -----------------------------
+  /* =========================
      BUTTONS
-  ----------------------------- */
+  ========================= */
 
   function setupButtons() {
-
     const sendButton =
       $("#sendButton") ||
       $("#sendBtn") ||
-      $(
-        "[data-action='send']"
-      );
+      $("[data-action='send']");
 
     if (sendButton) {
-
       sendButton.addEventListener(
         "click",
         send
@@ -858,45 +858,43 @@
     const newButton =
       $("#newChat") ||
       $("#newChatButton") ||
-      $(
-        "[data-action='new-chat']"
-      );
+      $("[data-action='new-chat']");
 
     if (newButton) {
-
       newButton.addEventListener(
         "click",
-        () => {
-          newChat();
-        }
+        newChat
       );
     }
   }
 
   function setupNewChat() {
-
+    /*
+      Extra support for buttons that
+      use data-action.
+    */
     document.addEventListener(
       "click",
       event => {
-
         const button =
           event.target.closest(
-            "#newChat, #newChatButton, [data-action='new-chat']"
+            "[data-action='new-chat']"
           );
 
-        if (!button) return;
+        if (!button) {
+          return;
+        }
 
         newChat();
       }
     );
   }
 
-  /* -----------------------------
+  /* =========================
      SPEAKER
-  ----------------------------- */
+  ========================= */
 
   function speak(text) {
-
     if (
       !("speechSynthesis" in window)
     ) {
@@ -920,20 +918,17 @@
     );
   }
 
-  /* -----------------------------
+  /* =========================
      SHARE
-  ----------------------------- */
+  ========================= */
 
   async function shareText(text) {
-
     try {
-
       if (
         navigator.share
       ) {
-
         await navigator.share({
-          text
+          text: text
         });
 
         return;
@@ -942,7 +937,6 @@
       if (
         navigator.clipboard
       ) {
-
         await navigator.clipboard.writeText(
           text
         );
@@ -950,12 +944,8 @@
         alert(
           "AI response copied."
         );
-
-        return;
       }
-
     } catch (error) {
-
       console.log(
         "Share cancelled:",
         error
@@ -963,44 +953,27 @@
     }
   }
 
-  /* -----------------------------
-     MESSAGE ACTIONS
-  ----------------------------- */
-
-  function setupMessageActions() {
-    /*
-      AI message Speaker + Share buttons
-      are created inside renderMessages().
-    */
-  }
-
-  /* -----------------------------
-     VOICE MODE
-  ----------------------------- */
+  /* =========================
+     VOICE
+  ========================= */
 
   function setupVoice() {
-
     const voiceButton =
       $("#voiceButton") ||
       $("#micButton") ||
-      $(
-        "[data-action='voice']"
-      );
+      $("[data-action='voice']");
 
-    if (!voiceButton) return;
-
-    if (
-      !(
-        "SpeechRecognition" in window ||
-        "webkitSpeechRecognition" in window
-      )
-    ) {
+    if (!voiceButton) {
       return;
     }
 
     const Recognition =
       window.SpeechRecognition ||
       window.webkitSpeechRecognition;
+
+    if (!Recognition) {
+      return;
+    }
 
     const recognition =
       new Recognition();
@@ -1023,12 +996,12 @@
 
     recognition.onresult =
       event => {
-
         const transcript =
           event.results[0][0]
             .transcript;
 
-        const field = input();
+        const field =
+          getInput();
 
         if (field) {
           field.value =
@@ -1043,17 +1016,12 @@
     voiceButton.addEventListener(
       "click",
       () => {
-
         try {
-
           if (
             state.listening
           ) {
-
             recognition.stop();
-
           } else {
-
             recognition.lang =
               state.language === "am"
                 ? "am-ET"
@@ -1061,7 +1029,6 @@
 
             recognition.start();
           }
-
         } catch (error) {
           console.log(error);
         }
@@ -1072,32 +1039,34 @@
       recognition;
   }
 
-  /* -----------------------------
+  /* =========================
      RECENT CHATS
-  ----------------------------- */
+  ========================= */
 
   function setupRecentChats() {
-
     document.addEventListener(
       "click",
       event => {
-
         const item =
           event.target.closest(
             "[data-chat-id]"
           );
 
-        if (!item) return;
+        if (!item) {
+          return;
+        }
 
         const id =
           item.dataset.chatId;
 
         const chat =
           state.chats.find(
-            x => x.id === id
+            item => item.id === id
           );
 
-        if (!chat) return;
+        if (!chat) {
+          return;
+        }
 
         state.activeId =
           chat.id;
@@ -1107,49 +1076,41 @@
     );
   }
 
-  /* -----------------------------
+  /* =========================
      TEMPORARY CHAT
-  ----------------------------- */
+  ========================= */
 
   function setupTemporaryChat() {
-
     const checkbox =
       $("#temporaryChat");
 
-    if (!checkbox) return;
+    if (!checkbox) {
+      return;
+    }
 
     checkbox.addEventListener(
       "change",
       () => {
-
         state.temporary =
           checkbox.checked;
 
         if (
           state.temporary
         ) {
-
           state.tempChat = null;
           state.activeId = null;
 
           newChat();
-
         } else {
-
           state.tempChat = null;
 
           if (
             !state.chats.length
           ) {
-
             newChat();
-
           } else {
-
             state.activeId =
               state.chats[0].id;
 
             render();
-          }
-        }
-            }
+         
