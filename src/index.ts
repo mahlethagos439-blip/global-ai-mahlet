@@ -215,7 +215,7 @@ honest that you are an AI.
 
         result =
           await env.AI.run(
-            "@cf/meta/llama-3.2-11b-vision-instruct",
+            "@cf/google/gemma-4-26b-a4b-it",
             {
               messages: [
                 {
