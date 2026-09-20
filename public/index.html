@@ -2387,14 +2387,24 @@ imageInput.addEventListener(
 
     if (!file) return;
 
+    const reader =
+      new FileReader();
 
-    filePreview.style.display =
-      "block";
+    reader.onload = () => {
 
-    filePreview.textContent =
-      "🖼️ " +
-      file.name +
-      " selected.";
+      selectedImageData =
+        String(reader.result || "");
+
+      filePreview.style.display =
+        "block";
+
+      filePreview.textContent =
+        "🖼️ " +
+        file.name +
+        " selected.";
+    };
+
+    reader.readAsDataURL(file);
   }
 );
 
