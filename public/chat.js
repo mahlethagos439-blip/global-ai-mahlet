@@ -1114,3 +1114,35 @@
 
             render();
          
+          }
+        }
+      }
+    );
+  }
+
+  function start() {
+    if (!state.chats.length) {
+      newChat();
+    } else {
+      state.activeId = state.chats[0].id;
+      render();
+    }
+
+    setupFiles();
+    setupFileRemove();
+    setupInput();
+    setupLanguage();
+    setupButtons();
+    setupNewChat();
+    setupVoice();
+    setupRecentChats();
+    setupTemporaryChat();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
+
+})();
