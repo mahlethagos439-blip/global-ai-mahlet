@@ -2418,12 +2418,22 @@ cameraInput.addEventListener(
 
     if (!file) return;
 
+    const reader =
+      new FileReader();
 
-    filePreview.style.display =
-      "block";
+    reader.onload = () => {
 
-    filePreview.textContent =
-      "📷 Camera image captured.";
+      selectedImageData =
+        String(reader.result || "");
+
+      filePreview.style.display =
+        "block";
+
+      filePreview.textContent =
+        "📷 Camera image captured.";
+    };
+
+    reader.readAsDataURL(file);
   }
 );
 
