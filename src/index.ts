@@ -37,7 +37,6 @@ export default {
       "Access-Control-Allow-Headers": "Content-Type"
     };
 
-    // CORS preflight
     if (request.method === "OPTIONS") {
       return new Response(null, {
         status: 204,
@@ -45,12 +44,10 @@ export default {
       });
     }
 
-    // Let Cloudflare serve the website
     if (url.pathname !== "/api/chat") {
       return env.ASSETS.fetch(request);
     }
 
-    // Only POST is allowed
     if (request.method !== "POST") {
       return new Response(
         JSON.stringify({
@@ -81,12 +78,6 @@ export default {
         typeof body.image === "string"
           ? body.image
           : "";
-
-      /*
-       * An image is optional.
-       * Text-only conversations continue using
-       * the existing Llama 3.1 model.
-       */
 
       if (!message && !image) {
         return new Response(
@@ -130,8 +121,98 @@ export default {
               )
           }));
 
-      // Add the current user message when present
-      if (message) {
+      const systemPrompt = `
+You are Global AI Mahlet, a helpful,
+friendly and honest multilingual AI assistant.
+
+The user's selected language is:
+${language}
+
+Help users learn, solve problems, write,
+code, understand information and analyze images.
+
+IMPORTANT IMAGE RULES:
+
+When the user sends an image, actually analyze it.
+
+Describe only things that can reasonably be
+seen in the image.
+
+If the user asks about text in the image,
+read the visible text carefully.
+
+If the image is unclear, say so.
+
+Never pretend to see something that is not visible.
+
+Answer naturally in the user's selected language
+when appropriate.
+
+You are an AI assistant. Be honest about that.
+`;
+
+      let result: any;
+
+      /*
+       * ================================
+       * IMAGE + TEXT REQUEST
+       * ================================
+       */
+
+      if (image) {
+
+        const imageUrl =
+          image.startsWith("data:")
+            ? image
+            : `data:image/jpeg;base64,${image}`;
+
+        const userContent: any[] = [
+          {
+            type: "image_url",
+            image_url: {
+              url: imageUrl
+            }
+          },
+          {
+            type: "text",
+            text:
+              message ||
+              "Please analyze this image and explain what you see."
+          }
+        ];
+
+        result =
+          await env.AI.run(
+            "@cf/google/gemma-4-26b-a4b-it",
+            {
+              messages: [
+                {
+                  role: "system",
+                  content: systemPrompt
+                },
+                {
+                  role: "user",
+                  content: userContent
+                }
+              ],
+
+              max_tokens: 1024,
+
+              temperature: 0.6,
+
+              chat_template_kwargs: {
+                enable_thinking: false
+              }
+            }
+          );
+
+      } else {
+
+        /*
+         * ================================
+         * NORMAL TEXT REQUEST
+         * ================================
+         */
 
         if (
           !messages.length ||
@@ -142,76 +223,6 @@ export default {
             content: message
           });
         }
-
-      } else if (image) {
-
-        // If the user sent an image without text,
-        // give the vision model a useful instruction.
-        messages.push({
-          role: "user",
-          content:
-            "Please analyze this image and explain what you see."
-        });
-      }
-
-      const systemPrompt = `
-You are Global AI Mahlet, a warm, helpful,
-multilingual AI assistant.
-
-Help users learn, create, solve problems,
-write, code, understand information,
-analyze images, and plan their goals.
-
-The user's selected language is:
-${language}
-
-Respond naturally in the selected language
-when appropriate.
-
-IMPORTANT IMAGE BEHAVIOR:
-
-When an image is provided, actually analyze
-the image before answering.
-
-Describe relevant visual information accurately.
-
-If the user asks a question about something
-in the image, answer using what you can actually
-observe.
-
-If the image is unclear, say what you can and
-cannot determine.
-
-Never pretend that you can see something that
-is not visible.
-
-If the user asks you to read text from an image,
-extract the text that is actually visible.
-
-If the user provides a photograph of a problem,
-diagram, document, object, or scene, help them
-understand it based on the image.
-
-Be accurate and useful.
-
-If you are uncertain, say so clearly.
-
-Do not claim to have performed actions that
-you cannot actually perform.
-
-Be warm and conversational while remaining
-honest that you are an AI.
-`;
-
-      let result: any;
-
-      /*
-       * IMAGE REQUEST
-       *
-       * Cloudflare's Llama 3.2 11B Vision model
-       * accepts the image as a base64/data URL.
-       */
-      if (image) {
 
         result =
           await env.AI.run(
@@ -225,43 +236,21 @@ honest that you are an AI.
                 ...messages
               ],
 
-              image: image,
-
               max_tokens: 1024,
 
-              temperature: 0.6
-            }
-          );
+              temperature: 0.6,
 
-      } else {
-
-        /*
-         * NORMAL TEXT REQUEST
-         *
-         * Keep the existing working model.
-         */
-        result =
-          await env.AI.run(
-            "@cf/meta/llama-3.1-8b-instruct-fast",
-            {
-              messages: [
-                {
-                  role: "system",
-                  content: systemPrompt
-                },
-                ...messages
-              ],
-
-              max_tokens: 1024,
-
-              temperature: 0.6
+              chat_template_kwargs: {
+                enable_thinking: false
+              }
             }
           );
       }
 
       const answer =
         result?.response ||
-        result?.result?.response;
+        result?.result?.response ||
+        result?.choices?.[0]?.message?.content;
 
       if (!answer) {
         throw new Error(
@@ -294,7 +283,7 @@ honest that you are an AI.
       return new Response(
         JSON.stringify({
           text:
-            "Global AI Mahlet could not analyze the image or connect to the AI model right now.",
+            "I couldn't complete that request right now.",
 
           error:
             error instanceof Error
