@@ -9,47 +9,48 @@
   const LANGUAGES = [
     ["English", "en"],
     ["Amharic", "am"],
-    ["Tigrigna (Tigrinya)", "ti"],
-    ["Afaan Oromo", "om"],
-    ["Somali", "so"],
     ["Arabic", "ar"],
-    ["French", "fr"],
     ["Spanish", "es"],
-    ["Portuguese", "pt"],
+    ["French", "fr"],
     ["German", "de"],
     ["Italian", "it"],
-    ["Dutch", "nl"],
+    ["Portuguese", "pt"],
     ["Russian", "ru"],
-    ["Ukrainian", "uk"],
-    ["Polish", "pl"],
-    ["Czech", "cs"],
-    ["Slovak", "sk"],
-    ["Romanian", "ro"],
-    ["Hungarian", "hu"],
-    ["Greek", "el"],
-    ["Turkish", "tr"],
-    ["Hebrew", "he"],
-    ["Persian", "fa"],
-    ["Urdu", "ur"],
-    ["Hindi", "hi"],
-    ["Bengali", "bn"],
-    ["Punjabi", "pa"],
-    ["Gujarati", "gu"],
-    ["Marathi", "mr"],
-    ["Tamil", "ta"],
-    ["Telugu", "te"],
-    ["Kannada", "kn"],
-    ["Malayalam", "ml"],
-    ["Sinhala", "si"],
-    ["Nepali", "ne"],
     ["Chinese", "zh"],
     ["Japanese", "ja"],
     ["Korean", "ko"],
-    ["Vietnamese", "vi"],
+    ["Hindi", "hi"],
+    ["Bengali", "bn"],
+    ["Urdu", "ur"],
+    ["Turkish", "tr"],
+    ["Persian", "fa"],
+    ["Swahili", "sw"],
+    ["Somali", "so"],
+    ["Oromo", "om"],
+    ["Tigrinya", "ti"],
+    ["Hausa", "ha"],
+    ["Yoruba", "yo"],
+    ["Igbo", "ig"],
+    ["Zulu", "zu"],
+    ["Xhosa", "xh"],
+    ["Afrikaans", "af"],
+    ["Dutch", "nl"],
+    ["Greek", "el"],
+    ["Hebrew", "he"],
     ["Thai", "th"],
+    ["Vietnamese", "vi"],
     ["Indonesian", "id"],
     ["Malay", "ms"],
-    ["Filipino", "tl"],
+    ["Filipino", "fil"],
+    ["Tamil", "ta"],
+    ["Telugu", "te"],
+    ["Marathi", "mr"],
+    ["Gujarati", "gu"],
+    ["Punjabi", "pa"],
+    ["Kannada", "kn"],
+    ["Malayalam", "ml"],
+    ["Nepali", "ne"],
+    ["Sinhala", "si"],
     ["Burmese", "my"],
     ["Khmer", "km"],
     ["Lao", "lo"],
@@ -57,15 +58,20 @@
     ["Kazakh", "kk"],
     ["Uzbek", "uz"],
     ["Azerbaijani", "az"],
-    ["Armenian", "hy"],
     ["Georgian", "ka"],
+    ["Armenian", "hy"],
     ["Albanian", "sq"],
     ["Serbian", "sr"],
     ["Croatian", "hr"],
-    ["Slovenian", "sl"],
-    ["Bulgarian", "bg"],
-    ["Macedonian", "mk"],
     ["Bosnian", "bs"],
+    ["Bulgarian", "bg"],
+    ["Romanian", "ro"],
+    ["Hungarian", "hu"],
+    ["Czech", "cs"],
+    ["Slovak", "sk"],
+    ["Slovenian", "sl"],
+    ["Polish", "pl"],
+    ["Ukrainian", "uk"],
     ["Lithuanian", "lt"],
     ["Latvian", "lv"],
     ["Estonian", "et"],
@@ -76,608 +82,440 @@
     ["Icelandic", "is"],
     ["Irish", "ga"],
     ["Welsh", "cy"],
-    ["Swahili", "sw"],
-    ["Zulu", "zu"],
-    ["Xhosa", "xh"],
-    ["Afrikaans", "af"],
-    ["Hausa", "ha"],
-    ["Yoruba", "yo"],
-    ["Igbo", "ig"],
-    ["Malagasy", "mg"],
-    ["Kinyarwanda", "rw"],
-    ["Shona", "sn"],
-    ["Sesotho", "st"],
     ["Catalan", "ca"],
     ["Basque", "eu"],
     ["Galician", "gl"],
+    ["Macedonian", "mk"],
     ["Maltese", "mt"],
-    ["Luxembourgish", "lb"],
-    ["Belarusian", "be"],
-    ["Kyrgyz", "ky"],
-    ["Tajik", "tg"],
-    ["Turkmen", "tk"],
+    ["Persian", "fa"],
     ["Pashto", "ps"],
     ["Kurdish", "ku"],
-    ["Māori", "mi"],
+    ["Nepali", "ne"],
     ["Samoan", "sm"],
     ["Tongan", "to"],
-    ["Fijian", "fj"],
-    ["Hawaiian", "haw"],
+    ["Maori", "mi"],
+    ["Haitian Creole", "ht"],
+    ["Latin", "la"],
     ["Esperanto", "eo"],
-    ["Uyghur", "ug"],
-    ["Javanese", "jv"],
+    ["Luxembourgish", "lb"],
+    ["Belarusian", "be"],
+    ["Mongolian", "mn"],
+    ["Khmer", "km"],
+    ["Tajik", "tg"],
+    ["Turkmen", "tk"],
+    ["Kyrgyz", "ky"],
     ["Sundanese", "su"]
   ];
 
-  const $ = (s) => document.querySelector(s);
-  const $$ = (s) => [...document.querySelectorAll(s)];
+  const $ = (selector) =>
+    document.querySelector(selector);
+
+  const $$ = (selector) =>
+    [...document.querySelectorAll(selector)];
 
   const state = {
-    chats: load(),
+    chats: loadChats(),
     activeId: null,
     temporary: false,
     tempChat: null,
     voiceMode: false,
     listening: false,
-    language: localStorage.getItem(LANG_KEY) || "en",
+    language:
+      localStorage.getItem(LANG_KEY) || "en",
     selectedFiles: [],
     recognition: null
   };
 
-  function uid() {
-    return Date.now().toString(36) +
-      Math.random().toString(36).slice(2, 8);
-  }
+  /* -----------------------------
+     STORAGE
+  ----------------------------- */
 
-  function esc(v) {
-    return String(v ?? "").replace(/[&<>"']/g, c => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
-      "'": "&#039;"
-    }[c]));
-  }
-
-  function load() {
+  function loadChats() {
     try {
-      const x = JSON.parse(
-        localStorage.getItem(KEY)
-      );
+      const saved =
+        localStorage.getItem(KEY);
 
-      return Array.isArray(x) ? x : [];
+      if (!saved) return [];
+
+      const data = JSON.parse(saved);
+
+      return Array.isArray(data)
+        ? data
+        : [];
     } catch {
       return [];
     }
   }
 
-  function save() {
-    if (!state.temporary) {
+  function saveChats() {
+    try {
       localStorage.setItem(
         KEY,
         JSON.stringify(state.chats)
       );
+    } catch (error) {
+      console.warn(
+        "Could not save chats:",
+        error
+      );
     }
   }
 
-  function active() {
+  function makeId() {
+    return (
+      Date.now().toString(36) +
+      Math.random()
+        .toString(36)
+        .slice(2)
+    );
+  }
+
+  function newChat() {
+    const chat = {
+      id: makeId(),
+      title: "New chat",
+      messages: [],
+      createdAt: Date.now()
+    };
+
+    if (state.temporary) {
+      state.tempChat = chat;
+    } else {
+      state.chats.unshift(chat);
+      saveChats();
+    }
+
+    state.activeId = chat.id;
+
+    render();
+  }
+
+  function getActiveChat() {
+    if (state.temporary) {
+      return state.tempChat;
+    }
+
     return (
       state.chats.find(
-        c => c.id === state.activeId
+        chat =>
+          chat.id === state.activeId
       ) || null
     );
   }
 
-  function newChat(saveIt = true) {
-    const c = {
-      id: uid(),
-      title: "New Chat",
-      created: Date.now(),
-      updated: Date.now(),
-      pinned: false,
-      messages: []
-    };
-
-    if (state.temporary) {
-      state.activeId = c.id;
-      state.tempChat = c;
-    } else {
-      state.chats.unshift(c);
-      state.activeId = c.id;
-
-      if (saveIt) {
-        save();
-      }
-    }
-
-    render();
-
-    return c;
-  }
-
-  function chat() {
-    if (state.temporary) {
-      if (!state.tempChat) {
-        state.tempChat = {
-          id: uid(),
-          title: "Temporary Chat",
-          created: Date.now(),
-          updated: Date.now(),
-          pinned: false,
-          messages: []
-        };
-      }
-
-      return state.tempChat;
-    }
-
-    return active() || newChat(false);
-  }
-
-  function add(role, text, extra = {}) {
-    const c = chat();
-
-    c.messages.push({
-      id: uid(),
-      role,
-      text: String(text || ""),
-      time: Date.now(),
-      ...extra
-    });
-
-    c.updated = Date.now();
-
-    if (
-      role === "user" &&
-      c.title === "New Chat"
-    ) {
-      const t = String(text)
-        .trim()
-        .replace(/\s+/g, " ");
-
-      c.title =
-        t.slice(0, 42) ||
-        "New Chat";
-    }
-
-    save();
-
-    renderMessages();
-    renderRecents();
-  }
-
-  function renderMessages() {
-    const box =
-      $("#messages") ||
-      $(".messages") ||
-      $("#chatMessages");
-
-    if (!box) return;
-
-    const c = chat();
-
-    if (!c.messages.length) {
-      box.innerHTML = `
-        <div class="empty-chat">
-          <div class="empty-icon">✨</div>
-
-          <h2>Hello, Mahlet ✨</h2>
-
-          <p>
-            I'm Global AI Mahlet — your smart assistant.<br>
-            Ask me anything, anytime. I'm here to help you
-            learn, create, solve, and grow! 💙
-          </p>
-        </div>
-      `;
-
-      return;
-    }
-
-    box.innerHTML =
-      c.messages.map(m => `
-        <div class="message ${
-          m.role === "assistant"
-            ? "ai-message"
-            : "user-message"
-        }" data-id="${m.id}">
-
-          ${
-            m.files &&
-            m.files.length
-              ? `
-                <div class="message-files">
-                  ${m.files.map(f => `
-                    <div class="message-file">
-                      ${
-                        f.type &&
-                        f.type.startsWith("image/")
-                          ? "🖼️"
-                          : "📎"
-                      }
-                      ${esc(f.name || "File")}
-                    </div>
-                  `).join("")}
-                </div>
-              `
-              : ""
-          }
-
-          <div class="message-bubble">
-            ${fmt(m.text)}
-          </div>
-
-          ${
-            m.role === "assistant"
-              ? `
-                <div class="message-actions">
-
-                  <button
-                    type="button"
-                    data-speak="${m.id}"
-                    title="Speak">
-                    🔊
-                  </button>
-
-                  <button
-                    type="button"
-                    data-share="${m.id}"
-                    title="Share">
-                    ↗
-                  </button>
-
-                </div>
-              `
-              : ""
-          }
-
-        </div>
-      `).join("");
-
-    box.scrollTop =
-      box.scrollHeight;
-  }
-
-  function fmt(t) {
-    return esc(t)
-      .replace(
-        /\*\*(.*?)\*\*/g,
-        "<strong>$1</strong>"
-      )
-      .replace(
-        /`([^`]+)`/g,
-        "<code>$1</code>"
-      )
-      .replace(
-        /\n/g,
-        "<br>"
-      );
-  }
-
-  function renderRecents(filter = "") {
-    const box =
-      $("#recentChats") ||
-      $(".recent-chats") ||
-      $("#recents");
-
-    if (!box) return;
-
-    if (state.temporary) {
-      box.innerHTML = `
-        <div class="recent-empty">
-          Temporary Chat is not saved.
-        </div>
-      `;
-
-      return;
-    }
-
-    let cs =
-      [...state.chats].sort(
-        (a, b) =>
-          Number(b.pinned) -
-            Number(a.pinned) ||
-          b.updated - a.updated
-      );
-
-    if (filter) {
-      const q =
-        filter.toLowerCase();
-
-      cs =
-        cs.filter(c =>
-          c.title
-            .toLowerCase()
-            .includes(q) ||
-
-          c.messages.some(m =>
-            m.text
-              .toLowerCase()
-              .includes(q)
-          )
-        );
-    }
-
-    if (!cs.length) {
-      box.innerHTML = `
-        <div class="recent-empty">
-          No recent chats yet.
-        </div>
-      `;
-
-      return;
-    }
-
-    box.innerHTML =
-      cs.map(c => `
-        <div class="recent-chat ${
-          c.id === state.activeId
-            ? "active"
-            : ""
-        }">
-
-          <button
-            type="button"
-            class="recent-open"
-            data-open="${c.id}">
-
-            <span>
-              ${c.pinned ? "📌 " : ""}
-              ${esc(c.title)}
-            </span>
-
-          </button>
-
-          <button
-            type="button"
-            class="recent-more"
-            data-more="${c.id}">
-            ⋮
-          </button>
-
-        </div>
-      `).join("");
-  }
-
-  function render() {
-    renderMessages();
-    renderRecents();
-    languageUI();
-    voiceUI();
-    temporaryUI();
-    filePreview();
-  }
-
-  function languageUI() {
-    $$("select[data-language]")
-      .forEach(select => {
-
-        select.innerHTML =
-          LANGUAGES.map(
-            ([name, code]) =>
-              `<option value="${code}">
-                ${name}
-              </option>`
-          ).join("");
-
-        select.value =
-          state.language;
-      });
-
-    $$("[data-language-label]")
-      .forEach(el => {
-        el.textContent =
-          state.language.toUpperCase();
-      });
-  }
-
-  function voiceUI() {
-    $$("[data-voice-mode]")
-      .forEach(button => {
-
-        button.classList.toggle(
-          "active",
-          state.voiceMode
-        );
-
-        button.setAttribute(
-          "aria-pressed",
-          String(state.voiceMode)
-        );
-      });
-
-    const mic =
-      $("#micButton");
-
-    if (mic) {
-      mic.classList.toggle(
-        "active",
-        state.listening
-      );
-    }
-
-    $$("[data-mic]")
-      .forEach(button => {
-
-        button.classList.toggle(
-          "active",
-          state.listening
-        );
-      });
-  }
-
-  function temporaryUI() {
-    const x =
-      $("#temporaryChat");
-
-    if (x) {
-      x.checked =
-        state.temporary;
-    }
-  }
+  /* -----------------------------
+     DOM HELPERS
+  ----------------------------- */
 
   function input() {
     return (
       $("#messageInput") ||
       $("textarea") ||
-      $("input[name='message']")
+      $("input[type='text']")
     );
   }
 
-  /* =====================================================
-     SEND MESSAGE + IMAGE TOGETHER
-     ===================================================== */
+  function messagesBox() {
+    return (
+      $("#messages") ||
+      $("#chatMessages") ||
+      $(".messages") ||
+      $(".chat-messages")
+    );
+  }
+
+  function render() {
+    renderMessages();
+    renderRecentChats();
+  }
+
+  function renderMessages() {
+    const box = messagesBox();
+
+    if (!box) return;
+
+    const chat =
+      getActiveChat();
+
+    if (!chat) return;
+
+    box.innerHTML = "";
+
+    chat.messages.forEach(
+      message => {
+        const wrapper =
+          document.createElement("div");
+
+        wrapper.className =
+          message.role === "user"
+            ? "message user-message"
+            : "message ai-message";
+
+        const content =
+          document.createElement("div");
+
+        content.className =
+          "message-content";
+
+        content.textContent =
+          message.content || "";
+
+        wrapper.appendChild(content);
+
+        if (
+          message.role === "assistant"
+        ) {
+          const actions =
+            document.createElement("div");
+
+          actions.className =
+            "message-actions";
+
+          const speaker =
+            document.createElement("button");
+
+          speaker.type = "button";
+          speaker.textContent = "🔊";
+          speaker.title = "Speaker";
+          speaker.setAttribute(
+            "aria-label",
+            "Speaker"
+          );
+
+          speaker.addEventListener(
+            "click",
+            () =>
+              speak(
+                message.content || ""
+              )
+          );
+
+          const share =
+            document.createElement("button");
+
+          share.type = "button";
+          share.textContent = "↗";
+          share.title = "Share";
+          share.setAttribute(
+            "aria-label",
+            "Share"
+          );
+
+          share.addEventListener(
+            "click",
+            () =>
+              shareText(
+                message.content || ""
+              )
+          );
+
+          actions.appendChild(
+            speaker
+          );
+
+          actions.appendChild(
+            share
+          );
+
+          wrapper.appendChild(
+            actions
+          );
+        }
+
+        box.appendChild(wrapper);
+      }
+    );
+
+    box.scrollTop =
+      box.scrollHeight;
+  }
+
+  function renderRecentChats() {
+    const box =
+      $("#recentChats") ||
+      $(".recent-chats");
+
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    state.chats.forEach(chat => {
+      const button =
+        document.createElement("button");
+
+      button.type = "button";
+      button.textContent =
+        chat.title ||
+        "New chat";
+
+      button.addEventListener(
+        "click",
+        () => {
+          state.activeId =
+            chat.id;
+
+          render();
+        }
+      );
+
+      box.appendChild(button);
+    });
+  }
+
+  /* -----------------------------
+     SEND MESSAGE
+  ----------------------------- */
 
   async function send() {
-    const i = input();
+    const field = input();
 
-    if (!i) return;
+    if (!field) return;
 
-    const text =
-      i.value.trim();
+    const message =
+      String(
+        field.value || ""
+      ).trim();
 
     if (
-      !text &&
+      !message &&
       !state.selectedFiles.length
     ) {
       return;
     }
 
-    /*
-     * IMPORTANT:
-     * prepare() converts images into data URLs.
-     * The text and image are then sent in ONE request.
-     */
+    let chat =
+      getActiveChat();
+
+    if (!chat) {
+      newChat();
+      chat =
+        getActiveChat();
+    }
+
     const files =
       await prepare();
 
-    /*
-     * Save the user's message before clearing input.
-     */
-    const displayText =
-      text ||
-      "Please analyze the attached image.";
+    chat.messages.push({
+      role: "user",
+      content:
+        message ||
+        "Please analyze this image.",
+      files
+    });
 
-    i.value = "";
+    if (
+      chat.title === "New chat" &&
+      message
+    ) {
+      chat.title =
+        message.length > 40
+          ? message.slice(0, 40) + "..."
+          : message;
+    }
 
-    i.style.height =
-      "auto";
+    saveChats();
+    renderMessages();
 
-    add(
-      "user",
-      displayText,
-      {
-        files
-      }
-    );
+    field.value = "";
+    field.style.height = "110px";
 
-    const c =
-      chat();
+    state.selectedFiles = [];
 
-    typing(true);
+    clearFilePreview();
 
     try {
-
-      const r =
+      const result =
         await requestAI({
-          message: text,
-          language: state.language,
-          chat: c,
+          message,
+          language:
+            state.language,
+          chat,
           files
         });
 
       const answer =
-        r?.text ||
-        r?.response ||
-        r?.message ||
-        "I received your message.";
+        result?.text ||
+        result?.response ||
+        "I couldn't generate a response.";
 
-      add(
-        "assistant",
-        answer
-      );
+      chat.messages.push({
+        role: "assistant",
+        content:
+          String(answer)
+      });
 
-      if (state.voiceMode) {
-        speak(answer);
-      }
+      saveChats();
+      renderMessages();
 
-    } catch (e) {
+    } catch (error) {
+      console.error(error);
 
-      console.error(
-        "Global AI Mahlet:",
-        e
-      );
+      chat.messages.push({
+        role: "assistant",
+        content:
+          "Sorry, I couldn't connect to the AI right now. Please try again."
+      });
 
-      add(
-        "assistant",
-        "I couldn't connect to the AI server right now. Please check the Cloudflare AI connection."
-      );
-
-    } finally {
-
-      typing(false);
-
-      state.selectedFiles = [];
-
-      filePreview();
+      saveChats();
+      renderMessages();
     }
   }
 
-  /* =====================================================
-     AI REQUEST
-     ===================================================== */
+  /* -----------------------------
+     CLOUDFLARE AI REQUEST
+  ----------------------------- */
 
-  async function requestAI(p) {
+  async function requestAI(params) {
 
     const endpoint =
       document.body.dataset.aiEndpoint ||
       window.GLOBAL_AI_ENDPOINT ||
       "/api/chat";
 
-    /*
-     * Find the first image.
-     *
-     * Your Cloudflare Worker expects:
-     *
-     * image: "data:image/...;base64,..."
-     *
-     * So we send the image using that exact field.
-     */
     const firstImage =
-      (p.files || []).find(
-        f =>
-          f &&
-          typeof f.type === "string" &&
-          f.type.startsWith("image/") &&
-          typeof f.preview === "string"
+      (params.files || []).find(
+        file =>
+          file &&
+          typeof file.type === "string" &&
+          file.type.startsWith(
+            "image/"
+          ) &&
+          typeof file.preview === "string"
       );
 
     const image =
       firstImage?.preview || "";
 
     const payload = {
-      message: p.message || "",
-      language: p.language || "en",
-      messages:
-        p.chat?.messages || [],
+      message:
+        params.message || "",
 
-      /*
-       * Keep files too so the frontend
-       * doesn't lose its existing file information.
-       */
+      language:
+        params.language || "en",
+
+      messages:
+        params.chat?.messages || [],
+
       files:
-        p.files || []
+        params.files || []
     };
 
     /*
-     * THIS is the important fix:
-     * image + written message are sent together.
-     */
+      IMPORTANT:
+
+      If the user selected an image AND
+      wrote a message, both are sent together.
+
+      The image is sent as "image"
+      because your working Worker expects
+      body.image.
+    */
+
     if (image) {
       payload.image = image;
     }
 
-    const r =
+    const response =
       await fetch(
         endpoint,
         {
@@ -689,187 +527,373 @@
           },
 
           body:
-            JSON.stringify(payload)
+            JSON.stringify(
+              payload
+            )
         }
       );
 
-    if (!r.ok) {
-      throw Error(
+    if (!response.ok) {
+      throw new Error(
         "AI request failed: " +
-        r.status
+        response.status
       );
     }
 
-    const type =
-      r.headers.get(
+    const contentType =
+      response.headers.get(
         "content-type"
       ) || "";
 
     if (
-      type.includes(
+      contentType.includes(
         "application/json"
       )
     ) {
-      return await r.json();
+      return await response.json();
     }
 
     return {
       text:
-        await r.text()
+        await response.text()
     };
   }
 
-  function typing(show) {
-    const box =
-      $("#messages") ||
-      $(".messages") ||
-      $("#chatMessages");
+  /* -----------------------------
+     IMAGE TO DATA URL
+  ----------------------------- */
 
-    if (!box) return;
-
-    const old =
-      box.querySelector(
-        ".typing"
-      );
-
-    if (old) {
-      old.remove();
-    }
-
-    if (show) {
-
-      box.insertAdjacentHTML(
-        "beforeend",
-        `
-        <div class="message ai-message typing">
-
-          <div class="message-bubble">
-            Thinking
-            <span>.</span>
-            <span>.</span>
-            <span>.</span>
-          </div>
-
-        </div>
-        `
-      );
-
-      box.scrollTop =
-        box.scrollHeight;
-    }
-  }
-
-  /* =====================================================
-     FILE PREPARATION
-     ===================================================== */
-
-  async function prepare() {
-
-    const out = [];
-
-    for (
-      const f of state.selectedFiles
-    ) {
-
-      const x = {
-        name: f.name,
-        type: f.type,
-        size: f.size
-      };
-
-      /*
-       * Convert images to a real data URL.
-       */
-      if (
-        f.type &&
-        f.type.startsWith("image/")
-      ) {
-        x.preview =
-          await dataURL(f);
-      }
-
-      out.push(x);
-    }
-
-    return out;
-  }
-
-  function dataURL(f) {
-
+  function dataURL(file) {
     return new Promise(
       (resolve, reject) => {
 
-        const r =
+        const reader =
           new FileReader();
 
-        r.onload = () =>
-          resolve(r.result);
+        reader.onload = () =>
+          resolve(
+            reader.result
+          );
 
-        r.onerror = reject;
+        reader.onerror = reject;
 
-        r.readAsDataURL(f);
+        reader.readAsDataURL(file);
       }
     );
   }
 
-  function addFiles(files) {
+  async function prepare() {
+    const output = [];
 
-    if (!files) return;
+    for (
+      const file of
+      state.selectedFiles
+    ) {
 
-    const incoming =
-      [...files];
+      const item = {
+        name: file.name,
+        type: file.type,
+        size: file.size
+      };
 
-    /*
-     * Keep selected files.
-     * This allows image + message together.
-     */
-    state.selectedFiles.push(
-      ...incoming
-    );
+      if (
+        file.type &&
+        file.type.startsWith(
+          "image/"
+        )
+      ) {
+        item.preview =
+          await dataURL(file);
+      }
 
-    filePreview();
+      output.push(item);
+    }
+
+    return output;
   }
 
-  function filePreview() {
+  /* -----------------------------
+     FILES
+  ----------------------------- */
 
-    const box =
+  function setupFiles() {
+
+    const fileInput =
+      $(
+        "#fileInput"
+      ) ||
+      $(
+        "input[type='file']"
+      );
+
+    if (!fileInput) return;
+
+    fileInput.addEventListener(
+      "change",
+      () => {
+
+        state.selectedFiles =
+          [
+            ...fileInput.files
+          ];
+
+        showFilePreview();
+      }
+    );
+  }
+
+  function showFilePreview() {
+
+    const area =
       $("#filePreview") ||
       $(".file-preview");
 
-    if (!box) return;
+    if (!area) return;
 
-    box.innerHTML =
-      state.selectedFiles.map(
-        (f, i) => `
+    area.innerHTML = "";
 
-        <div class="file-chip">
+    state.selectedFiles.forEach(
+      file => {
 
-          <span>
-            ${
-              f.type &&
-              f.type.startsWith("image/")
-                ? "🖼️"
-                : "📎"
-            }
+        const item =
+          document.createElement(
+            "div"
+          );
 
-            ${esc(f.name)}
-          </span>
+        item.className =
+          "selected-file";
 
-          <button
-            type="button"
-            data-remove-file="${i}">
-            ×
-          </button>
+        item.textContent =
+          file.name;
 
-        </div>
-
-      `
-      ).join("");
+        area.appendChild(item);
+      }
+    );
   }
 
-  /* =====================================================
-     VOICE
-     ===================================================== */
+  function clearFilePreview() {
+
+    const area =
+      $("#filePreview") ||
+      $(".file-preview");
+
+    if (area) {
+      area.innerHTML = "";
+    }
+  }
+
+  function setupFileRemove() {
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        const button =
+          event.target.closest(
+            "[data-remove-file], .remove-file"
+          );
+
+        if (!button) return;
+
+        state.selectedFiles = [];
+
+        clearFilePreview();
+
+        const fileInput =
+          $(
+            "#fileInput"
+          ) ||
+          $(
+            "input[type='file']"
+          );
+
+        if (fileInput) {
+          fileInput.value = "";
+        }
+      }
+    );
+  }
+
+  /* -----------------------------
+     LARGE MESSAGE BOX
+  ----------------------------- */
+
+  function setupInput() {
+
+    const field = input();
+
+    if (!field) return;
+
+    if (
+      field.tagName ===
+      "TEXTAREA"
+    ) {
+
+      field.style.minHeight =
+        "110px";
+
+      field.style.maxHeight =
+        "320px";
+
+      field.style.overflowY =
+        "auto";
+
+      field.style.resize =
+        "vertical";
+    }
+
+    field.addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key === "Enter" &&
+          !event.shiftKey
+        ) {
+
+          event.preventDefault();
+
+          send();
+        }
+      }
+    );
+
+    field.addEventListener(
+      "input",
+      () => {
+
+        field.style.height =
+          "auto";
+
+        field.style.height =
+          Math.min(
+            field.scrollHeight,
+            320
+          ) + "px";
+      }
+    );
+  }
+
+  /* -----------------------------
+     LANGUAGE
+  ----------------------------- */
+
+  function setupLanguage() {
+
+    const selector =
+      $("#languageSelect") ||
+      $("select");
+
+    if (!selector) return;
+
+    const existingValues =
+      [...selector.options]
+        .map(
+          option =>
+            option.value
+        );
+
+    if (
+      existingValues.length === 0
+    ) {
+
+      LANGUAGES.forEach(
+        ([name, code]) => {
+
+          const option =
+            document.createElement(
+              "option"
+            );
+
+          option.value = code;
+          option.textContent =
+            name;
+
+          selector.appendChild(
+            option
+          );
+        }
+      );
+    }
+
+    selector.value =
+      state.language;
+
+    selector.addEventListener(
+      "change",
+      () => {
+
+        state.language =
+          selector.value;
+
+        localStorage.setItem(
+          LANG_KEY,
+          state.language
+        );
+      }
+    );
+  }
+
+  /* -----------------------------
+     BUTTONS
+  ----------------------------- */
+
+  function setupButtons() {
+
+    const sendButton =
+      $("#sendButton") ||
+      $("#sendBtn") ||
+      $(
+        "[data-action='send']"
+      );
+
+    if (sendButton) {
+
+      sendButton.addEventListener(
+        "click",
+        send
+      );
+    }
+
+    const newButton =
+      $("#newChat") ||
+      $("#newChatButton") ||
+      $(
+        "[data-action='new-chat']"
+      );
+
+    if (newButton) {
+
+      newButton.addEventListener(
+        "click",
+        () => {
+          newChat();
+        }
+      );
+    }
+  }
+
+  function setupNewChat() {
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        const button =
+          event.target.closest(
+            "#newChat, #newChatButton, [data-action='new-chat']"
+          );
+
+        if (!button) return;
+
+        newChat();
+      }
+    );
+  }
+
+  /* -----------------------------
+     SPEAKER
+  ----------------------------- */
 
   function speak(text) {
 
@@ -879,258 +903,253 @@
       return;
     }
 
-    speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
 
-    const u =
+    const utterance =
       new SpeechSynthesisUtterance(
         text
       );
 
-    u.lang =
-      state.language;
+    utterance.lang =
+      state.language === "am"
+        ? "am-ET"
+        : state.language;
 
-    u.rate = 1;
-    u.pitch = 1;
-
-    speechSynthesis.speak(u);
+    window.speechSynthesis.speak(
+      utterance
+    );
   }
 
-  function createRecognition() {
+  /* -----------------------------
+     SHARE
+  ----------------------------- */
 
-    const R =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
+  async function shareText(text) {
 
-    if (!R) {
-      return null;
-    }
+    try {
 
-    const r =
-      new R();
+      if (
+        navigator.share
+      ) {
 
-    r.lang =
-      state.language;
+        await navigator.share({
+          text
+        });
 
-    r.continuous =
-      state.voiceMode;
-
-    r.interimResults =
-      false;
-
-    r.onstart = () => {
-
-      state.listening =
-        true;
-
-      voiceUI();
-    };
-
-    r.onend = () => {
-
-      state.listening =
-        false;
-
-      voiceUI();
-
-      if (state.voiceMode) {
-        try {
-          r.start();
-        } catch {}
-      }
-    };
-
-    r.onerror = e => {
-
-      console.warn(
-        "Speech recognition:",
-        e.error
-      );
-
-      state.listening =
-        false;
-
-      voiceUI();
-    };
-
-    r.onresult = e => {
-
-      const text =
-        [...e.results]
-          .map(
-            x =>
-              x[0].transcript
-          )
-          .join(" ");
-
-      const i =
-        input();
-
-      if (i) {
-        i.value = text;
-
-        /*
-         * Make the textarea grow
-         * when voice input creates
-         * a longer message.
-         */
-        i.style.height =
-          "auto";
-
-        i.style.height =
-          Math.min(
-            i.scrollHeight,
-            320
-          ) + "px";
-      }
-
-      if (state.voiceMode) {
-        send();
-      }
-    };
-
-    return r;
-  }
-
-  function toggleVoice() {
-
-    state.voiceMode =
-      !state.voiceMode;
-
-    if (state.voiceMode) {
-
-      state.recognition =
-        createRecognition();
-
-      if (state.recognition) {
-        try {
-          state.recognition.start();
-        } catch {}
-      }
-
-      add(
-        "assistant",
-        "Voice mode is on 🎙️. You can speak naturally, and I'll respond by voice."
-      );
-
-    } else {
-
-      if (state.recognition) {
-        try {
-          state.recognition.stop();
-        } catch {}
+        return;
       }
 
       if (
-        "speechSynthesis" in window
+        navigator.clipboard
       ) {
-        speechSynthesis.cancel();
+
+        await navigator.clipboard.writeText(
+          text
+        );
+
+        alert(
+          "AI response copied."
+        );
+
+        return;
       }
 
-      state.listening =
-        false;
+    } catch (error) {
 
-      voiceUI();
+      console.log(
+        "Share cancelled:",
+        error
+      );
     }
   }
 
-  function mic() {
+  /* -----------------------------
+     MESSAGE ACTIONS
+  ----------------------------- */
 
-    if (!state.recognition) {
-      state.recognition =
-        createRecognition();
-    }
+  function setupMessageActions() {
+    /*
+      AI message Speaker + Share buttons
+      are created inside renderMessages().
+    */
+  }
 
-    if (!state.recognition) {
+  /* -----------------------------
+     VOICE MODE
+  ----------------------------- */
 
-      alert(
-        "Voice input is not supported by this browser."
+  function setupVoice() {
+
+    const voiceButton =
+      $("#voiceButton") ||
+      $("#micButton") ||
+      $(
+        "[data-action='voice']"
       );
 
+    if (!voiceButton) return;
+
+    if (
+      !(
+        "SpeechRecognition" in window ||
+        "webkitSpeechRecognition" in window
+      )
+    ) {
       return;
     }
 
-    if (state.listening) {
+    const Recognition =
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition;
 
-      try {
-        state.recognition.stop();
-      } catch {}
+    const recognition =
+      new Recognition();
 
-    } else {
+    recognition.continuous = false;
+    recognition.interimResults = false;
 
-      state.recognition.lang =
-        state.language;
+    recognition.lang =
+      state.language === "am"
+        ? "am-ET"
+        : state.language;
 
-      try {
-        state.recognition.start();
-      } catch {}
-    }
+    recognition.onstart = () => {
+      state.listening = true;
+    };
+
+    recognition.onend = () => {
+      state.listening = false;
+    };
+
+    recognition.onresult =
+      event => {
+
+        const transcript =
+          event.results[0][0]
+            .transcript;
+
+        const field = input();
+
+        if (field) {
+          field.value =
+            transcript;
+
+          field.dispatchEvent(
+            new Event("input")
+          );
+        }
+      };
+
+    voiceButton.addEventListener(
+      "click",
+      () => {
+
+        try {
+
+          if (
+            state.listening
+          ) {
+
+            recognition.stop();
+
+          } else {
+
+            recognition.lang =
+              state.language === "am"
+                ? "am-ET"
+                : state.language;
+
+            recognition.start();
+          }
+
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    );
+
+    state.recognition =
+      recognition;
   }
 
-  /* =====================================================
-     RECENT CHAT MENU
-     ===================================================== */
+  /* -----------------------------
+     RECENT CHATS
+  ----------------------------- */
 
-  function recentMenu(id) {
+  function setupRecentChats() {
 
-    const c =
-      state.chats.find(
-        x => x.id === id
-      );
+    document.addEventListener(
+      "click",
+      event => {
 
-    if (!c) return;
-
-    const a =
-      prompt(
-        "Choose an action:\n\n" +
-        "1 = Rename\n" +
-        "2 = Pin / Unpin\n" +
-        "3 = Delete"
-      );
-
-    if (a === "1") {
-
-      const n =
-        prompt(
-          "New chat name:",
-          c.title
-        );
-
-      if (n?.trim()) {
-
-        c.title =
-          n.trim().slice(
-            0,
-            60
+        const item =
+          event.target.closest(
+            "[data-chat-id]"
           );
 
-        c.updated =
-          Date.now();
+        if (!item) return;
+
+        const id =
+          item.dataset.chatId;
+
+        const chat =
+          state.chats.find(
+            x => x.id === id
+          );
+
+        if (!chat) return;
+
+        state.activeId =
+          chat.id;
+
+        render();
       }
-    }
+    );
+  }
 
-    if (a === "2") {
+  /* -----------------------------
+     TEMPORARY CHAT
+  ----------------------------- */
 
-      c.pinned =
-        !c.pinned;
+  function setupTemporaryChat() {
 
-      c.updated =
-        Date.now();
-    }
+    const checkbox =
+      $("#temporaryChat");
 
-    if (
-      a === "3" &&
-      confirm(
-        "Delete this chat?"
-      )
-    ) {
+    if (!checkbox) return;
 
-      state.chats =
-        state.chats.filter(
-          x => x.id !== id
-        );
+    checkbox.addEventListener(
+      "change",
+      () => {
 
-      if (
-        state.activeId === id
-      ) {
+        state.temporary =
+          checkbox.checked;
 
-    
+        if (
+          state.temporary
+        ) {
+
+          state.tempChat = null;
+          state.activeId = null;
+
+          newChat();
+
+        } else {
+
+          state.tempChat = null;
+
+          if (
+            !state.chats.length
+          ) {
+
+            newChat();
+
+          } else {
+
+            state.activeId =
+              state.chats[0].id;
+
+            render();
+          }
+        }
+            }
