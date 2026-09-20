@@ -141,7 +141,10 @@
 
   function load() {
     try {
-      const x = JSON.parse(localStorage.getItem(KEY));
+      const x = JSON.parse(
+        localStorage.getItem(KEY)
+      );
+
       return Array.isArray(x) ? x : [];
     } catch {
       return [];
@@ -150,12 +153,19 @@
 
   function save() {
     if (!state.temporary) {
-      localStorage.setItem(KEY, JSON.stringify(state.chats));
+      localStorage.setItem(
+        KEY,
+        JSON.stringify(state.chats)
+      );
     }
   }
 
   function active() {
-    return state.chats.find(c => c.id === state.activeId) || null;
+    return (
+      state.chats.find(
+        c => c.id === state.activeId
+      ) || null
+    );
   }
 
   function newChat(saveIt = true) {
@@ -174,10 +184,14 @@
     } else {
       state.chats.unshift(c);
       state.activeId = c.id;
-      if (saveIt) save();
+
+      if (saveIt) {
+        save();
+      }
     }
 
     render();
+
     return c;
   }
 
@@ -193,6 +207,7 @@
           messages: []
         };
       }
+
       return state.tempChat;
     }
 
@@ -212,15 +227,21 @@
 
     c.updated = Date.now();
 
-    if (role === "user" && c.title === "New Chat") {
+    if (
+      role === "user" &&
+      c.title === "New Chat"
+    ) {
       const t = String(text)
         .trim()
         .replace(/\s+/g, " ");
 
-      c.title = t.slice(0, 42) || "New Chat";
+      c.title =
+        t.slice(0, 42) ||
+        "New Chat";
     }
 
     save();
+
     renderMessages();
     renderRecents();
   }
@@ -239,7 +260,9 @@
       box.innerHTML = `
         <div class="empty-chat">
           <div class="empty-icon">✨</div>
+
           <h2>Hello, Mahlet ✨</h2>
+
           <p>
             I'm Global AI Mahlet — your smart assistant.<br>
             Ask me anything, anytime. I'm here to help you
@@ -247,53 +270,88 @@
           </p>
         </div>
       `;
+
       return;
     }
 
-    box.innerHTML = c.messages.map(m => `
-      <div class="message ${
-        m.role === "assistant"
-          ? "ai-message"
-          : "user-message"
-      }" data-id="${m.id}">
-
-        <div class="message-bubble">
-          ${fmt(m.text)}
-        </div>
-
-        ${
+    box.innerHTML =
+      c.messages.map(m => `
+        <div class="message ${
           m.role === "assistant"
-            ? `
-              <div class="message-actions">
-                <button
-                  type="button"
-                  data-speak="${m.id}"
-                  title="Speak">
-                  🔊
-                </button>
+            ? "ai-message"
+            : "user-message"
+        }" data-id="${m.id}">
 
-                <button
-                  type="button"
-                  data-share="${m.id}"
-                  title="Share">
-                  ↗
-                </button>
-              </div>
-            `
-            : ""
-        }
+          ${
+            m.files &&
+            m.files.length
+              ? `
+                <div class="message-files">
+                  ${m.files.map(f => `
+                    <div class="message-file">
+                      ${
+                        f.type &&
+                        f.type.startsWith("image/")
+                          ? "🖼️"
+                          : "📎"
+                      }
+                      ${esc(f.name || "File")}
+                    </div>
+                  `).join("")}
+                </div>
+              `
+              : ""
+          }
 
-      </div>
-    `).join("");
+          <div class="message-bubble">
+            ${fmt(m.text)}
+          </div>
 
-    box.scrollTop = box.scrollHeight;
+          ${
+            m.role === "assistant"
+              ? `
+                <div class="message-actions">
+
+                  <button
+                    type="button"
+                    data-speak="${m.id}"
+                    title="Speak">
+                    🔊
+                  </button>
+
+                  <button
+                    type="button"
+                    data-share="${m.id}"
+                    title="Share">
+                    ↗
+                  </button>
+
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+      `).join("");
+
+    box.scrollTop =
+      box.scrollHeight;
   }
 
   function fmt(t) {
     return esc(t)
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/`([^`]+)`/g, "<code>$1</code>")
-      .replace(/\n/g, "<br>");
+      .replace(
+        /\*\*(.*?)\*\*/g,
+        "<strong>$1</strong>"
+      )
+      .replace(
+        /`([^`]+)`/g,
+        "<code>$1</code>"
+      )
+      .replace(
+        /\n/g,
+        "<br>"
+      );
   }
 
   function renderRecents(filter = "") {
@@ -305,64 +363,80 @@
     if (!box) return;
 
     if (state.temporary) {
-      box.innerHTML =
-        `<div class="recent-empty">
+      box.innerHTML = `
+        <div class="recent-empty">
           Temporary Chat is not saved.
-        </div>`;
+        </div>
+      `;
+
       return;
     }
 
-    let cs = [...state.chats].sort(
-      (a, b) =>
-        Number(b.pinned) - Number(a.pinned) ||
-        b.updated - a.updated
-    );
+    let cs =
+      [...state.chats].sort(
+        (a, b) =>
+          Number(b.pinned) -
+            Number(a.pinned) ||
+          b.updated - a.updated
+      );
 
     if (filter) {
-      const q = filter.toLowerCase();
+      const q =
+        filter.toLowerCase();
 
-      cs = cs.filter(c =>
-        c.title.toLowerCase().includes(q) ||
-        c.messages.some(m =>
-          m.text.toLowerCase().includes(q)
-        )
-      );
+      cs =
+        cs.filter(c =>
+          c.title
+            .toLowerCase()
+            .includes(q) ||
+
+          c.messages.some(m =>
+            m.text
+              .toLowerCase()
+              .includes(q)
+          )
+        );
     }
 
     if (!cs.length) {
-      box.innerHTML =
-        `<div class="recent-empty">
+      box.innerHTML = `
+        <div class="recent-empty">
           No recent chats yet.
-        </div>`;
+        </div>
+      `;
+
       return;
     }
 
-    box.innerHTML = cs.map(c => `
-      <div class="recent-chat ${
-        c.id === state.activeId ? "active" : ""
-      }">
+    box.innerHTML =
+      cs.map(c => `
+        <div class="recent-chat ${
+          c.id === state.activeId
+            ? "active"
+            : ""
+        }">
 
-        <button
-          type="button"
-          class="recent-open"
-          data-open="${c.id}">
+          <button
+            type="button"
+            class="recent-open"
+            data-open="${c.id}">
 
-          <span>
-            ${c.pinned ? "📌 " : ""}
-            ${esc(c.title)}
-          </span>
+            <span>
+              ${c.pinned ? "📌 " : ""}
+              ${esc(c.title)}
+            </span>
 
-        </button>
+          </button>
 
-        <button
-          type="button"
-          class="recent-more"
-          data-more="${c.id}">
-          ⋮
-        </button>
+          <button
+            type="button"
+            class="recent-more"
+            data-more="${c.id}">
+            ⋮
+          </button>
 
-      </div>
-    `).join("");
+        </div>
+      `).join("");
   }
 
   function render() {
@@ -375,37 +449,45 @@
   }
 
   function languageUI() {
-    $$("select[data-language]").forEach(select => {
-      select.innerHTML = LANGUAGES
-        .map(([name, code]) =>
-          `<option value="${code}">
-            ${name}
-          </option>`
-        )
-        .join("");
+    $$("select[data-language]")
+      .forEach(select => {
 
-      select.value = state.language;
-    });
+        select.innerHTML =
+          LANGUAGES.map(
+            ([name, code]) =>
+              `<option value="${code}">
+                ${name}
+              </option>`
+          ).join("");
 
-    $$("[data-language-label]").forEach(el => {
-      el.textContent = state.language.toUpperCase();
-    });
+        select.value =
+          state.language;
+      });
+
+    $$("[data-language-label]")
+      .forEach(el => {
+        el.textContent =
+          state.language.toUpperCase();
+      });
   }
 
   function voiceUI() {
-    $$("[data-voice-mode]").forEach(button => {
-      button.classList.toggle(
-        "active",
-        state.voiceMode
-      );
+    $$("[data-voice-mode]")
+      .forEach(button => {
 
-      button.setAttribute(
-        "aria-pressed",
-        String(state.voiceMode)
-      );
-    });
+        button.classList.toggle(
+          "active",
+          state.voiceMode
+        );
 
-    const mic = $("#micButton");
+        button.setAttribute(
+          "aria-pressed",
+          String(state.voiceMode)
+        );
+      });
+
+    const mic =
+      $("#micButton");
 
     if (mic) {
       mic.classList.toggle(
@@ -414,19 +496,23 @@
       );
     }
 
-    $$("[data-mic]").forEach(button => {
-      button.classList.toggle(
-        "active",
-        state.listening
-      );
-    });
+    $$("[data-mic]")
+      .forEach(button => {
+
+        button.classList.toggle(
+          "active",
+          state.listening
+        );
+      });
   }
 
   function temporaryUI() {
-    const x = $("#temporaryChat");
+    const x =
+      $("#temporaryChat");
 
     if (x) {
-      x.checked = state.temporary;
+      x.checked =
+        state.temporary;
     }
   }
 
@@ -438,39 +524,67 @@
     );
   }
 
+  /* =====================================================
+     SEND MESSAGE + IMAGE TOGETHER
+     ===================================================== */
+
   async function send() {
     const i = input();
 
     if (!i) return;
 
-    const text = i.value.trim();
+    const text =
+      i.value.trim();
 
-    if (!text && !state.selectedFiles.length) {
+    if (
+      !text &&
+      !state.selectedFiles.length
+    ) {
       return;
     }
 
-    const files = await prepare();
+    /*
+     * IMPORTANT:
+     * prepare() converts images into data URLs.
+     * The text and image are then sent in ONE request.
+     */
+    const files =
+      await prepare();
+
+    /*
+     * Save the user's message before clearing input.
+     */
+    const displayText =
+      text ||
+      "Please analyze the attached image.";
 
     i.value = "";
-    i.style.height = "auto";
+
+    i.style.height =
+      "auto";
 
     add(
       "user",
-      text || "Please analyze the attached file/image.",
-      { files }
+      displayText,
+      {
+        files
+      }
     );
 
-    const c = chat();
+    const c =
+      chat();
 
     typing(true);
 
     try {
-      const r = await requestAI({
-        message: text,
-        language: state.language,
-        chat: c,
-        files
-      });
+
+      const r =
+        await requestAI({
+          message: text,
+          language: state.language,
+          chat: c,
+          files
+        });
 
       const answer =
         r?.text ||
@@ -478,13 +592,17 @@
         r?.message ||
         "I received your message.";
 
-      add("assistant", answer);
+      add(
+        "assistant",
+        answer
+      );
 
       if (state.voiceMode) {
         speak(answer);
       }
 
     } catch (e) {
+
       console.error(
         "Global AI Mahlet:",
         e
@@ -496,46 +614,108 @@
       );
 
     } finally {
+
       typing(false);
+
       state.selectedFiles = [];
+
       filePreview();
     }
   }
 
+  /* =====================================================
+     AI REQUEST
+     ===================================================== */
+
   async function requestAI(p) {
+
     const endpoint =
       document.body.dataset.aiEndpoint ||
       window.GLOBAL_AI_ENDPOINT ||
       "/api/chat";
 
-    const r = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        message: p.message,
-        language: p.language,
-        messages: p.chat?.messages || [],
-        files: p.files || []
-      })
-    });
+    /*
+     * Find the first image.
+     *
+     * Your Cloudflare Worker expects:
+     *
+     * image: "data:image/...;base64,..."
+     *
+     * So we send the image using that exact field.
+     */
+    const firstImage =
+      (p.files || []).find(
+        f =>
+          f &&
+          typeof f.type === "string" &&
+          f.type.startsWith("image/") &&
+          typeof f.preview === "string"
+      );
+
+    const image =
+      firstImage?.preview || "";
+
+    const payload = {
+      message: p.message || "",
+      language: p.language || "en",
+      messages:
+        p.chat?.messages || [],
+
+      /*
+       * Keep files too so the frontend
+       * doesn't lose its existing file information.
+       */
+      files:
+        p.files || []
+    };
+
+    /*
+     * THIS is the important fix:
+     * image + written message are sent together.
+     */
+    if (image) {
+      payload.image = image;
+    }
+
+    const r =
+      await fetch(
+        endpoint,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify(payload)
+        }
+      );
 
     if (!r.ok) {
       throw Error(
-        "AI request failed: " + r.status
+        "AI request failed: " +
+        r.status
       );
     }
 
     const type =
-      r.headers.get("content-type") || "";
+      r.headers.get(
+        "content-type"
+      ) || "";
 
-    if (type.includes("application/json")) {
+    if (
+      type.includes(
+        "application/json"
+      )
+    ) {
       return await r.json();
     }
 
     return {
-      text: await r.text()
+      text:
+        await r.text()
     };
   }
 
@@ -547,38 +727,65 @@
 
     if (!box) return;
 
-    const old = box.querySelector(".typing");
+    const old =
+      box.querySelector(
+        ".typing"
+      );
 
-    if (old) old.remove();
+    if (old) {
+      old.remove();
+    }
 
     if (show) {
+
       box.insertAdjacentHTML(
         "beforeend",
         `
         <div class="message ai-message typing">
+
           <div class="message-bubble">
-            Thinking<span>.</span><span>.</span><span>.</span>
+            Thinking
+            <span>.</span>
+            <span>.</span>
+            <span>.</span>
           </div>
+
         </div>
         `
       );
 
-      box.scrollTop = box.scrollHeight;
+      box.scrollTop =
+        box.scrollHeight;
     }
   }
 
+  /* =====================================================
+     FILE PREPARATION
+     ===================================================== */
+
   async function prepare() {
+
     const out = [];
 
-    for (const f of state.selectedFiles) {
+    for (
+      const f of state.selectedFiles
+    ) {
+
       const x = {
         name: f.name,
         type: f.type,
         size: f.size
       };
 
-      if (f.type.startsWith("image/")) {
-        x.preview = await dataURL(f);
+      /*
+       * Convert images to a real data URL.
+       */
+      if (
+        f.type &&
+        f.type.startsWith("image/")
+      ) {
+        x.preview =
+          await dataURL(f);
       }
 
       out.push(x);
@@ -588,62 +795,100 @@
   }
 
   function dataURL(f) {
-    return new Promise((resolve, reject) => {
-      const r = new FileReader();
 
-      r.onload = () => resolve(r.result);
-      r.onerror = reject;
+    return new Promise(
+      (resolve, reject) => {
 
-      r.readAsDataURL(f);
-    });
+        const r =
+          new FileReader();
+
+        r.onload = () =>
+          resolve(r.result);
+
+        r.onerror = reject;
+
+        r.readAsDataURL(f);
+      }
+    );
   }
 
   function addFiles(files) {
+
     if (!files) return;
 
-    state.selectedFiles.push(...[...files]);
+    const incoming =
+      [...files];
+
+    /*
+     * Keep selected files.
+     * This allows image + message together.
+     */
+    state.selectedFiles.push(
+      ...incoming
+    );
 
     filePreview();
   }
 
   function filePreview() {
+
     const box =
       $("#filePreview") ||
       $(".file-preview");
 
     if (!box) return;
 
-    box.innerHTML = state.selectedFiles.map(
-      (f, i) => `
-      <div class="file-chip">
-        <span>
-          ${
-            f.type.startsWith("image/")
-              ? "🖼️"
-              : "📎"
-          }
-          ${esc(f.name)}
-        </span>
+    box.innerHTML =
+      state.selectedFiles.map(
+        (f, i) => `
 
-        <button
-          type="button"
-          data-remove-file="${i}">
-          ×
-        </button>
-      </div>
+        <div class="file-chip">
+
+          <span>
+            ${
+              f.type &&
+              f.type.startsWith("image/")
+                ? "🖼️"
+                : "📎"
+            }
+
+            ${esc(f.name)}
+          </span>
+
+          <button
+            type="button"
+            data-remove-file="${i}">
+            ×
+          </button>
+
+        </div>
+
       `
-    ).join("");
+      ).join("");
   }
 
+  /* =====================================================
+     VOICE
+     ===================================================== */
+
   function speak(text) {
-    if (!("speechSynthesis" in window)) return;
+
+    if (
+      !("speechSynthesis" in window)
+    ) {
+      return;
+    }
 
     speechSynthesis.cancel();
 
     const u =
-      new SpeechSynthesisUtterance(text);
+      new SpeechSynthesisUtterance(
+        text
+      );
 
-    u.lang = state.language;
+    u.lang =
+      state.language;
+
     u.rate = 1;
     u.pitch = 1;
 
@@ -651,25 +896,40 @@
   }
 
   function createRecognition() {
+
     const R =
       window.SpeechRecognition ||
       window.webkitSpeechRecognition;
 
-    if (!R) return null;
+    if (!R) {
+      return null;
+    }
 
-    const r = new R();
+    const r =
+      new R();
 
-    r.lang = state.language;
-    r.continuous = state.voiceMode;
-    r.interimResults = false;
+    r.lang =
+      state.language;
+
+    r.continuous =
+      state.voiceMode;
+
+    r.interimResults =
+      false;
 
     r.onstart = () => {
-      state.listening = true;
+
+      state.listening =
+        true;
+
       voiceUI();
     };
 
     r.onend = () => {
-      state.listening = false;
+
+      state.listening =
+        false;
+
       voiceUI();
 
       if (state.voiceMode) {
@@ -680,24 +940,47 @@
     };
 
     r.onerror = e => {
+
       console.warn(
         "Speech recognition:",
         e.error
       );
 
-      state.listening = false;
+      state.listening =
+        false;
+
       voiceUI();
     };
 
     r.onresult = e => {
-      const text = [...e.results]
-        .map(x => x[0].transcript)
-        .join(" ");
 
-      const i = input();
+      const text =
+        [...e.results]
+          .map(
+            x =>
+              x[0].transcript
+          )
+          .join(" ");
+
+      const i =
+        input();
 
       if (i) {
         i.value = text;
+
+        /*
+         * Make the textarea grow
+         * when voice input creates
+         * a longer message.
+         */
+        i.style.height =
+          "auto";
+
+        i.style.height =
+          Math.min(
+            i.scrollHeight,
+            320
+          ) + "px";
       }
 
       if (state.voiceMode) {
@@ -709,9 +992,12 @@
   }
 
   function toggleVoice() {
-    state.voiceMode = !state.voiceMode;
+
+    state.voiceMode =
+      !state.voiceMode;
 
     if (state.voiceMode) {
+
       state.recognition =
         createRecognition();
 
@@ -727,39 +1013,50 @@
       );
 
     } else {
+
       if (state.recognition) {
         try {
           state.recognition.stop();
         } catch {}
       }
 
-      if ("speechSynthesis" in window) {
+      if (
+        "speechSynthesis" in window
+      ) {
         speechSynthesis.cancel();
       }
 
-      state.listening = false;
+      state.listening =
+        false;
+
       voiceUI();
     }
   }
 
   function mic() {
+
     if (!state.recognition) {
       state.recognition =
         createRecognition();
     }
 
     if (!state.recognition) {
+
       alert(
         "Voice input is not supported by this browser."
       );
+
       return;
     }
 
     if (state.listening) {
+
       try {
         state.recognition.stop();
       } catch {}
+
     } else {
+
       state.recognition.lang =
         state.language;
 
@@ -769,289 +1066,71 @@
     }
   }
 
+  /* =====================================================
+     RECENT CHAT MENU
+     ===================================================== */
+
   function recentMenu(id) {
+
     const c =
-      state.chats.find(x => x.id === id);
+      state.chats.find(
+        x => x.id === id
+      );
 
     if (!c) return;
 
-    const a = prompt(
-      "Choose an action:\n\n" +
-      "1 = Rename\n" +
-      "2 = Pin / Unpin\n" +
-      "3 = Delete"
-    );
-
-    if (a === "1") {
-      const n = prompt(
-        "New chat name:",
-        c.title
+    const a =
+      prompt(
+        "Choose an action:\n\n" +
+        "1 = Rename\n" +
+        "2 = Pin / Unpin\n" +
+        "3 = Delete"
       );
 
-      if (n?.trim()) {
-        c.title =
-          n.trim().slice(0, 60);
+    if (a === "1") {
 
-        c.updated = Date.now();
+      const n =
+        prompt(
+          "New chat name:",
+          c.title
+        );
+
+      if (n?.trim()) {
+
+        c.title =
+          n.trim().slice(
+            0,
+            60
+          );
+
+        c.updated =
+          Date.now();
       }
     }
 
     if (a === "2") {
-      c.pinned = !c.pinned;
-      c.updated = Date.now();
+
+      c.pinned =
+        !c.pinned;
+
+      c.updated =
+        Date.now();
     }
 
-    if (a === "3" &&
-        confirm("Delete this chat?")) {
+    if (
+      a === "3" &&
+      confirm(
+        "Delete this chat?"
+      )
+    ) {
 
       state.chats =
         state.chats.filter(
           x => x.id !== id
         );
 
-      if (state.activeId === id) {
-        state.activeId =
-          state.chats[0]?.id || null;
-      }
-    }
+      if (
+        state.activeId === id
+      ) {
 
-    save();
-    render();
-  }
-
-  /* DIRECT BUTTON EVENTS
-     Instead of one huge document click handler,
-     each control gets its own listener. */
-
-  function setupButtons() {
-
-    const sendButton =
-      $("#sendButton");
-
-    if (sendButton) {
-      sendButton.addEventListener(
-        "click",
-        e => {
-          e.preventDefault();
-          e.stopPropagation();
-          send();
-        }
-      );
-    }
-
-    const micButton =
-      $("#micButton");
-
-    if (micButton) {
-      micButton.addEventListener(
-        "click",
-        e => {
-          e.preventDefault();
-          e.stopPropagation();
-          mic();
-        }
-      );
-    }
-
-    $$("[data-camera]").forEach(
-      button => {
-        button.addEventListener(
-          "click",
-          e => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const input =
-              document.querySelector(
-                'input[type="file"][capture="environment"]'
-              );
-
-            if (input) input.click();
-          }
-        );
-      }
-    );
-
-    $$("[data-attach]").forEach(
-      button => {
-        button.addEventListener(
-          "click",
-          e => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const input =
-              document.querySelector(
-                'input[type="file"][data-file-input]'
-              );
-
-            if (input) input.click();
-          }
-        );
-      }
-    );
-
-    const imageButton =
-      $("#imageButton");
-
-    const imageInput =
-      $("#imageInput");
-
-    if (imageButton && imageInput) {
-      imageButton.addEventListener(
-        "click",
-        e => {
-          e.preventDefault();
-          e.stopPropagation();
-          imageInput.click();
-        }
-      );
-    }
-  }
-
-  function setupLanguage() {
-    $$("select[data-language]")
-      .forEach(select => {
-        select.addEventListener(
-          "change",
-          () => {
-            state.language =
-              select.value;
-
-            localStorage.setItem(
-              LANG_KEY,
-              state.language
-            );
-
-            if (state.recognition) {
-              state.recognition.lang =
-                state.language;
-            }
-
-            languageUI();
-          }
-        );
-      });
-  }
-
-  function setupInput() {
-    const i = input();
-
-    if (!i) return;
-
-    i.addEventListener(
-      "keydown",
-      e => {
-        if (
-          e.key === "Enter" &&
-          !e.shiftKey
-        ) {
-          e.preventDefault();
-          send();
-        }
-      }
-    );
-
-    i.addEventListener(
-      "input",
-      () => {
-        i.style.height = "auto";
-
-        i.style.height =
-          Math.min(
-            i.scrollHeight,
-            160
-          ) + "px";
-      }
-    );
-  }
-
-  function setupFiles() {
-    $$('input[type="file"]')
-      .forEach(i => {
-        i.addEventListener(
-          "change",
-          () => {
-            addFiles(i.files);
-            i.value = "";
-          }
-        );
-      });
-  }
-
-  function setupRecentChats() {
-
-    const box =
-      $("#recentChats");
-
-    if (!box) return;
-
-    box.addEventListener(
-      "click",
-      e => {
-
-        const open =
-          e.target.closest(
-            "[data-open]"
-          );
-
-        const more =
-          e.target.closest(
-            "[data-more]"
-          );
-
-        if (open) {
-          e.preventDefault();
-
-          state.activeId =
-            open.dataset.open;
-
-          render();
-          return;
-        }
-
-        if (more) {
-          e.preventDefault();
-
-          recentMenu(
-            more.dataset.more
-          );
-        }
-      }
-    );
-  }
-
-  function setupTemporaryChat() {
-
-    const x =
-      $("#temporaryChat");
-
-    if (!x) return;
-
-    x.addEventListener(
-      "change",
-      () => {
-
-        state.temporary =
-          x.checked;
-
-        if (state.temporary) {
-          state.tempChat = null;
-          state.activeId = null;
-        } else {
-          state.tempChat = null;
-
-          if (!state.chats.length) {
-            newChat();
-          } else {
-            state.activeId =
-              state.chats[0].id;
-          }
-        }
-
-        render();
-      }
-    );
-  }
-
-  funct
+    
