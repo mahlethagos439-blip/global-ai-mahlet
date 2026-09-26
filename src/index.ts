@@ -55,28 +55,20 @@ const VISION_FALLBACK_MODEL = "@cf/qwen/qwen3.8-27b";
 let visionLicenseAgreed = false;
 const SEARCH_MODEL = "openai/gpt-4o-mini";
 
-function isClearlyBadSituation(text:string):boolean{
-  const q=String(text||"").trim().toLowerCase();
-  if(!q)return false;
-  return /\b(i am|i\'m|im|i feel|i\'ve been|i have been)\b[^\n]{0,80}\b(bad situation|terrible situation|very bad situation|in a bad situation|crying|cry|hopeless|overwhelmed|falling apart|give up|cannot go on|can\'t go on)\b/i.test(q)
-    || /\b(i am|i\'m|im)\s+(sad|scared|afraid|worried|stressed|hurt|lonely|overwhelmed|not okay|not ok)\b/i.test(q);
-}
-
 function shouldUseWebSearchServer(text:string):boolean{
   const q=String(text||"").trim().toLowerCase();
   if(!q)return false;
   if(/^(hi|hii|hello|hey|good morning|good afternoon|good evening|thanks|thank you|ok|okay|yes|no|sure|great|nice|bye|goodbye)[.!?\s]*$/i.test(q))return false;
-  if(/\b(search|look up|search the web|search online|search the internet|web search|browse the web|research online|find online|find me|search me|internet|online search)\b/.test(q))return true;
-  if(/\b(find|give|show|send|get|provide)\s+(me\s+)?(the\s+)?(official\s+)?(website|link|source|sources|article|articles|photos|images|pictures)\b/.test(q))return true;
+  if(/\b(i am|i'm|im)\s+(in a )?(bad|terrible|difficult|hard)\s+(situation|place|time)\b/i.test(q))return false;
+  if(/\b(sad|crying|cry|scared|afraid|worried|stressed|tired|hurt|lonely|overwhelmed|not okay|not ok|falling apart)\b/i.test(q) && !/\b(search|latest|current|today|news|weather|price|official|website|source|sources)\b/i.test(q))return false;
+  // Explicit image requests use the visual-search pipeline, not text web search.
+  if(/\b(show|give|find|send|provide|get|fetch|display)\s+(me\s+)?(the\s+)?(real|actual|genuine|true)?\s*(image|images|photo|photos|photograph|photographs|picture|pictures|visual|visuals)\b/i.test(q))return false;
+  if(/\b(image|images|photo|photos|photograph|photographs|picture|pictures|visual|visuals)\s+of\b/i.test(q) && !/\b(search|website|source|sources)\b/i.test(q))return false;
+  if(/\b(search|look up|search the web|search online|search the internet|web search|browse the web|research online|find online|internet|online search)\b/.test(q))return true;
+  if(/\b(find|give|show|send|get|provide)\s+(me\s+)?(the\s+)?(official\s+)?(website|link|source|sources|article|articles)\b/.test(q))return true;
   if(/\bofficial\s+(website|page|site|source)\b/.test(q))return true;
   if(/\b(latest|current|right now|as of|today|tonight|yesterday|this week|this month|recent|recently|breaking|live)\b/.test(q))return true;
   if(/\b(weather|forecast|temperature|news|score|scores|match|game|schedule|price|prices|exchange rate|traffic|outage|power outage|stock|stocks|market|election|results|event|events|opening hours|hours|release|released|version|update|updates|availability)\b/.test(q))return true;
-  // A clearly distressed message must never trigger external search just because
-  // it is long enough. This keeps the Sources UI hidden for supportive conversations.
-  if(isClearlyBadSituation(q))return false;
-  // IMPORTANT: never infer web search merely from message length.
-  // Ordinary conversation and knowledge questions should stay local unless
-  // the user explicitly asks for live/external information.
   return false;
 }
 
@@ -173,16 +165,9 @@ function buildVisualQuery(message:string, signals:{distress:boolean;celebration:
     }
     return query.slice(0,160);
   }
-  if(signals.distress)return text.slice(0,180)+" emotional support comfort supportive conversation";
-  if(signals.celebration)return "celebration achievement success happy student";
-  if(signals.encouragement)return "motivation studying student goal achievement";
-  if(/\b(solar system|planet|planets|space|galaxy|star|moon|sun)\b/i.test(text))return text+" educational";
-  if(/\b(photosynthesis|cell|biology|anatomy|human body|chemistry|chemical|physics|electricity|magnet|gravity|atom|molecule|math|geometry|triangle|algebra)\b/i.test(text))return text+" educational diagram";
-  if(/\b(animal|bird|flower|plant|tree|ocean|mountain|river|forest|nature|country|city|landmark|museum)\b/i.test(text))return text+" photo";
-  if(/\b(code|coding|programming|software|computer|robot|artificial intelligence|AI)\b/i.test(text))return text+" technology";
-  if(/\b(study|studying|exam|school|student|learning|education|university|college|classroom|teacher|scholarship|career|business|startup|entrepreneur)\b/i.test(text))return text+" educational contextual photo";
-  if(/\b(history|historical|culture|cultural|country|city|africa|ethiopia|addis ababa|harvard|mit|duke|rice|columbia|campus|landmark|museum|library|church|mosque)\b/i.test(text))return text+" relevant photo";
-  // Do not fetch a random picture for ordinary conversation or vague problems.
+  // Visuals are opt-in: explanations, school questions, emotional support,
+  // writing, and translation do not receive random pictures.
+  if(signals.distress || !signals.imageRequest)return "";
   return "";
 }
 
@@ -192,30 +177,12 @@ function cleanVisualText(value:any):string{
 
 function isPhysicalPlaceVisual(query:string, title:string, description:string):boolean{
   const q=query.toLowerCase();
-  const titleText=String(title||"").toLowerCase();
-  const descriptionText=String(description||"").toLowerCase();
-  const searchable=(titleText+" "+descriptionText);
-  const badHit=/\b(statue|sculpture|portrait|painting|artwork|costume|gown|robe|medal|bust|museum object|artifact|book cover|logo|seal|flag|shirt|merchandise|football player|basketball player|map|maps|diagram|floor plan|site plan|location map)\b/i.test(searchable);
-  if(badHit)return false;
-
-  // For a named place, the place name must actually appear in the image
-  // title/metadata. Do not accept an unrelated photograph merely because
-  // the description happens to contain one matching word.
-  const namedPlace =
-    /\b(harvard|mit|stanford|yale|princeton|columbia|duke|cornell|berkeley|oxford|cambridge)\b/i.exec(q)?.[1]?.toLowerCase() || "";
-  if(namedPlace && !titleText.includes(namedPlace)){
-    // Allow a well-known landmark explicitly requested with the institution.
-    if(namedPlace==="harvard" && !/\b(harvard yard|widener|harvard hall)\b/i.test(titleText))return false;
-    if(namedPlace==="mit" && !/\b(mit|massachusetts institute|great dome|killian)\b/i.test(titleText))return false;
-    if(!/\b(campus|yard|hall|library|quad|courtyard|gate|tower|entrance|exterior|grounds|facade|front|school|university|college)\b/i.test(titleText))return false;
-  }
-
-  const requestedLandmark = q.match(/\b(harvard yard|widener library|great dome|killian court)\b/i)?.[1]?.toLowerCase() || "";
-  if(requestedLandmark && !titleText.includes(requestedLandmark) &&
-     !(requestedLandmark==="widener library" && /\bwidener\b/i.test(titleText))) return false;
-
+  const searchable=(title+" "+description).toLowerCase();
+  const qTerms=q.split(/[^a-z0-9]+/).filter(t=>t.length>=3 && !/^(photo|photograph|picture|image|visual|campus|building|university|college|school|the|of|in|and|yard|city|massachusetts|north|carolina|texas)$/i.test(t));
+  const entityHit=qTerms.length===0 || qTerms.some(t=>searchable.includes(t));
   const physicalHit=/\b(campus|yard|building|hall|library|quad|courtyard|gate|tower|entrance|exterior|street|view|aerial|grounds|facade|front|school|university|college)\b/i.test(searchable);
-  return physicalHit;
+  const badHit=/\b(statue|sculpture|portrait|painting|artwork|costume|gown|robe|medal|bust|museum object|artifact|book cover|logo|seal|flag|shirt|merchandise|football player|basketball player)\b/i.test(searchable);
+  return entityHit && physicalHit && !badHit;
 }
 
 async function fetchWikimediaVisuals(query:string):Promise<AnswerVisual[]>{
@@ -238,19 +205,18 @@ async function fetchWikimediaVisuals(query:string):Promise<AnswerVisual[]>{
     const data:any=await response.json();
     const pages=Object.values(data?.query?.pages||{}) as any[];
     const isPlaceQuery=/\b(university|college|campus|school|museum|airport|hospital|stadium|library|church|mosque|cathedral|monument|landmark|building|palace|bridge|tower)\b/i.test(query);
-    const terms=query.toLowerCase().split(/[^a-z0-9]+/).filter(t=>t.length>=3 && !/^(photo|photograph|picture|image|visual|real|actual|campus|building|university|college|school|the|of|in|and|yard|city|massachusetts|north|carolina|texas)$/i.test(t));
+    const terms=query.toLowerCase().split(/[^a-z0-9]+/).filter(t=>t.length>=3 && !/^(photo|photograph|picture|image|visual|campus|building|university|college|school|the|of|in|and|yard|city|massachusetts|north|carolina|texas)$/i.test(t));
     const ranked=pages.map((item,index)=>{
       const title=String(item?.title||"").replace(/^File:/i,"");
       const meta=item?.imageinfo?.[0]?.extmetadata||{};
       const description=cleanVisualText(meta?.ImageDescription);
       const searchable=(title+" "+description).toLowerCase();
       const entityMatches=terms.reduce((n,t)=>n+(searchable.includes(t)?1:0),0);
-      const titleMatches=terms.reduce((n,t)=>n+(title.toLowerCase().includes(t)?1:0),0);
-      const exactPhrase=/harvard\s+university/i.test(query)&&/harvard\s+university/i.test(searchable)?8:0;
+      const exactPhrase=/harvard\s+university/i.test(query)&&/harvard\s+university/i.test(searchable)?5:0;
       const physical=/\b(campus|yard|hall|library|quad|courtyard|gate|tower|entrance|exterior|street|view|aerial|grounds|facade|front|school|university|college)\b/i.test(searchable)?4:0;
-      const bad=/\b(statue|sculpture|portrait|painting|artwork|costume|gown|robe|medal|bust|artifact|book cover|logo|seal|flag|shirt|merchandise|player|map|maps|diagram|floor plan|site plan|campus map|location map)\b/i.test(searchable)?-30:0;
+      const bad=/\b(statue|sculpture|portrait|painting|artwork|costume|gown|robe|medal|bust|artifact|book cover|logo|seal|flag|shirt|merchandise|player)\b/i.test(searchable)?-10:0;
       const placeValid=!isPlaceQuery || isPhysicalPlaceVisual(query,title,description);
-      return {item,index,score:titleMatches*12+entityMatches*3+exactPhrase+physical+bad,placeValid};
+      return {item,index,score:entityMatches*3+exactPhrase+physical+bad,placeValid};
     }).filter(x=>x.placeValid && (!isPlaceQuery || x.score>0))
       .sort((a,b)=>b.score-a.score||a.index-b.index);
 
@@ -280,19 +246,16 @@ async function fetchOpenverseVisuals(query:string):Promise<AnswerVisual[]>{
     const data:any=await response.json();
     const results=Array.isArray(data?.results)?data.results:[];
     const isPlaceQuery=/\b(university|college|campus|school|museum|airport|hospital|stadium|library|church|mosque|cathedral|monument|landmark|building|palace|bridge|tower)\b/i.test(query);
-    const terms=query.toLowerCase().split(/[^a-z0-9]+/).filter(t=>t.length>=3 && !/^(photo|photograph|picture|image|visual|real|actual|campus|building|university|college|school|the|of|in|and|yard|city|massachusetts|north|carolina|texas)$/i.test(t));
-    const namedPlace=/\b(harvard|mit|stanford|yale|princeton|columbia|duke|cornell|berkeley|oxford|cambridge)\b/i.exec(query)?.[1]?.toLowerCase()||"";
+    const terms=query.toLowerCase().split(/[^a-z0-9]+/).filter(t=>t.length>=3 && !/^(photo|photograph|picture|image|visual|campus|building|university|college|school|the|of|in|and|yard|city|massachusetts|north|carolina|texas)$/i.test(t));
     const ranked=results.map((item:any,index:number)=>{
       const title=typeof item?.title==="string"?item.title:"";
       const tags=Array.isArray(item?.tags)?item.tags.map((tag:any)=>typeof tag==="string"?tag:String(tag?.name||"")).join(" "):"";
       const desc=typeof item?.description==="string"?item.description:"";
       const searchable=(title+" "+tags+" "+desc).toLowerCase();
       const entityMatches=terms.reduce((n,t)=>n+(searchable.includes(t)?1:0),0);
-      const titleMatches=terms.reduce((n,t)=>n+(title.toLowerCase().includes(t)?1:0),0);
       const physical=/\b(campus|yard|hall|library|quad|courtyard|gate|tower|entrance|exterior|street|view|aerial|grounds|facade|front|school|university|college)\b/i.test(searchable)?4:0;
-      const bad=/\b(statue|sculpture|portrait|painting|artwork|costume|gown|robe|medal|bust|artifact|book cover|logo|seal|flag|shirt|merchandise|player|map|maps|diagram|floor plan|site plan|campus map|location map)\b/i.test(searchable)?-30:0;
-      const namedPlaceHit=!namedPlace || title.toLowerCase().includes(namedPlace) || (namedPlace==="harvard" && /\b(widener|harvard yard|harvard university)\b/i.test(title));
-      return {item,index,score:titleMatches*12+entityMatches*3+physical+bad,valid:!isPlaceQuery || (namedPlaceHit && entityMatches>0 && physical>0 && bad===0)};
+      const bad=/\b(statue|sculpture|portrait|painting|artwork|costume|gown|robe|medal|bust|artifact|book cover|logo|seal|flag|shirt|merchandise|player)\b/i.test(searchable)?-10:0;
+      return {item,index,score:entityMatches*3+physical+bad,valid:!isPlaceQuery || (entityMatches>0 && physical>0 && bad===0)};
     }).filter((x:any)=>x.valid && x.score>0).sort((a:any,b:any)=>b.score-a.score||a.index-b.index);
     const visuals:AnswerVisual[]=[]; const seen=new Set<string>();
     for(const row of ranked){
@@ -308,110 +271,19 @@ async function fetchOpenverseVisuals(query:string):Promise<AnswerVisual[]>{
 async function fetchRelevantVisuals(query:string):Promise<AnswerVisual[]>{
   const base=String(query||"").trim(); if(!base)return [];
   const place=/\b(university|college|campus|school|museum|airport|hospital|stadium|library|church|mosque|cathedral|monument|landmark|building|palace|bridge|tower)\b/i.test(base);
-  let variants:string[];
-  if(place){
-    const lower=base.toLowerCase();
-    if(/\bharvard\b/.test(lower)){
-      // Prefer recognizable physical campus photographs instead of maps, logos,
-      // documents, portraits, or other objects merely associated with Harvard.
-      variants=[
-        "Harvard Yard Harvard University",
-        "Widener Library Harvard University",
-        "Harvard University Yard campus",
-        "Harvard University campus exterior Massachusetts"
-      ];
-    }else if(/\bmit\b|massachusetts institute of technology/.test(lower)){
-      variants=[
-        "MIT campus Cambridge Massachusetts real photo",
-        "Massachusetts Institute of Technology campus real photograph",
-        "MIT Great Dome campus real photo"
-      ];
-    }else{
-      variants=[base, `${base} exterior real photo`, `${base} grounds real photo`, `${base} building real photograph`];
-    }
-  }else{
-    variants=[base, `${base} real photo`, `${base} real photograph`];
-  }
+  const variants=place
+    ? [base, `${base} exterior`, `${base} campus`, `${base} building`, `${base} grounds`]
+    : [base, `${base} photo`, `${base} photograph`];
   const seen=new Set<string>(); const collected:AnswerVisual[]=[];
   for(const q of variants){
     const wiki=await fetchWikimediaVisuals(q);
-    for(const item of wiki){
-      const key=item.image||item.thumbnail||item.url||"";
-      if(!key||seen.has(key))continue;
-      seen.add(key);
-      collected.push(item);
-    }
+    for(const item of wiki){const key=item.image||item.thumbnail||item.url||"";if(!key||seen.has(key))continue;seen.add(key);collected.push(item);if(collected.length>=4)return collected;}
   }
   for(const q of variants){
     const openverse=await fetchOpenverseVisuals(q);
-    for(const item of openverse){
-      const key=item.image||item.thumbnail||item.url||"";
-      if(!key||seen.has(key))continue;
-      seen.add(key);
-      collected.push(item);
-    }
+    for(const item of openverse){const key=item.image||item.thumbnail||item.url||"";if(!key||seen.has(key))continue;seen.add(key);collected.push(item);if(collected.length>=4)return collected;}
   }
-  // Re-check the identity at the final boundary. It is better to show fewer
-  // trustworthy photos than to fill the gallery with unrelated images.
-  if(/\bharvard\b/i.test(base)){
-    return collected
-      .filter(item=>/\bharvard\b|\bwidener\b|\bharvard yard\b/i.test(String(item.title||"")))
-      .slice(0,4);
-  }
-  return collected.slice(0,4);
-}
-
-function buildVisualSources(visuals:AnswerVisual[]):WebSource[]{
-  const out:WebSource[]=[];
-  const seen=new Set<string>();
-  for(const visual of visuals||[]){
-    const url=String(visual?.url||"").trim();
-    if(!url)continue;
-    const provider=String(visual?.provider||"").trim();
-    const key=(provider||url).toLowerCase();
-    if(seen.has(key))continue;
-    seen.add(key);
-    let icon="";
-    if(/wikimedia/i.test(provider)) icon="https://commons.wikimedia.org/static/favicon/commons.ico";
-    else if(/openverse/i.test(provider)) icon="https://openverse.org/favicon.ico";
-    else {
-      try{
-        const host=new URL(url).hostname;
-        icon="https://www.google.com/s2/favicons?domain="+encodeURIComponent(host)+"&sz=128";
-      }catch{}
-    }
-    out.push({
-      title:provider||"Image source",
-      url,
-      ...(icon?{image:icon,imageKind:"favicon" as const}:{}),
-    });
-  }
-  return out.slice(0,8);
-}
-
-function cleanAssistantAnswer(value:string):string{
-  let text=String(value||"").replace(/\r/g,"").trim();
-
-  // The UI renders image cards and source cards. Never expose the model's
-  // internal image list, markdown image links, or raw URLs in the answer.
-  text=text.replace(/!\[[^\]]*\]\([^)]*\)/g,"");
-  text=text.replace(/\[\s*(?:Image|Photo|Picture|Photograph|Visual)\s*\d+[^\]]*\]\s*\([^)]*\)/gi,"");
-  text=text.replace(/^\s*(?:Image|Photo|Picture|Photograph|Visual)\s*\d+\s*[:\-–—]?\s*[^\n]*(?:https?:\/\/\S+)?\s*$/gim,"");
-  text=text.replace(/^\s*(?:Image|Photo|Picture|Photograph|Visual)\s*[:\-–—]\s*[^\n]*(?:https?:\/\/\S+)?\s*$/gim,"");
-  text=text.replace(/^\s*https?:\/\/\S+\s*$/gim,"");
-  text=text.replace(/\n?\s*(?:Sources?|References?)\s*:\s*[\s\S]*$/i,"");
-
-  // Remove the common model-generated image-search preamble when it is
-  // followed only by links. A short natural sentence is supplied by the UI.
-  text=text.replace(/\b(?:Here are|Below are)\s+(?:some\s+)?(?:relevant|real|actual|matching)?\s*(?:real\s+)?(?:photos?|images?|pictures?|visuals?)\s*(?:of|for)[^\n]*:?\s*$/gim,"");
-  text=text.replace(/\n{3,}/g,"\n\n").trim();
-
-  // If cleanup removed an image-only answer, keep a neutral fallback.
-  // Do not force the same canned opening on every visual response.
-  if(!text || text.length<12 || /^here are (some )?(relevant|real) (photos?|images?|pictures?)[.!]?$/i.test(text)){
-    return "";
-  }
-  return text;
+  return collected;
 }
 
 function detectResponseMood(signals:{distress:boolean;celebration:boolean;encouragement:boolean},message:string):string{
@@ -509,13 +381,11 @@ async function fetchOpenGraphImage(pageUrl:string):Promise<string>{
 
 async function decorateWebSearchSources(sources:WebSource[]):Promise<WebSource[]>{
   const selected=sources.slice(0,8);
-  const decorated=await Promise.all(selected.map(async source=>{
+  const decorated=selected.map(source=>{
     let image=typeof source.image==="string"?source.image:"";
     let imageKind:WebSource["imageKind"] = image ? "og" : undefined;
-    if(!image){
-      image=await fetchOpenGraphImage(source.url||"");
-      if(image)imageKind="og";
-    }
+    // Source chips should show the actual source site's icon/logo, not a random
+    // page photograph. This is especially important for image-search sources.
     if(!image){
       try{
         const host=new URL(source.url||"").hostname;
@@ -526,7 +396,7 @@ async function decorateWebSearchSources(sources:WebSource[]):Promise<WebSource[]
       }catch{}
     }
     return {...source,...(image?{image}:{}) ,...(imageKind?{imageKind}:{})};
-  }));
+  });
   return decorated;
 }
 
@@ -816,10 +686,13 @@ export default {
           ? body.image
           : "";
 
+      const lowerForRouting=message.toLowerCase();
+      const distressRequest=/\b(i am|i'm|im)\s+(in a )?(bad|terrible|difficult|hard)\s+(situation|place|time)\b/i.test(lowerForRouting) || /\b(sad|crying|cry|scared|afraid|worried|stressed|tired|hurt|lonely|overwhelmed|not okay|not ok|falling apart)\b/i.test(lowerForRouting);
+      const explicitVisualRequest=/\b(show|give|find|send|provide|get|fetch|display)\s+(me\s+)?(the\s+)?(real|actual|genuine|true)?\s*(image|images|photo|photos|photograph|photographs|picture|pictures|visual|visuals)\b/i.test(lowerForRouting) || /\b(image|images|photo|photos|photograph|photographs|picture|pictures|visual|visuals)\s+of\b/i.test(lowerForRouting);
       const webSearch =
         url.pathname === "/api/search"
           ? true
-          : Boolean(body.webSearch) || shouldUseWebSearchServer(message);
+          : !distressRequest && !explicitVisualRequest && (Boolean(body.webSearch) || shouldUseWebSearchServer(message));
 
       if (!message && !image) {
         return json(
@@ -912,7 +785,7 @@ export default {
 
       const lowerMessage = message.toLowerCase();
       const emotionalSignals = {
-        distress: isClearlyBadSituation(message) || /\b(sad|depressed|hopeless|cry|crying|failed|failure|lonely|scared|afraid|worried|anxious|stressed|stress|hurt|broken|tired|give up|can\'t do|cannot do|lost|overwhelmed|bad day|bad situation|terrible situation|not okay|not ok|falling apart)\b/i.test(message),
+        distress: /\b(sad|depressed|hopeless|cry|crying|failed|failure|lonely|scared|afraid|worried|anxious|stressed|stress|hurt|broken|tired|give up|can\'t do|cannot do|lost|overwhelmed|bad day|bad situation|terrible situation|not okay|not ok|falling apart)\b/i.test(message),
         celebration: /\b(congratulations|i did it|i passed|passed my exam|got accepted|accepted|won|success|succeeded|happy|excited|proud|thank you)\b/i.test(message),
         encouragement: /\b(encourage|motivate|motivation|help me continue|i want to give up|how can i succeed|path to success|what should i do)\b/i.test(message),
         imageRequest: /\b(show me|give me|find me|image|photo|picture|visual|illustration|diagram)\b/i.test(message),
@@ -957,10 +830,6 @@ NATURAL CONVERSATION:
 - Do not repeat the user's entire question unnecessarily.
 
 RESPONSE DESIGN — make every answer pleasant to read:
-- Adapt the response style to the request, context, and conversation. Do not make every answer sound the same.
-- Avoid repetitive openings such as "Absolutely", "Sure", "Of course", "Certainly", or "Here are". Use them only occasionally and only when they genuinely fit.
-- Vary sentence structure and pacing naturally. Some answers should be one or two sentences; others can use headings, bullets, examples, tables, or step-by-step guidance when useful.
-- For image requests, prioritize the actual requested visual over filler text. For educational topics, use clear explanations and only visuals that genuinely teach or illustrate the topic.
 - Use a short opening sentence when appropriate.
 - Use Markdown headings only when they improve navigation.
 - Prefer short paragraphs over one giant block of text.
@@ -976,16 +845,8 @@ RESPONSE DESIGN — make every answer pleasant to read:
 VISUALS:
 - If the user asks for a real image/photo/picture/visual, treat it as an image-search request.
 - Never say that you are "text-based", that you "cannot display images", or that the user should search Google when the application has returned relevant visual results. The application can display the returned visuals directly below your answer.
-- Make the opening and wording vary naturally from answer to answer. Do NOT repeatedly begin with "Absolutely", "Sure", "Of course", "Here are", or any other fixed canned phrase.
-- Match the wording to the user's exact request and the situation. For a direct photo request, you can use a simple line such as "Real photographs of Harvard's campus are below." For an explanation plus visuals, explain first and then introduce the visuals naturally. For casual conversation, you may not need any introduction at all.
-- Never use a fixed template just because visuals are present. The response should feel like it was written specifically for this user and this question.
-- Do not write image numbers, image URLs, markdown image links, or source URLs in your answer. The application renders the actual image cards below the text.
-- If the user asks only for photos, keep the text concise: one natural sentence or no extra sentence when the images speak for themselves.
-- If the user asks for an explanation plus photos, answer the explanation first, then introduce the image gallery naturally.
+- When relevant visuals are returned, briefly introduce them naturally (for example, "Here are some relevant photos.") and keep the written answer focused on the user's request.
 - Do not attach unrelated images merely to make an answer look attractive.
-- Do not mention or use an uploaded user image as a web source. User-uploaded images are input for analysis only.
-- Never write source URLs or a source list in the answer; the application creates the compact Sources UI from actual retrieved sources.
-- When visuals are shown, prefer a clean, stylish structure: concise answer -> useful visual gallery -> brief context when needed. Do not fill the response with repeated filler.
 
 CONVERSATION RULES:
 - Use the supplied previous conversation to maintain continuity.
@@ -1231,35 +1092,30 @@ ${emotionalSignals.imageRequest ? "The user is requesting a visual. Do not claim
         ? await fetchRelevantVisuals(visualQuery)
         : [];
 
-      // Sources are evidence of external retrieval, not a decoration.
-      // Uploaded user images are NEVER sources. Visuals found online ARE sources.
-      let externalSources:WebSource[]=[];
-      if(!image && !emotionalSignals.distress){
-        if(webSearch) externalSources.push(...sources);
-        if(visuals.length) externalSources.push(...buildVisualSources(visuals));
+      // Real photos are external content too. Expose their actual landing
+      // pages as compact source icons without printing a link list in the answer.
+      if(!image && visuals.length){
+        const visualSources:WebSource[]=visuals
+          .filter(v=>v && v.url)
+          .map(v=>({title:v.title || "Image source",url:String(v.url)}));
+        const decoratedVisualSources=await decorateWebSearchSources(visualSources);
+        const seenSourceUrls=new Set(sources.map(s=>s.url));
+        for(const source of decoratedVisualSources){
+          if(source.url && !seenSourceUrls.has(source.url)){
+            sources.push(source);
+            seenSourceUrls.add(source.url);
+          }
+        }
       }
-      const sourceSeen=new Set<string>();
-      externalSources=externalSources.filter(source=>{
-        const key=String(source.url||"").trim();
-        if(!key||sourceSeen.has(key))return false;
-        sourceSeen.add(key);
-        return true;
-      }).slice(0,8);
 
-      let finalAnswer = cleanAssistantAnswer(String(answer));
-      if(webSearch && !image) finalAnswer = cleanWebSearchAnswer(finalAnswer);
+      let finalAnswer = webSearch && !image
+        ? cleanWebSearchAnswer(String(answer))
+        : String(answer);
 
       // Keep the written answer AND show real visual results underneath it.
-      // The frontend owns the image cards, so the model answer stays clean.
-      // Add only a natural, varied visual cue when the model did not already
-      // introduce the gallery. Never force the same "Absolutely..." sentence.
+      // Never replace the user's requested explanation with only a photo label.
       if(!image && emotionalSignals.imageRequest && visuals.length){
-        const clean=finalAnswer.trim();
-        if(!clean){
-          finalAnswer = "Real images matching your request are below.";
-        } else if(!/(photo|photos|image|images|picture|pictures|visual|below|shown|gallery)/i.test(clean)){
-          finalAnswer = `${clean}\n\nThe matching images are shown below.`.trim();
-        }
+        finalAnswer = `${finalAnswer.trim()}\n\nHere are relevant real photos for your request.`.trim();
       } else if(!image && emotionalSignals.imageRequest && !visuals.length){
         finalAnswer = `${finalAnswer.trim()}\n\nI couldn't find a reliable matching real photo right now.`.trim();
       }
@@ -1270,7 +1126,7 @@ ${emotionalSignals.imageRequest ? "The user is requesting a visual. Do not claim
           language,
           imageAnalyzed: Boolean(image),
           webSearchUsed: Boolean(webSearch && !image),
-          sources: externalSources,
+          sources,
           visuals,
           mood: detectResponseMood(emotionalSignals,message),
           responseStyle: {
