@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050914"><title>Global AI Mahlet</title>
+<link rel="stylesheet" href="/styles.css"></head><body>
+<div class="app">
+<header id="topbar"><button id="left" type="button" aria-label="Open left menu">☰</button><div class="brand"><span>✦</span> Global AI Mahlet</div><button id="right" type="button" aria-label="Open right menu">⋮</button></header>
+<main><div class="badge">● Intelligent workspace</div><h1>Your AI Partner<br>for a <i>Smarter Future.</i></h1>
+<p>One intelligent workspace to think, create, research, code, and get things done.</p>
+
+<section class="suggestions"><label>Start with an idea</label><div class="cards">
+<button type="button" data-p="Research the latest information about ">⌕<b>Research</b><small>Find and understand</small></button>
+<button type="button" data-p="Create ">✦<b>Create</b><small>Turn ideas into something</small></button>
+<button type="button" data-p="Analyze this file and explain the key findings">▤<b>Analyze</b><small>Understand your files</small></button>
+<button type="button" data-p="Help me build ">&lt;/&gt;<b>Build</b><small>Code and solve</small></button></div></section>
+
+<div class="composer"><textarea id="prompt" placeholder="Ask anything..." autocomplete="off"></textarea><button id="send" type="button" aria-label="Send message">➤</button>
+<nav><button id="attach" type="button">＋ Attach</button><button id="search" type="button">⌕ Search</button><button id="voice" type="button">◉ Voice</button><button id="create" type="button">✦ Create</button></nav></div>
+<div id="temp" class="temp hidden">◷ Temporary Chat is on <button id="off" type="button">Turn off</button></div>
+<section id="chat" class="chat hidden"><div id="title">New Chat</div><div id="messages"></div></section></main>
+<div id="shade" class="shade hidden" aria-hidden="true"></div>
+<aside id="lp" aria-hidden="true"><div class="head"><b>✦ Global AI Mahlet</b><button id="lx" type="button" aria-label="Close left menu">✕</button></div><div class="body">
+<button class="item primary" id="new" type="button">＋ New Chat</button><button class="item" id="temporary" type="button">◷ <span>Temporary Chat</span><em id="toggle"></em></button>
+<button class="item" id="srch" type="button">⌕ Search Recent Chats</button><input id="recentSearch" class="hidden searchbox" placeholder="Search your chats...">
+<h4>Recent Chats</h4><div id="recent"></div><button class="item" id="rename" type="button">✎ Rename</button><button class="item" id="pin" type="button">⚑ Pin</button><button class="item danger" id="del" type="button">♲ Delete</button>
+<hr><button class="item" id="settings" type="button">⚙ Settings</button><button class="profile" type="button"><span>M</span><b>User Profile</b><small>Personal workspace</small>›</button></div></aside>
+<aside id="rp" aria-hidden="true"><div class="head"><b>AI Capabilities</b><button id="rx" type="button" aria-label="Close right menu">✕</button></div><div class="body"><input id="capSearch" class="searchbox" placeholder="Search capabilities...">
+<h4>Intelligence</h4><div class="caps">Chat & Reasoning|Web Search|Deep Research|Vision|Image Generation|Voice</div>
+<h4>Create & Analyze</h4><div class="caps">Files|Data Analysis|Coding|Canvas</div><h4>Work & Productivity</h4><div class="caps">Memory|Projects|Agents|Automation|Custom AI</div>
+<h4>Connect & Integrate</h4><div class="caps">Apps & Integrations|AI Marketplace|Collaboration|Developer API</div><h4>Global & Enterprise</h4><div class="caps">Languages|Security & Privacy|Safety|Enterprise</div></div></aside>
+<div id="toast" class="toast hidden"></div></div><script src="/app.js"></script></body></html>
