@@ -180,7 +180,12 @@
       if($('#attachmentPreview'))$('#attachmentPreview').classList.add('hidden');
       const history=getCurrentMessages().filter(m=>m.r==='u'||m.r==='a').map(m=>({role:m.r==='u'?'user':'assistant',content:m.c}));
       if(!navigator.onLine)throw new Error('OFFLINE_NETWORK');
-      const endpoint=/^\s*(search the web|search online|look up online|find current|latest news|current weather)\b/i.test(text)?'/api/search':'/api/chat';
+      
+const needsWebSearch = /^\s*(search the web|search online|look up online|find current|latest news|current weather)\b/i.test(text);
+const needsPhotos = /\b(find|show|give|send|display|fetch|search for)\b.*\b(real\s+)?(photos?|photographs?|pictures?|images?)\b/i.test(text);
+
+const endpoint = (needsWebSearch || needsPhotos) ? '/api/search' : '/api/chat';
+       
       const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:outgoing,messages:history,image:imageData,webSearch:endpoint==='/api/search'||undefined,language:localStorage.getItem('gam_language')||'System Default'})});
       const data=await res.json().catch(()=>({}));typing(false);if(!res.ok&&!data.text&&!data.response&&!data.result)throw new Error(data.error||`Request failed (${res.status}).`);
       const answer=data.text||data.response||data.result||data.message||data.error||'I could not complete that request.';addMessage('a',answer);pendingFiles=[];pendingImageFile=null;clearPendingPreviewUrls();renderAttachmentPreview();
