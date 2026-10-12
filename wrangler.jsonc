@@ -16,7 +16,15 @@
 		"enabled": true
 	},
 	"ai": {
-		"binding": "AI"
-	},
-	"upload_source_maps": true
+  "binding": "AI"
+},
+"d1_databases": [
+  {
+    "binding": "DB",
+    "database_name": "global-ai-mahlet-db",
+    "database_id": "c92c8d7c-72b0-48ed-9707-e2b1d3d78d5c"
+  }
+],
+"upload_source_maps": true
 }
+
