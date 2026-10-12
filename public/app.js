@@ -94,7 +94,80 @@
     box.scrollTop = box.scrollHeight;
   }
   async function copyText(text) { if (navigator.clipboard?.writeText) { try { await navigator.clipboard.writeText(text); toast('Copied.'); return; } catch {} } const ta = document.createElement('textarea'); ta.value = text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); try { const ok=document.execCommand('copy'); toast(ok ? 'Copied.' : 'Copy is blocked by this browser.'); } catch { toast('Copy is blocked by this browser.'); } ta.remove(); }
-  function action(kind, index, messages, button) { const m = messages[index]; if (!m) return; if (kind === 'more') { showModal('Response options', `<button class=\"modal-action\" id=\"moreCopy\">Copy response</button><button class=\"modal-action\" id=\"moreShare\">Share response</button>`); $('#moreCopy')?.addEventListener('click',()=>{copyText(m.c);$('#modal')?.classList.add('hidden');}); $('#moreShare')?.addEventListener('click',()=>{if(navigator.share)navigator.share({title:'Global AI Mahlet',text:m.c}).catch(()=>{});else copyText(m.c);$('#modal')?.classList.add('hidden');}); return; } if (kind === 'copy') return copyText(m.c); if (kind === 'speak') return speak(m.c); if (kind === 'share') { if (navigator.share) navigator.share({title:'Global AI Mahlet', text:m.c}).then(()=>toast('Shared.')).catch(()=>{}); else copyText(m.c); return; } if (kind === 'like' || kind === 'dislike') { const key = `${active || 'temporary'}:${index}`; feedback[key] = kind; const parent = button.closest('.actions'); parent?.querySelectorAll('[data-act="like"],[data-act="dislike"]').forEach(b=>b.classList.toggle('active',b.dataset.act===kind)); toast('Thanks for your feedback.'); } }
+  
+function action(kind, index, messages, button) {
+  const m = messages[index];
+  if (!m) return;
+
+  if (kind === 'sources') {
+    const items = Array.isArray(m.sources) ? m.sources : [];
+
+    if (!items.length) {
+      toast('No sources are attached to this response yet.');
+      return;
+    }
+
+    const links = items.map(item => {
+      const href = safeUrl(item.url || item.link || '');
+      if (!href || !/^https?:/i.test(href)) return '';
+
+      return `<p><a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(item.title || item.name || href)}</a></p>`;
+    }).filter(Boolean).join('');
+
+    showModal('Sources', links || '<p>No usable source links were found.</p>');
+    return;
+  }
+
+  if (kind === 'more') {
+    showModal('Response options', `<button class="modal-action" id="moreCopy">Copy response</button><button class="modal-action" id="moreShare">Share response</button>`);
+
+    $('#moreCopy')?.addEventListener('click', () => {
+      copyText(m.c);
+      $('#modal')?.classList.add('hidden');
+    });
+
+    $('#moreShare')?.addEventListener('click', () => {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Global AI Mahlet',
+          text: m.c
+        }).catch(() => {});
+      } else {
+        copyText(m.c);
+      }
+      $('#modal')?.classList.add('hidden');
+    });
+
+    return;
+  }
+
+  if (kind === 'copy') return copyText(m.c);
+  if (kind === 'speak') return speak(m.c);
+
+  if (kind === 'share') {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Global AI Mahlet',
+        text: m.c
+      }).then(() => toast('Shared.')).catch(() => {});
+    } else {
+      copyText(m.c);
+    }
+    return;
+  }
+
+  if (kind === 'like' || kind === 'dislike') {
+    const key = `${active || 'temporary'}:${index}`;
+    feedback[key] = kind;
+    const parent = button.closest('.actions');
+
+    parent?.querySelectorAll('[data-act="like"],[data-act="dislike"]')
+      .forEach(b => b.classList.toggle('active', b.dataset.act === kind));
+
+    toast('Thanks for your feedback.');
+  }
+}
+   
   function renderRecent(query = '') {
     const box = $('#recent'); if (!box) return;
     const q = String(query || '').toLowerCase();
