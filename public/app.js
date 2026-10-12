@@ -261,9 +261,22 @@ const endpoint = (needsWebSearch || needsPhotos) ? '/api/search' : '/api/chat';
        
       const res=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:outgoing,messages:history,image:imageData,webSearch:endpoint==='/api/search'||undefined,language:localStorage.getItem('gam_language')||'System Default'})});
       const data=await res.json().catch(()=>({}));typing(false);if(!res.ok&&!data.text&&!data.response&&!data.result)throw new Error(data.error||`Request failed (${res.status}).`);
-      const answer=data.text||data.response||data.result||data.message||data.error||'I could not complete that request.';addMessage('a',answer);pendingFiles=[];pendingImageFile=null;clearPendingPreviewUrls();renderAttachmentPreview();
-      if(Array.isArray(data.visuals)&&data.visuals.length&&isExplicitVisualRequest(originalText))renderVisuals(data.visuals);
-      if(Array.isArray(data.sources)&&data.sources.length&&data.webSearchUsed===true)renderSources(data.sources);
+      const answer = data.text || data.response || data.result || data.message || data.error || 'I could not complete that request.';
+
+const visuals = Array.isArray(data.visuals) && isExplicitVisualRequest(originalText)
+? data.visuals
+: [];
+
+const sources = Array.isArray(data.sources) && data.webSearchUsed === true
+? data.sources
+: [];
+
+addMessage('a', answer, { sources, visuals });
+
+pendingFiles = [];
+pendingImageFile = null;
+clearPendingPreviewUrls();
+renderAttachmentPreview();
       await maybeGenerateTitle();
     }catch(err){typing(false);const message=String(err?.message||err);if(message==='OFFLINE_NETWORK'||(!navigator.onLine)||err instanceof TypeError){addMessage('a','There is no internet connection. Please connect to the internet and try again.');}else if(/web search|search provider|search service/i.test(message)){addMessage('a','Web search is temporarily unavailable. Please try again in a moment.');}else{addMessage('a',`I couldn't complete that request right now. Please try again.\n\nDetails: ${message}`);}} finally {sending=false;if(sendButton)sendButton.disabled=false;} }
   function isExplicitVisualRequest(text){return /\b(show me|give me|find me|send me|display|fetch|search for|real photos? of|images? of|pictures? of|photographs? of|illustration of|diagram of)\b/i.test(String(text||''));}
